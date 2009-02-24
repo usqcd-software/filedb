@@ -21,7 +21,10 @@
  *      
  * Revision History:
  *   $Log: ConfCreateTest.cpp,v $
- *   Revision 1.1  2009-02-20 20:44:47  chen
+ *   Revision 1.2  2009-02-24 21:43:15  chen
+ *   Add O_CREAT
+ *
+ *   Revision 1.1  2009/02/20 20:44:47  chen
  *   initial import
  *
  *
@@ -69,7 +72,7 @@ main (int argc, char** argv)
   dbtest.setMaxUserInfoLen (4000);
   dbtest.setMaxNumberConfigs (2);
 
-  if (dbtest.open (dbase, O_RDWR | O_TRUNC, 0664) != 0) {
+  if (dbtest.open (dbase, O_RDWR | O_TRUNC | O_CREAT, 0664) != 0) {
     cerr << "cannot open database " << dbase << endl;
     sf.close ();
     return -1;
