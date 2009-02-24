@@ -35,7 +35,11 @@
  *
  * Revision History:
  *     $Log: ffdb_pagepool.c,v $
- *     Revision 1.1  2009-02-20 20:44:47  chen
+ *     Revision 1.2  2009-02-24 04:25:05  edwards
+ *     Check if O_LARGEFILE is defined before attempting to add it to the lflags
+ *     used in the "open" call.
+ *
+ *     Revision 1.1  2009/02/20 20:44:47  chen
  *     initial import
  *
  *
@@ -457,8 +461,11 @@ ffdb_pagepool_open (ffdb_pagepool_t* pgp,
   /**
    * Always support large file if I am on a 32bit linux machine
    */
+#if defined(O_LARGEFILE)
   if (sizeof(long) == sizeof(int))
     lflags |= O_LARGEFILE;
+#endif
+
   fd = open (filename, lflags, mode);
   if (fd <= 0) {
     fprintf (stderr, "ffdb_pagepool_open cannot open file %s\n",
