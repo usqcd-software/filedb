@@ -20,7 +20,10 @@
  *
  * Revision History:
  *   $Log: ConfigInfo.cpp,v $
- *   Revision 1.1  2009-02-20 20:44:48  chen
+ *   Revision 1.2  2009-02-24 04:22:55  edwards
+ *   Added include of time.h
+ *
+ *   Revision 1.1  2009/02/20 20:44:48  chen
  *   initial import
  *
  *
@@ -29,6 +32,7 @@
 #include <cstring>
 #include <sstream>
 #include "ConfigInfo.h"
+#include <time.h>
 
 using namespace std;
 
