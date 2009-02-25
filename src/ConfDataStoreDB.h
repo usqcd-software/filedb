@@ -26,7 +26,10 @@
  *      
  * Revision History:
  *   $Log: ConfDataStoreDB.h,v $
- *   Revision 1.1  2009-02-20 20:44:48  chen
+ *   Revision 1.2  2009-02-25 15:49:12  edwards
+ *   Changed insertUserdata to take a const string.
+ *
+ *   Revision 1.1  2009/02/20 20:44:48  chen
  *   initial import
  *
  *
@@ -339,7 +342,7 @@ namespace FFDB
      * @param user_data user supplied data
      * @return returns 0 if success, else failure
      */
-    virtual int insertUserdata (std::string& user_data)
+    virtual int insertUserdata (const std::string& user_data)
     {
       return ffdb_set_user_info (dbh_, 
 				 (unsigned char *)user_data.c_str(), user_data.length());
