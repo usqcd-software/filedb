@@ -21,7 +21,10 @@
  *      
  * Revision History:
  *   $Log: ConfCreateTest.cpp,v $
- *   Revision 1.2  2009-02-24 21:43:15  chen
+ *   Revision 1.3  2009-02-25 18:16:07  edwards
+ *   Changed userdata to go through a string.
+ *
+ *   Revision 1.2  2009/02/24 21:43:15  chen
  *   Add O_CREAT
  *
  *   Revision 1.1  2009/02/20 20:44:47  chen
@@ -69,7 +72,8 @@ main (int argc, char** argv)
   dbtest.setNumberBuckets (nbuckets);
   if  (rearrange)
     dbtest.enablePageMove ();
-  dbtest.setMaxUserInfoLen (4000);
+  std::string userdata(USER_STRING);
+  dbtest.setMaxUserInfoLen (userdata.size());
   dbtest.setMaxNumberConfigs (2);
 
   if (dbtest.open (dbase, O_RDWR | O_TRUNC | O_CREAT, 0664) != 0) {
@@ -78,7 +82,6 @@ main (int argc, char** argv)
     return -1;
   }
 
-  std::string userdata(USER_STRING);
   if (dbtest.insertUserdata (userdata) != 0) {
     cerr << "Cannot insert user string" << endl;
     sf.close ();
