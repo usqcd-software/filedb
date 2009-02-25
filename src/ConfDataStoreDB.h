@@ -26,7 +26,10 @@
  *      
  * Revision History:
  *   $Log: ConfDataStoreDB.h,v $
- *   Revision 1.2  2009-02-25 15:49:12  edwards
+ *   Revision 1.3  2009-02-25 18:16:30  edwards
+ *   Add 1 to user data length to account for null terminators.
+ *
+ *   Revision 1.2  2009/02/25 15:49:12  edwards
  *   Changed insertUserdata to take a const string.
  *
  *   Revision 1.1  2009/02/20 20:44:48  chen
@@ -151,7 +154,7 @@ namespace FFDB
      */
     virtual void setMaxUserInfoLen (unsigned int len)
     {
-      options_.userinfolen = len;
+      options_.userinfolen = len + 1;  // account for possible null terminator on string
     }
 
     virtual unsigned int getMaxUserInfoLen (void) const
