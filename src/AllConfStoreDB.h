@@ -22,7 +22,10 @@
  *      
  * Revision History:
  *   $Log: AllConfStoreDB.h,v $
- *   Revision 1.1  2009-02-20 20:44:47  chen
+ *   Revision 1.2  2009-02-27 03:37:54  edwards
+ *   Moved the "exist" function from AllConfStore to the base class ConfDataStore
+ *
+ *   Revision 1.1  2009/02/20 20:44:47  chen
  *   initial import
  *
  *
@@ -100,7 +103,7 @@ namespace FFDB
      * Default constructor
      */
     AllConfStoreDB (void)
-      :ConfDataStoreDB<K, D>(), nbin_(0), bytesize_(0), empty_(1)
+      : ConfDataStoreDB<K, D>(), nbin_(0), bytesize_(0), empty_(1)
     {
       allcfgs_.numconfigs = 0;
       allcfgs_.allconfigs = 0;
@@ -463,27 +466,6 @@ namespace FFDB
     {
       std::cerr << "erease not yet implemented " << std::endl;
     }
-
-    /**
-     * Does this key exist in the store
-     * @param key a key object
-     * @return true if the answer is yes
-     */
-    bool exist(K& key)
-    {
-      int ret;
-
-      try {
-	ret = keyExist< K > (this->dbh_, key);
-      }
-      catch (SerializeException& e) {
-	std::cerr << "Key check exist error: " << e.what () << std::endl;
-	ret = 0;
-      }
-      
-      return ret;
-    }
-
 
     /**
      * Tell the storage handler updating process is finished

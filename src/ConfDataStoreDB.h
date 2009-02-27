@@ -26,7 +26,10 @@
  *      
  * Revision History:
  *   $Log: ConfDataStoreDB.h,v $
- *   Revision 1.3  2009-02-25 18:16:30  edwards
+ *   Revision 1.4  2009-02-27 03:37:54  edwards
+ *   Moved the "exist" function from AllConfStore to the base class ConfDataStore
+ *
+ *   Revision 1.3  2009/02/25 18:16:30  edwards
  *   Add 1 to user data length to account for null terminators.
  *
  *   Revision 1.2  2009/02/25 15:49:12  edwards
@@ -284,6 +287,26 @@ namespace FFDB
     int getBinary (std::string& key, std::string& data)
     {
       return getBinaryData (dbh_, key, data);
+    }
+
+    /**
+     * Does this key exist in the store
+     * @param key a key object
+     * @return true if the answer is yes
+     */
+    virtual bool exist(K& key)
+    {
+      int ret;
+
+      try {
+	ret = keyExist< K > (dbh_, key);
+      }
+      catch (SerializeException& e) {
+	std::cerr << "Key check exist error: " << e.what () << std::endl;
+	ret = 0;
+      }
+      
+      return ret;
     }
 
     /**
