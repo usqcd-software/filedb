@@ -23,7 +23,10 @@
  *      
  * Revision History:
  *   $Log: DBFunc.cpp,v $
- *   Revision 1.2  2009-02-26 20:22:15  edwards
+ *   Revision 1.3  2009-02-27 16:15:44  chen
+ *   Fix missing FFDB_KEY_CURSOR
+ *
+ *   Revision 1.2  2009/02/26 20:22:15  edwards
  *   Changed an error message to show the correct function name - binaryAllPairs.
  *
  *   Revision 1.1  2009/02/20 20:44:48  chen
@@ -64,7 +67,7 @@ namespace FFDB
     int  ret;
     
     // create cursor
-    ret = dbh->cursor (dbh, &crp, 0);
+    ret = dbh->cursor (dbh, &crp, FFDB_KEY_CURSOR);
     if (ret != 0) 
       throw FileHashDBException ("DBFunc binaryAllPairs", "Create Cursor Error");
 
