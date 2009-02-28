@@ -26,7 +26,11 @@
  *      
  * Revision History:
  *   $Log: ConfDataStoreDB.h,v $
- *   Revision 1.4  2009-02-27 03:37:54  edwards
+ *   Revision 1.5  2009-02-28 20:45:51  edwards
+ *   Bug fix. Changed the arguments to  binaryKeysAndData to use a reference
+ *   so data can be returned.
+ *
+ *   Revision 1.4  2009/02/27 03:37:54  edwards
  *   Moved the "exist" function from AllConfStore to the base class ConfDataStore
  *
  *   Revision 1.3  2009/02/25 18:16:30  edwards
@@ -337,8 +341,8 @@ namespace FFDB
      * @param data user supplied empty vector to hold data
      * @return keys and data in the vectors having the same size     
      */
-    virtual void binaryKeysAndData (std::vector<std::string> keys,
-				    std::vector<std::string> values)
+    virtual void binaryKeysAndData (std::vector<std::string>& keys,
+				    std::vector<std::string>& values)
     {
       binaryAllPairs (dbh_, keys, values);
     }
