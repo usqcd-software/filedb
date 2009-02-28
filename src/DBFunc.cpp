@@ -23,7 +23,10 @@
  *      
  * Revision History:
  *   $Log: DBFunc.cpp,v $
- *   Revision 1.4  2009-02-28 21:05:26  edwards
+ *   Revision 1.5  2009-02-28 21:08:29  edwards
+ *   Removed debugging comment.
+ *
+ *   Revision 1.4  2009/02/28 21:05:26  edwards
  *   Put in a try/catch within binaryAllPairs.
  *
  *   Revision 1.3  2009/02/27 16:15:44  chen
@@ -79,8 +82,6 @@ namespace FFDB
       dbkey.data = dbdata.data = 0;
       dbkey.size = dbdata.size = 0;
 
-      int cnt=0;
-      std::cout << __func__ << ": cnt= " << cnt << std::endl;
       while ((ret = crp->get (crp, &dbkey, &dbdata, FFDB_NEXT)) == 0) 
       {
 	// convert into key object
