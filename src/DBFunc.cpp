@@ -23,7 +23,10 @@
  *      
  * Revision History:
  *   $Log: DBFunc.cpp,v $
- *   Revision 1.3  2009-02-27 16:15:44  chen
+ *   Revision 1.4  2009-02-28 21:05:26  edwards
+ *   Put in a try/catch within binaryAllPairs.
+ *
+ *   Revision 1.3  2009/02/27 16:15:44  chen
  *   Fix missing FFDB_KEY_CURSOR
  *
  *   Revision 1.2  2009/02/26 20:22:15  edwards
@@ -66,36 +69,45 @@ namespace FFDB
     ffdb_cursor_t* crp;
     int  ret;
     
-    // create cursor
-    ret = dbh->cursor (dbh, &crp, FFDB_KEY_CURSOR);
-    if (ret != 0) 
-      throw FileHashDBException ("DBFunc binaryAllPairs", "Create Cursor Error");
+    try {
+      // create cursor
+      ret = dbh->cursor (dbh, &crp, FFDB_KEY_CURSOR);
+      if (ret != 0) 
+	throw FileHashDBException ("DBFunc binaryAllPairs", "Create Cursor Error");
 
-    // get everything from meta data
-    dbkey.data = dbdata.data = 0;
-    dbkey.size = dbdata.size = 0;
-    while ((ret = crp->get (crp, &dbkey, &dbdata, FFDB_NEXT)) == 0) {
-      // convert into key object
-      std::string keyObj;
-      keyObj.assign((char*)dbkey.data, dbkey.size);
-
-      // convert into data object
-      std::string dataObj;
-      dataObj.assign((char*)dbdata.data, dbdata.size);
-
-      // put this new key into the vector
-      keys.push_back (keyObj);
-	
-      // put this data into the other vector
-      data.push_back (dataObj);
-
-      // free memory
-      free (dbkey.data); free (dbdata.data);
+      // get everything from meta data
       dbkey.data = dbdata.data = 0;
       dbkey.size = dbdata.size = 0;
+
+      int cnt=0;
+      std::cout << __func__ << ": cnt= " << cnt << std::endl;
+      while ((ret = crp->get (crp, &dbkey, &dbdata, FFDB_NEXT)) == 0) 
+      {
+	// convert into key object
+	std::string keyObj;
+	keyObj.assign((char*)dbkey.data, dbkey.size);
+
+	// convert into data object
+	std::string dataObj;
+	dataObj.assign((char*)dbdata.data, dbdata.size);
+
+	// put this new key into the vector
+	keys.push_back (keyObj);
+	
+	// put this data into the other vector
+	data.push_back (dataObj);
+
+	// free memory
+	free (dbkey.data); free (dbdata.data);
+	dbkey.data = dbdata.data = 0;
+	dbkey.size = dbdata.size = 0;
+      }
+      if (ret != FFDB_NOT_FOUND) 
+	throw FileHashDBException ("DBFunc binaryAllPairs", "Cursor Next Error");
     }
-    if (ret != FFDB_NOT_FOUND) 
-      throw FileHashDBException ("DBFunc AllPairs", "Cursor Next Error");
+    catch (SerializeException& e) {
+      throw;
+    }
     
     // close cursor
     if (crp != NULL)
