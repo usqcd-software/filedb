@@ -22,7 +22,10 @@
  *
  * Revision History:
  *   $Log: ConfDataDBMerger.h,v $
- *   Revision 1.1  2009-02-20 20:44:48  chen
+ *   Revision 1.2  2009-02-28 21:03:17  edwards
+ *   Rerranged some code in merge. Declare objects when they are used.
+ *
+ *   Revision 1.1  2009/02/20 20:44:48  chen
  *   initial import
  *
  *
@@ -368,11 +371,8 @@ namespace FFDB
      */
     void merge (void)
     {
-      unsigned int c, loop, i, dcachesize, numloops;
-      MemMap_t bag;
-
-    
       // find everything in the database that have valid database name in it
+      unsigned int i;
       for (i = 0; i < configs_.size(); i++) {
 	if (configs_[i].urlname().length () != 0) 
 	  break;
@@ -399,9 +399,17 @@ namespace FFDB
       // get keys and data in binary form
       fsconfdb->binaryKeysAndData (allkeys, data0);
 
+      if (allkeys.size() == 0 || data0.size() == 0)
+      {
+	std::cerr << __func__ << ": empty key or data size in db " << configs_[i].urlname() << std::endl;
+	::exit (1);
+      }
+
       // calculate the number of elements we use in the above two vectors each
       // time we accumulate all configurations into memory before we
       // write out to the final database.
+      unsigned int dcachesize;
+
       int chunk = iterateSize (allkeys[0], data0[0], 
 			       allkeys.size(), configs_.size(),
 			       max_memory_,
@@ -413,12 +421,11 @@ namespace FFDB
 #endif
       // calculate how many loops are we going to run.
       // Take care the case when size is multiple of chunk
-      if (allkeys.size () == allkeys.size()/chunk * chunk)
-	numloops = allkeys.size()/chunk;
-      else
-	numloops = allkeys.size()/chunk + 1;
+      unsigned int numloops = 
+	(allkeys.size () == allkeys.size()/chunk * chunk) ? allkeys.size()/chunk : allkeys.size()/chunk + 1;
 
-      for (loop = 0; loop < numloops; loop++) {
+      MemMap_t bag;
+      for (int loop = 0; loop < numloops; loop++) {
 	// clear the bag
 	bag.clear ();
 
@@ -426,7 +433,7 @@ namespace FFDB
 	initBag (configs_[i], allkeys, data0, chunk, loop, configs_.size(), bag);
 
 	// retrieve all information from each configuration
-	for (c = 0; c < configs_.size(); c++) {
+	for (int c = 0; c < configs_.size(); c++) {
 	  // populate bag for each configurations
 	  if (c != i)
 	    populateBag (configs_[c], allkeys, chunk, loop, 
