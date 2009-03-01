@@ -26,7 +26,11 @@
  *      
  * Revision History:
  *   $Log: ConfDataStoreDB.h,v $
- *   Revision 1.5  2009-02-28 20:45:51  edwards
+ *   Revision 1.6  2009-03-01 22:28:43  edwards
+ *   Bug fix. Changed the "close" member function to actually return something
+ *   since it is declared an int.
+ *
+ *   Revision 1.5  2009/02/28 20:45:51  edwards
  *   Bug fix. Changed the arguments to  binaryKeysAndData to use a reference
  *   so data can be returned.
  *
@@ -210,10 +214,12 @@ namespace FFDB
 
     virtual int close (void)
     {
+      int ret = 0;
       if (this->dbh_) {
-	this->dbh_->close (this->dbh_);
+	ret = this->dbh_->close (this->dbh_);
 	this->dbh_ = 0;
       }
+      return ret;
     }
 
     /**
