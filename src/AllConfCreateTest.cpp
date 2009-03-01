@@ -21,7 +21,10 @@
  *      
  * Revision History:
  *   $Log: AllConfCreateTest.cpp,v $
- *   Revision 1.1  2009-02-20 20:44:47  chen
+ *   Revision 1.2  2009-03-01 01:03:56  chen
+ *   Add missing O_CREAT flag
+ *
+ *   Revision 1.1  2009/02/20 20:44:47  chen
  *   initial import
  *
  *
@@ -72,7 +75,7 @@ main (int argc, char** argv)
   dbtest.setMaxUserInfoLen (5000);
   dbtest.setMaxNumberConfigs (numconfigs);  
 
-  if (dbtest.open (dbase, O_RDWR | O_TRUNC, 0664) != 0) {
+  if (dbtest.open (dbase, O_RDWR | O_TRUNC | O_CREAT, 0664) != 0) {
     cerr << "cannot open database " << dbase << endl;
     return -1;
   }
