@@ -36,7 +36,10 @@
  *
  * Revision History:
  *     $Log: ffdb_page.c,v $
- *     Revision 1.1  2009-02-20 20:44:47  chen
+ *     Revision 1.2  2009-03-02 23:58:21  chen
+ *     Change implementation on keys iterator which get keys only
+ *
+ *     Revision 1.1  2009/02/20 20:44:47  chen
  *     initial import
  *
  *
@@ -2816,12 +2819,15 @@ ffdb_cursor_find_by_key (ffdb_htab_t* hashp, ffdb_crs_t* cursor,
   }
   memcpy (key->data, ekdata, eksize);
 
-  /* Get data for this key */
-  cursor->item.status = ITEM_OK;
-  cursor->item.key_off = KEY_OFF(cursor->item.pagep, cursor->item.pgndx);
-  cursor->item.key_len = eksize;
-  cursor->item.data_off = DATAP_OFF(cursor->item.pagep, cursor->item.pgndx);
+  if (data) {
+    /* Get data for this key */
+    cursor->item.status = ITEM_OK;
+    cursor->item.key_off = KEY_OFF(cursor->item.pagep, cursor->item.pgndx);
+    cursor->item.key_len = eksize;
+    cursor->item.data_off = DATAP_OFF(cursor->item.pagep, cursor->item.pgndx);
 
-  return ffdb_get_item (hashp, key, data, &cursor->item, 0);
+    return ffdb_get_item (hashp, key, data, &cursor->item, 0);
+  }
+  return 0;
 }
 

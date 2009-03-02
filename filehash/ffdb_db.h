@@ -34,7 +34,10 @@
  *
  * Revision History:
  *     $Log: ffdb_db.h,v $
- *     Revision 1.1  2009-02-20 20:44:47  chen
+ *     Revision 1.2  2009-03-02 23:58:21  chen
+ *     Change implementation on keys iterator which get keys only
+ *
+ *     Revision 1.1  2009/02/20 20:44:47  chen
  *     initial import
  *
  *
@@ -148,7 +151,8 @@ typedef struct _ffdb_dbt_{
  */
 typedef struct _ffdb_cursor_
 {
-  /* Get routine */	  
+  /* Get routine */
+  /* If data is null (0), caller is not interested in data */
   int (*get) (struct _ffdb_cursor_ *c, 
 	      FFDB_DBT* key,  FFDB_DBT* data, unsigned int flags);
   /* Close this cursor */

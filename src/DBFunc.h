@@ -25,7 +25,10 @@
  *      
  * Revision History:
  *   $Log: DBFunc.h,v $
- *   Revision 1.1  2009-02-20 20:44:48  chen
+ *   Revision 1.2  2009-03-02 23:58:21  chen
+ *   Change implementation on keys iterator which get keys only
+ *
+ *   Revision 1.1  2009/02/20 20:44:48  chen
  *   initial import
  *
  *
@@ -319,7 +322,7 @@ namespace FFDB
   void allKeys (FFDB_DB* dbh, std::vector<K>& keys) 
     throw (SerializeException, FileHashDBException)
   {
-    FFDB_DBT  dbkey, dbdata;
+    FFDB_DBT  dbkey;
     ffdb_cursor_t *crp;
     K    arg;
     int  ret;
@@ -333,9 +336,7 @@ namespace FFDB
       // get everything from meta dat
       dbkey.data = 0;
       dbkey.size = 0;
-      dbdata.data = 0;
-      dbdata.size = 0;
-      while ((ret = crp->get (crp, &dbkey, &dbdata, FFDB_NEXT)) == 0) {
+      while ((ret = crp->get (crp, &dbkey, 0, FFDB_NEXT)) == 0) {
 	// convert into key object
 	std::string keyObj;
 	keyObj.assign((char*)dbkey.data, dbkey.size);
@@ -345,12 +346,10 @@ namespace FFDB
 	keys.push_back (arg);
 
 	// free memory
-	free (dbkey.data); free (dbdata.data);
+	free (dbkey.data);
 
 	dbkey.data = 0;
 	dbkey.size = 0;
-	dbdata.data = 0;
-	dbdata.size = 0;
       }
       if (ret != FFDB_NOT_FOUND) 
 	throw FileHashDBException ("DBFunc AllKeys", "Cursor next error");

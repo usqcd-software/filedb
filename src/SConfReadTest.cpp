@@ -21,7 +21,10 @@
  *      
  * Revision History:
  *   $Log: SConfReadTest.cpp,v $
- *   Revision 1.1  2009-03-02 23:27:26  chen
+ *   Revision 1.2  2009-03-02 23:58:21  chen
+ *   Change implementation on keys iterator which get keys only
+ *
+ *   Revision 1.1  2009/03/02 23:27:26  chen
  *   Test DBMerge Code
  *
  *
@@ -119,7 +122,7 @@ main (int argc, char** argv)
   }
   sf.close ();
 
-
+#if 0
   // dump all data
   vector<StringKey> keys;
   vector<VFloatData> data;
@@ -134,6 +137,19 @@ main (int argc, char** argv)
     cerr << endl;
     cerr << endl;
   }
+#endif
+
+  vector<StringKey> keys;
+  dbtest.keys (keys);
+
+  for (int i = 0; i < keys.size(); i++) {
+    cerr << "Key " << i << endl;
+    cerr << (string)keys[i] << endl;
+    
+    cerr << endl;
+    cerr << endl;
+  }
+
   dbtest.close ();
 
   return 0;
