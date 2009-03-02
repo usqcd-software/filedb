@@ -32,9 +32,10 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
-check_PROGRAMS = ConfCreateTest$(EXEEXT) ConfReadTest$(EXEEXT) \
+check_PROGRAMS = ConfCreateTest$(EXEEXT) SConfCreateTest$(EXEEXT) \
+	SConfReadTest$(EXEEXT) ConfReadTest$(EXEEXT) \
 	AllConfCreateTest$(EXEEXT) AllConfReadTest$(EXEEXT) \
-	AllConfUpdateTest$(EXEEXT)
+	AllConfUpdateTest$(EXEEXT) DBMergeTest$(EXEEXT)
 subdir = src
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -59,7 +60,7 @@ libffdbfile_a_LIBADD =
 am_libffdbfile_a_OBJECTS = FFDB.$(OBJEXT) DBCursor.$(OBJEXT) \
 	DBFunc.$(OBJEXT) DBString.$(OBJEXT) ConfDataStoreDB.$(OBJEXT) \
 	AllConfStoreDB.$(OBJEXT) ConfDataDBMerger.$(OBJEXT) \
-	ConfigInfo.$(OBJEXT) HashFunc.$(OBJEXT)
+	ConfigInfo.$(OBJEXT) HashFunc.$(OBJEXT) VFloatData.$(OBJEXT)
 libffdbfile_a_OBJECTS = $(am_libffdbfile_a_OBJECTS)
 am_AllConfCreateTest_OBJECTS = AllConfCreateTest.$(OBJEXT)
 AllConfCreateTest_OBJECTS = $(am_AllConfCreateTest_OBJECTS)
@@ -83,6 +84,18 @@ am_ConfReadTest_OBJECTS = ConfReadTest.$(OBJEXT)
 ConfReadTest_OBJECTS = $(am_ConfReadTest_OBJECTS)
 ConfReadTest_LDADD = $(LDADD)
 ConfReadTest_DEPENDENCIES = libffdbfile.a ../filehash/libfilehash.a
+am_DBMergeTest_OBJECTS = DBMergeTest.$(OBJEXT)
+DBMergeTest_OBJECTS = $(am_DBMergeTest_OBJECTS)
+DBMergeTest_LDADD = $(LDADD)
+DBMergeTest_DEPENDENCIES = libffdbfile.a ../filehash/libfilehash.a
+am_SConfCreateTest_OBJECTS = SConfCreateTest.$(OBJEXT)
+SConfCreateTest_OBJECTS = $(am_SConfCreateTest_OBJECTS)
+SConfCreateTest_LDADD = $(LDADD)
+SConfCreateTest_DEPENDENCIES = libffdbfile.a ../filehash/libfilehash.a
+am_SConfReadTest_OBJECTS = SConfReadTest.$(OBJEXT)
+SConfReadTest_OBJECTS = $(am_SConfReadTest_OBJECTS)
+SConfReadTest_LDADD = $(LDADD)
+SConfReadTest_DEPENDENCIES = libffdbfile.a ../filehash/libfilehash.a
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -97,10 +110,14 @@ CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(libffdbfile_a_SOURCES) $(AllConfCreateTest_SOURCES) \
 	$(AllConfReadTest_SOURCES) $(AllConfUpdateTest_SOURCES) \
-	$(ConfCreateTest_SOURCES) $(ConfReadTest_SOURCES)
+	$(ConfCreateTest_SOURCES) $(ConfReadTest_SOURCES) \
+	$(DBMergeTest_SOURCES) $(SConfCreateTest_SOURCES) \
+	$(SConfReadTest_SOURCES)
 DIST_SOURCES = $(libffdbfile_a_SOURCES) $(AllConfCreateTest_SOURCES) \
 	$(AllConfReadTest_SOURCES) $(AllConfUpdateTest_SOURCES) \
-	$(ConfCreateTest_SOURCES) $(ConfReadTest_SOURCES)
+	$(ConfCreateTest_SOURCES) $(ConfReadTest_SOURCES) \
+	$(DBMergeTest_SOURCES) $(SConfCreateTest_SOURCES) \
+	$(SConfReadTest_SOURCES)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(include_HEADERS)
 ETAGS = etags
@@ -227,7 +244,9 @@ libffdbfile_a_SOURCES = \
 	ConfigInfo.h \
 	ConfigInfo.cpp \
 	HashFunc.h \
-	HashFunc.cpp
+	HashFunc.cpp \
+	VFloatData.h \
+	VFloatData.cpp
 
 include_HEADERS = \
 	FFDB.h \
@@ -244,10 +263,13 @@ include_HEADERS = \
 	HashFunc.h
 
 ConfCreateTest_SOURCES = ConfCreateTest.cpp
+SConfCreateTest_SOURCES = SConfCreateTest.cpp
+SConfReadTest_SOURCES = SConfReadTest.cpp
 ConfReadTest_SOURCES = ConfReadTest.cpp
 AllConfCreateTest_SOURCES = AllConfCreateTest.cpp
 AllConfReadTest_SOURCES = AllConfReadTest.cpp
 AllConfUpdateTest_SOURCES = AllConfUpdateTest.cpp
+DBMergeTest_SOURCES = DBMergeTest.cpp
 LDADD = libffdbfile.a ../filehash/libfilehash.a -lpthread
 all: all-am
 
@@ -333,6 +355,15 @@ ConfCreateTest$(EXEEXT): $(ConfCreateTest_OBJECTS) $(ConfCreateTest_DEPENDENCIES
 ConfReadTest$(EXEEXT): $(ConfReadTest_OBJECTS) $(ConfReadTest_DEPENDENCIES) 
 	@rm -f ConfReadTest$(EXEEXT)
 	$(CXXLINK) $(ConfReadTest_OBJECTS) $(ConfReadTest_LDADD) $(LIBS)
+DBMergeTest$(EXEEXT): $(DBMergeTest_OBJECTS) $(DBMergeTest_DEPENDENCIES) 
+	@rm -f DBMergeTest$(EXEEXT)
+	$(CXXLINK) $(DBMergeTest_OBJECTS) $(DBMergeTest_LDADD) $(LIBS)
+SConfCreateTest$(EXEEXT): $(SConfCreateTest_OBJECTS) $(SConfCreateTest_DEPENDENCIES) 
+	@rm -f SConfCreateTest$(EXEEXT)
+	$(CXXLINK) $(SConfCreateTest_OBJECTS) $(SConfCreateTest_LDADD) $(LIBS)
+SConfReadTest$(EXEEXT): $(SConfReadTest_OBJECTS) $(SConfReadTest_DEPENDENCIES) 
+	@rm -f SConfReadTest$(EXEEXT)
+	$(CXXLINK) $(SConfReadTest_OBJECTS) $(SConfReadTest_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -351,9 +382,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ConfigInfo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DBCursor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DBFunc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DBMergeTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DBString.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FFDB.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HashFunc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SConfCreateTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SConfReadTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VFloatData.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

@@ -22,7 +22,10 @@
  *
  * Revision History:
  *   $Log: ConfDataDBMerger.h,v $
- *   Revision 1.2  2009-02-28 21:03:17  edwards
+ *   Revision 1.3  2009-03-02 23:27:26  chen
+ *   Test DBMerge Code
+ *
+ *   Revision 1.2  2009/02/28 21:03:17  edwards
  *   Rerranged some code in merge. Declare objects when they are used.
  *
  *   Revision 1.1  2009/02/20 20:44:48  chen
@@ -74,25 +77,6 @@ namespace FFDB
 
 
     /**
-     * Get configuration index from config number and configuration list
-     */
-    int getConfigIndex (int config,
-			const std::vector<int>& config_list)
-    {
-      int idx = 0;
-      std::vector<int>::const_iterator ite;
-
-      for (ite = config_list.begin(); ite != config_list.end(); ite++) {
-	if (config == *ite)
-	  return idx;
-	idx++;
-      }
-      std::cerr << "Cannot find this configuration " << config << " in the config_list " << std::endl;
-      return -1;
-    }
-
-
-    /**
      * Populate initial keys and data from the first configuration
      *
      * @param info configuration information for this set of keys and data
@@ -123,6 +107,7 @@ namespace FFDB
 	felem = keys.size();
       
       for (i = ielem; i < felem; i++) {
+	std::cerr << "Element " << i << std::endl;
 	std::vector< std::string > thr;
 	
 	thr.resize (numconfigs);
@@ -135,6 +120,7 @@ namespace FFDB
 	
 	// insert data into the vector
 	bag.find (keys[i])->second[info.index()] = data[i];
+	std::cerr << "Init index " << info.index() << std::endl;
       }    
     }
 
@@ -177,7 +163,7 @@ namespace FFDB
 	if (felem > keys.size())
 	  felem = keys.size();
 
-#if 0	
+#if 1
 	std::cerr << "initial item = " << ielem << " final item = " << felem << std::endl;
 #endif
 	// retrieve data for each key in this chunk
@@ -195,6 +181,7 @@ namespace FFDB
 	    ::exit (143);
 	  }
 	  // insert data into the ensemble
+	  std::cerr << "Update index " << info.index() << std::endl;
 	  bag.find (keys[i])->second[info.index()] = tdata;
 	}
 
@@ -302,12 +289,10 @@ namespace FFDB
 
     /**
      * Constructor
-     * Take a vector of database names, configuration number
-     * and configuration list
+     * Take a vector of database names, configuration numbers
      */
-    ConfDataDBMerger (const std::vector<std::string>& dbase_names,
-		      const std::vector<int>& config_numbers,
-		      const std::vector<int>& config_list,
+    ConfDataDBMerger (const std::vector<int>& config_numbers,
+		      const std::vector<std::string>& dbase_names,
 		      unsigned int max_memory)
       :dbh_(0), configs_ (), max_memory_(max_memory)
     {
@@ -315,22 +300,16 @@ namespace FFDB
       int i;
     
       // all these vectors should have the same size
-      if (dbase_names.size () == config_numbers.size () && 
-	  config_numbers.size() == config_list.size()) {
+      if (dbase_names.size () == config_numbers.size ()) {
 	std::vector<std::string>::const_iterator site;
 	std::vector<int>::const_iterator cite;
-	int idx;
 
 	cite = config_numbers.begin();
 	site = dbase_names.begin();
 	i = 0;
 	while (site != dbase_names.end() && cite != config_numbers.end()) {
-	  idx = getConfigIndex (*cite, config_list);
-	  if (idx == -1) {
-	    ::exit (143);
-	  }
 	  info.configNumber (*cite);
-	  info.index (idx);
+	  info.index (i);
 	  info.type (0);
 	  if ((*site) != "N/A")
 	    info.urlname (*site);
@@ -338,6 +317,7 @@ namespace FFDB
 	  
 	  site++;
 	  cite++;
+	  i++;
 	}
       }
       else {
@@ -405,11 +385,14 @@ namespace FFDB
 	::exit (1);
       }
 
+      std::cerr << "Number of keys and data = " << allkeys.size() << std::endl;
+      std::cerr << "Data size = " << data0.size() << std::endl;
+
       // calculate the number of elements we use in the above two vectors each
       // time we accumulate all configurations into memory before we
       // write out to the final database.
       unsigned int dcachesize;
-
+      
       int chunk = iterateSize (allkeys[0], data0[0], 
 			       allkeys.size(), configs_.size(),
 			       max_memory_,

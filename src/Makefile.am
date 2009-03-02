@@ -23,7 +23,9 @@ libffdbfile_a_SOURCES = \
 	ConfigInfo.h \
 	ConfigInfo.cpp \
 	HashFunc.h \
-	HashFunc.cpp
+	HashFunc.cpp \
+	VFloatData.h \
+	VFloatData.cpp
 
 include_HEADERS = \
 	FFDB.h \
@@ -39,13 +41,16 @@ include_HEADERS = \
 	ConfigInfo.h \
 	HashFunc.h
 
-check_PROGRAMS = ConfCreateTest ConfReadTest AllConfCreateTest AllConfReadTest AllConfUpdateTest
+check_PROGRAMS = ConfCreateTest SConfCreateTest SConfReadTest ConfReadTest AllConfCreateTest AllConfReadTest AllConfUpdateTest DBMergeTest
 
 ConfCreateTest_SOURCES=ConfCreateTest.cpp
+SConfCreateTest_SOURCES=SConfCreateTest.cpp
+SConfReadTest_SOURCES=SConfReadTest.cpp
 ConfReadTest_SOURCES=ConfReadTest.cpp
 AllConfCreateTest_SOURCES=AllConfCreateTest.cpp
 AllConfReadTest_SOURCES=AllConfReadTest.cpp
 AllConfUpdateTest_SOURCES=AllConfUpdateTest.cpp
+DBMergeTest_SOURCES=DBMergeTest.cpp
 
 LDADD = libffdbfile.a ../filehash/libfilehash.a -lpthread
 

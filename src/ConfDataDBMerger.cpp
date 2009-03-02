@@ -21,7 +21,10 @@
  *
  * Revision History:
  *   $Log: ConfDataDBMerger.cpp,v $
- *   Revision 1.1  2009-02-20 20:44:48  chen
+ *   Revision 1.2  2009-03-02 23:27:26  chen
+ *   Test DBMerge Code
+ *
+ *   Revision 1.1  2009/02/20 20:44:48  chen
  *   initial import
  *
  *
@@ -40,10 +43,9 @@ namespace FFDB
     vector<ConfigInfo> configs;
     vector<string> dnames;
     vector<int> cfigs;
-    vector<int> cfig_list;
     
     ConfDataDBMerger<StringKey, UserData> m1 (configs, 100000000);
-    ConfDataDBMerger<StringKey, UserData> m2 (dnames, cfigs, cfig_list, 100000000);
+    ConfDataDBMerger<StringKey, UserData> m2 (cfigs, dnames, 100000000);
 
     AllConfStoreDB<StringKey, UserData> dbh;
 

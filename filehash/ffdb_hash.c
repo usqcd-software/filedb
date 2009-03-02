@@ -36,7 +36,10 @@
  *
  * Revision History:
  *     $Log: ffdb_hash.c,v $
- *     Revision 1.1  2009-02-20 20:44:47  chen
+ *     Revision 1.2  2009-03-02 23:27:26  chen
+ *     Test DBMerge Code
+ *
+ *     Revision 1.1  2009/02/20 20:44:47  chen
  *     initial import
  *
  *
@@ -1382,7 +1385,7 @@ ffdb_set_config (FFDB_DB* db, ffdb_config_info_t* config)
 
   hashp = (ffdb_htab_t *)db->internal;
 
-  if (config->index >= hashp->hdr.cfig_npages || config->index < 0) {
+  if (config->index >= hashp->hdr.num_cfigs || config->index < 0) {
     fprintf (stderr, "ffdb_set_config provides a wrong configuration index number %d ( shoud be less than %d) \n",
 	     config->index, hashp->hdr.cfig_npages);
     errno = EINVAL;

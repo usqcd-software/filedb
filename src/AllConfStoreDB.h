@@ -22,7 +22,10 @@
  *      
  * Revision History:
  *   $Log: AllConfStoreDB.h,v $
- *   Revision 1.2  2009-02-27 03:37:54  edwards
+ *   Revision 1.3  2009-03-02 23:27:26  chen
+ *   Test DBMerge Code
+ *
+ *   Revision 1.2  2009/02/27 03:37:54  edwards
  *   Moved the "exist" function from AllConfStore to the base class ConfDataStore
  *
  *   Revision 1.1  2009/02/20 20:44:47  chen
@@ -126,6 +129,40 @@ namespace FFDB
 	allcfgs_.allconfigs[i].type = 0;
 	allcfgs_.allconfigs[i].mtime = 0;
 	allcfgs_.allconfigs[i].fname[0] = '\0';
+      }
+
+      // Set configuration maximum slot
+      this->setMaxNumberConfigs (nbin_);
+    }
+
+
+    /**
+     * Constructor taking a vector of configuration information
+     * Plus names of databases
+     */
+    AllConfStoreDB (const std::vector<int>& configs, 
+		    const std::vector<std::string>& names)
+      :ConfDataStoreDB<K, D>(), bytesize_ (0), empty_(1)
+    {
+      if (configs.size () != names.size()) {
+	std::cerr << "configuration number size != configuration name size" << std::endl;
+	abort ();
+      }
+      nbin_ = configs.size();
+
+      allcfgs_.numconfigs = nbin_;
+      allcfgs_.allconfigs = new ffdb_config_info_t[nbin_];
+      for (int i = 0; i < nbin_; i++) {
+	allcfgs_.allconfigs[i].config = configs[i];
+	allcfgs_.allconfigs[i].index = i;
+	allcfgs_.allconfigs[i].inserted = 0;
+	allcfgs_.allconfigs[i].type = 0;
+	allcfgs_.allconfigs[i].mtime = 0;
+	if (names[i] == "N/A")
+	  allcfgs_.allconfigs[i].fname[0] = '\0';
+	else
+	  strncpy (allcfgs_.allconfigs[i].fname, names[i].c_str(), 
+		   _FFDB_MAX_FNAME);
       }
 
       // Set configuration maximum slot
@@ -452,6 +489,65 @@ namespace FFDB
 	}
 
 	return ret;
+      }
+    }
+
+    void keysAndData (std::vector<K>& keys, 
+		      std::vector< std::vector <D> >& values)
+    {
+      std::vector<std::string> binkeys;
+      std::vector<std::string> bvalues;
+
+      this->binaryKeysAndData (binkeys, bvalues);
+
+      for (unsigned int i = 0; i < binkeys.size(); i++) {
+	K tkey;
+	try {
+	  tkey.readObject (binkeys[i]);
+	}
+	catch (SerializeException& e) {
+	  std::cerr << "Serialize individual key error: " << e.what() << std::endl;
+	  abort ();
+	}
+	keys.push_back (tkey);
+      }
+
+      // walk through each vector of string convert it into vector of D
+      for (unsigned int i = 0; i < bvalues.size(); i++) {
+	if (bvalues[i].length() % nbin_ != 0) {
+	  std::cerr << "Data element size " << bvalues[i].length() << " is not multiple of number of configuration " << nbin_ << std::endl;
+	  abort ();
+	}
+
+	// this is the beginning of the string buffer
+	char* dbuf = (char *)&bvalues[i][0];
+	std::vector<D> vals;
+	unsigned int bsize = bvalues[i].length()/nbin_;
+	if (bytesize_ == 0)
+	  bytesize_ = bsize;
+	
+	if (bsize != bytesize_) {
+	  std::cerr << "Individual element size " << bsize << " != expected " << bytesize_ << std::endl;
+	  abort ();
+	}
+
+	for (unsigned int k = 0; k < bvalues[i].length(); k += bsize) {
+	  D elem;
+	  std::string tmp;
+	  tmp.assign (&dbuf[k], bsize);
+	  try {
+	    elem.readObject(tmp);
+	  }
+	  catch (SerializeException &e) {
+	    std::cerr << "Serialize individual element error: " << e.what() << std::endl;
+	    abort ();
+	  }
+	  // insert into the individual vector
+	  vals.push_back (elem);
+	}
+	
+	// add this vector into the big vector
+	values.push_back (vals);
       }
     }
 
