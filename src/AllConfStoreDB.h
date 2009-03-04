@@ -22,7 +22,10 @@
  *      
  * Revision History:
  *   $Log: AllConfStoreDB.h,v $
- *   Revision 1.4  2009-03-04 15:55:25  chen
+ *   Revision 1.5  2009-03-04 17:08:03  edwards
+ *   Changed include of FFDB.h to FileDB.h
+ *
+ *   Revision 1.4  2009/03/04 15:55:25  chen
  *   Change Namespace from FFDB to FILEDB
  *
  *   Revision 1.3  2009/03/02 23:27:26  chen
@@ -43,7 +46,7 @@
 #include <vector>
 #include <iterator>
 #include <string>
-#include "FFDB.h"
+#include "FileDB.h"
 #include "DBCursor.h"
 #include "DBFunc.h"
 #include "ConfigInfo.h"
