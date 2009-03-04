@@ -34,7 +34,10 @@
  *
  * Revision History:
  *     $Log: ffdb_pagepool.h,v $
- *     Revision 1.1  2009-02-20 20:44:47  chen
+ *     Revision 1.2  2009-03-04 01:44:26  chen
+ *     Combine multiple writes
+ *
+ *     Revision 1.1  2009/02/20 20:44:47  chen
  *     initial import
  *
  *
@@ -74,6 +77,15 @@
  * Clear first a few bytes on a new page
  */
 #define FFDB_CLEANHDR_SIZE        32
+
+
+/**
+ * What fractions of pages inside cache to flush out when
+ * The maximum of cache is reached
+ *
+ * This is the inverse of the above value
+ */
+#define FFDB_WRITE_FRAC           5
 
 
 /*

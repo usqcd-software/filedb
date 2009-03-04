@@ -35,7 +35,10 @@
  *
  * Revision History:
  *     $Log: ffdb_pagepool.c,v $
- *     Revision 1.2  2009-02-24 04:25:05  edwards
+ *     Revision 1.3  2009-03-04 01:44:26  chen
+ *     Combine multiple writes
+ *
+ *     Revision 1.2  2009/02/24 04:25:05  edwards
  *     Check if O_LARGEFILE is defined before attempting to add it to the lflags
  *     used in the "open" call.
  *
@@ -68,6 +71,12 @@
 #include <errno.h>
 #include <ffdb_db.h>
 #include "ffdb_pagepool.h"
+
+/**
+ * Flush out some pages in order of page numbers
+ */
+static int 
+_ffdb_pagepool_sync_i (ffdb_pagepool_t* pgp, unsigned int numpages);
 
 /* Test for valid page sizes. */
 #define	IS_VALID_PAGESIZE(x)						\
@@ -242,6 +251,7 @@ _ffdb_pagepool_reuse_bkt (ffdb_pagepool_t* pgp, ffdb_bkt_t** retbp)
 {
   struct _ffdb_hqh *head;
   int ret = 0;
+  int needwrite = 0;
   int reusepage = 0;
   ffdb_bkt_t* bp = 0;
 
@@ -278,6 +288,8 @@ _ffdb_pagepool_reuse_bkt (ffdb_pagepool_t* pgp, ffdb_bkt_t** retbp)
 	  ret = errno;
 	  reusepage = 0;
 	}
+	else
+	  needwrite = 1;
       }
       
       /**
@@ -315,6 +327,15 @@ _ffdb_pagepool_reuse_bkt (ffdb_pagepool_t* pgp, ffdb_bkt_t** retbp)
   /* not found any reuseable page */
   if ((*retbp) == 0)
     ret = -1;
+
+  /* Now flush out some fraction of pages to speed up performance */
+  if (needwrite) {
+#ifdef _FFDB_DEBUG
+    fprintf (stderr, "Flush %d pages out\n", pgp->maxcache/FFDB_WRITE_FRAC);
+#endif
+    _ffdb_pagepool_sync_i (pgp, pgp->maxcache/FFDB_WRITE_FRAC);
+  }
+
   return ret;
 }
 
@@ -1208,14 +1229,13 @@ ffdb_pagepool_change_page (ffdb_pagepool_t* pgp, void* mem,
 }
 
 /**
- * Flush all dirty pages back to the back end file. However, if any modified 
- * pages are in use. They will be ignored
- *
- * @param  pgp cache page pool pointer
+ * Flush number of pages to disk
+ * If numpages == 0, flush all dirty pages to disk
  */
-int
-ffdb_pagepool_sync (ffdb_pagepool_t* pgp)
+static int
+_ffdb_pagepool_sync_i (ffdb_pagepool_t* pgp, unsigned int numpages)
 {
+  unsigned int num;
   ffdb_bkt_t* bp;
   ffdb_sbkt_t* sbp;
   ffdb_sbkt_t* next;
@@ -1226,8 +1246,7 @@ ffdb_pagepool_sync (ffdb_pagepool_t* pgp)
    * If it is not pinned and it is dirty, I will sort these pages
    * according to page number
    */
-  FFDB_LOCK (pgp->lock);
-
+  num = 0;
   FFDB_CIRCLEQ_FOREACH(bp, &pgp->lqh, lq){
     if (!FFDB_FLAG_ISSET(bp->flags, FFDB_PAGE_PINNED) &&
 	bp->waiters == 0 && 
@@ -1241,8 +1260,15 @@ ffdb_pagepool_sync (ffdb_pagepool_t* pgp)
       _ffdb_shallow_copy_bk (sbp, bp);
       /* add this to the list */
       FFDB_SLIST_INSERT_HEAD (&slh, sbp, sl);
+      num++;
+      if (numpages > 0 && num >= numpages)
+	break;
     }
   }
+
+#ifdef _FFDB_DEBUG
+  fprintf (stderr, "Flushed %d pages out\n", num);
+#endif
 
   /* Do a merge sort on the list slh according to pageno */
   _ffdb_slist_merge_sort (&slh);
@@ -1258,7 +1284,6 @@ ffdb_pagepool_sync (ffdb_pagepool_t* pgp)
       if (_ffdb_pagepool_write (pgp, sbp->bp) != 0) {
 	fprintf (stderr, "ffdb_pagepool_sync: writing page %d error.\n",
 		 sbp->bp->pgno);
-	FFDB_UNLOCK(pgp->lock);
 	return -1;
       }
     }
@@ -1270,9 +1295,29 @@ ffdb_pagepool_sync (ffdb_pagepool_t* pgp)
     free (sbp);
     sbp = next;
   }
-  FFDB_UNLOCK (pgp->lock);
 
   return 0;
+}
+
+
+/**
+ * Flush all dirty pages back to the back end file. However, if any modified 
+ * pages are in use. They will be ignored
+ *
+ * @param  pgp cache page pool pointer
+ */
+int
+ffdb_pagepool_sync (ffdb_pagepool_t* pgp)
+{
+  int ret;
+
+  FFDB_LOCK (pgp->lock);
+
+  ret = _ffdb_pagepool_sync_i (pgp, 0);
+
+  FFDB_UNLOCK (pgp->lock);
+
+  return ret;
 }
 
 
