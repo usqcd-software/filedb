@@ -26,7 +26,10 @@
  *      
  * Revision History:
  *   $Log: ConfDataStoreDB.h,v $
- *   Revision 1.7  2009-03-04 15:55:25  chen
+ *   Revision 1.8  2009-03-04 19:13:05  edwards
+ *   Changed some include guards and paths to filehash to be relative.
+ *
+ *   Revision 1.7  2009/03/04 15:55:25  chen
  *   Change Namespace from FFDB to FILEDB
  *
  *   Revision 1.6  2009/03/01 22:28:43  edwards
@@ -52,8 +55,8 @@
  *
  *
  */
-#ifndef _FFDB_CONF_DATA_STORE_DB_H
-#define _FFDB_CONF_DATA_STORE_DB_H
+#ifndef _FILEDB_CONF_DATA_STORE_DB_H
+#define _FILEDB_CONF_DATA_STORE_DB_H
 
 #include <string>
 #include "DBCursor.h"
