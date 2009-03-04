@@ -22,7 +22,10 @@
  *
  * Revision History:
  *   $Log: ConfDataDBMerger.h,v $
- *   Revision 1.3  2009-03-02 23:27:26  chen
+ *   Revision 1.4  2009-03-04 15:55:25  chen
+ *   Change Namespace from FFDB to FILEDB
+ *
+ *   Revision 1.3  2009/03/02 23:27:26  chen
  *   Test DBMerge Code
  *
  *   Revision 1.2  2009/02/28 21:03:17  edwards
@@ -34,8 +37,8 @@
  *
  *
  */
-#ifndef _FFDB_CONF_DATA_DB_MERGER_H
-#define _FFDB_CONF_DATA_DB_MERGER_H
+#ifndef _FILEDB_CONF_DATA_DB_MERGER_H
+#define _FILEDB_CONF_DATA_DB_MERGER_H
 
 #include <vector>
 #include "ConfigInfo.h"
@@ -45,7 +48,7 @@
 
 #include <tr1/unordered_map>
 
-namespace FFDB
+namespace FILEDB
 {
   template <typename K, typename D>
   class ConfDataDBMerger

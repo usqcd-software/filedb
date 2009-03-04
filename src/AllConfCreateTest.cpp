@@ -21,7 +21,10 @@
  *      
  * Revision History:
  *   $Log: AllConfCreateTest.cpp,v $
- *   Revision 1.2  2009-03-01 01:03:56  chen
+ *   Revision 1.3  2009-03-04 15:55:25  chen
+ *   Change Namespace from FFDB to FILEDB
+ *
+ *   Revision 1.2  2009/03/01 01:03:56  chen
  *   Add missing O_CREAT flag
  *
  *   Revision 1.1  2009/02/20 20:44:47  chen
@@ -40,7 +43,7 @@
 
 
 using namespace std;
-using namespace FFDB;
+using namespace FILEDB;
 
 #define NUM_KEYS 1000
 

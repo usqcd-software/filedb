@@ -1,6 +1,6 @@
 #include "HashFunc.h"
 
-namespace FFDB {
+namespace FILEDB {
   unsigned int RSHash(char* str, unsigned int len)
   {
     unsigned int b    = 378551;

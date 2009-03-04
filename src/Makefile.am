@@ -1,10 +1,10 @@
-AM_CXXFLAGS = @FFDB_BYTE_ORDER_DEF@ -I@top_srcdir@/filehash
+AM_CXXFLAGS = @FILEDB_BYTE_ORDER_DEF@ @FILEDB_TEMP_COMP_TEST@ -I@top_srcdir@/filehash
 
-lib_LIBRARIES = libffdbfile.a
+lib_LIBRARIES = libfiledb.a
 
-libffdbfile_a_SOURCES = \
-	FFDB.cpp \
-	FFDB.h \
+libfiledb_a_SOURCES = \
+	FileDB.cpp \
+	FileDB.h \
 	Serializable.h \
 	DBKey.h \
 	DBData.h \
@@ -28,7 +28,7 @@ libffdbfile_a_SOURCES = \
 	VFloatData.cpp
 
 include_HEADERS = \
-	FFDB.h \
+	FileDB.h \
 	Serializable.h \
 	DBKey.h \
 	DBData.h \
@@ -52,7 +52,7 @@ AllConfReadTest_SOURCES=AllConfReadTest.cpp
 AllConfUpdateTest_SOURCES=AllConfUpdateTest.cpp
 DBMergeTest_SOURCES=DBMergeTest.cpp
 
-LDADD = libffdbfile.a ../filehash/libfilehash.a -lpthread
+LDADD = libfiledb.a ../filehash/libfilehash.a -lpthread
 
 clean-local:
 	-rm -rf *~ core*

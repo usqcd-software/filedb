@@ -23,7 +23,10 @@
  *      
  * Revision History:
  *   $Log: DBFunc.cpp,v $
- *   Revision 1.5  2009-02-28 21:08:29  edwards
+ *   Revision 1.6  2009-03-04 15:55:25  chen
+ *   Change Namespace from FFDB to FILEDB
+ *
+ *   Revision 1.5  2009/02/28 21:08:29  edwards
  *   Removed debugging comment.
  *
  *   Revision 1.4  2009/02/28 21:05:26  edwards
@@ -46,7 +49,7 @@
 
 using namespace std;
 
-namespace FFDB
+namespace FILEDB
 {
   void flushDatabase (FFDB_DB* dbh)
   {

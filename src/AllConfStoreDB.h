@@ -22,7 +22,10 @@
  *      
  * Revision History:
  *   $Log: AllConfStoreDB.h,v $
- *   Revision 1.3  2009-03-02 23:27:26  chen
+ *   Revision 1.4  2009-03-04 15:55:25  chen
+ *   Change Namespace from FFDB to FILEDB
+ *
+ *   Revision 1.3  2009/03/02 23:27:26  chen
  *   Test DBMerge Code
  *
  *   Revision 1.2  2009/02/27 03:37:54  edwards
@@ -34,8 +37,8 @@
  *
  *
  */
-#ifndef _ALL_CONF_DATA_STORE_DB_H
-#define _ALL_CONF_DATA_STORE_DB_H
+#ifndef _FILEDB_ALL_CONF_DATA_STORE_DB_H
+#define _FILEDB_ALL_CONF_DATA_STORE_DB_H
 
 #include <vector>
 #include <iterator>
@@ -47,7 +50,7 @@
 #include "ConfDataStoreDB.h"
 
 
-namespace FFDB
+namespace FILEDB
 {
   /**
    * Class that store keys and corresponding data for all configurations

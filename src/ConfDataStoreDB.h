@@ -26,7 +26,10 @@
  *      
  * Revision History:
  *   $Log: ConfDataStoreDB.h,v $
- *   Revision 1.6  2009-03-01 22:28:43  edwards
+ *   Revision 1.7  2009-03-04 15:55:25  chen
+ *   Change Namespace from FFDB to FILEDB
+ *
+ *   Revision 1.6  2009/03/01 22:28:43  edwards
  *   Bug fix. Changed the "close" member function to actually return something
  *   since it is declared an int.
  *
@@ -56,10 +59,10 @@
 #include "DBCursor.h"
 #include "DBFunc.h"
 
-#define FFDB_DEFAULT_PAGESIZE 8192
-#define FFDB_DEFAULT_NUM_BUCKETS 32
+#define FILEDB_DEFAULT_PAGESIZE 8192
+#define FILEDB_DEFAULT_NUM_BUCKETS 32
 
-namespace FFDB
+namespace FILEDB
 {
   /**
    * Class that store one configuration worth of data and keys
@@ -88,8 +91,8 @@ namespace FFDB
       crc32_init();
     
       ::memset (&options_, 0, sizeof(FFDB_HASHINFO));
-      options_.bsize = FFDB_DEFAULT_PAGESIZE;
-      options_.nbuckets = FFDB_DEFAULT_NUM_BUCKETS;
+      options_.bsize = FILEDB_DEFAULT_PAGESIZE;
+      options_.nbuckets = FILEDB_DEFAULT_NUM_BUCKETS;
       // the other elements will be arranged by file hash package
     }
 

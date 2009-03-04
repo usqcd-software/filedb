@@ -23,7 +23,10 @@
  *      
  * Revision History:
  *   $Log: DBCursor.h,v $
- *   Revision 1.1  2009-02-20 20:44:48  chen
+ *   Revision 1.2  2009-03-04 15:55:25  chen
+ *   Change Namespace from FFDB to FILEDB
+ *
+ *   Revision 1.1  2009/02/20 20:44:48  chen
  *   initial import
  *
  *   Revision 1.4  2008/08/12 17:37:00  chen
@@ -45,9 +48,10 @@
 
 #include <DBKey.h>
 #include <DBData.h>
+
 #include <ffdb_db.h>
 
-namespace FFDB 
+namespace FILEDB 
 {
   /**
    * A database cursor class with reference counting

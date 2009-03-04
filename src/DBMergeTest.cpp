@@ -22,7 +22,10 @@
  *
  * Revision History:
  *   $Log: DBMergeTest.cpp,v $
- *   Revision 1.1  2009-03-02 23:27:26  chen
+ *   Revision 1.2  2009-03-04 15:55:25  chen
+ *   Change Namespace from FFDB to FILEDB
+ *
+ *   Revision 1.1  2009/03/02 23:27:26  chen
  *   Test DBMerge Code
  *
  *
@@ -43,7 +46,7 @@
 #include "ConfDataDBMerger.h"
 
 using namespace std;
-using namespace FFDB;
+using namespace FILEDB;
 
 static void
 usage (int argc, char** argv)

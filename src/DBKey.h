@@ -22,19 +22,22 @@
  *      
  * Revision History:
  *   $Log: DBKey.h,v $
- *   Revision 1.1  2009-02-20 20:44:48  chen
+ *   Revision 1.2  2009-03-04 15:55:25  chen
+ *   Change Namespace from FFDB to FILEDB
+ *
+ *   Revision 1.1  2009/02/20 20:44:48  chen
  *   initial import
  *
  *
  *
  */
-#ifndef _DB_KEY_H
-#define _DB_KEY_H
+#ifndef _FILE_DB_KEY_H
+#define _FILE_DB_KEY_H
 
 #include "Serializable.h"
 #include <ffdb_db.h>
 
-namespace FFDB
+namespace FILEDB
 {
   /**
    * Database Hash function definition

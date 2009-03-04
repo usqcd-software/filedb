@@ -28,18 +28,21 @@
  *      
  * Revision History:
  *   $Log: Serializable.h,v $
- *   Revision 1.1  2009-02-20 20:44:48  chen
+ *   Revision 1.2  2009-03-04 15:55:25  chen
+ *   Change Namespace from FFDB to FILEDB
+ *
+ *   Revision 1.1  2009/02/20 20:44:48  chen
  *   initial import
  *
  *
  */
-#ifndef _SERIALIZABLE_H
-#define _SERIALIZABLE_H
+#ifndef _FILEDB_SERIALIZABLE_H
+#define _FILEDB_SERIALIZABLE_H
 
-#include "FFDB.h"
+#include "FileDB.h"
 #include <string>
 
-namespace FFDB
+namespace FILEDB
 {
   class Serializable
   {

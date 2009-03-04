@@ -21,20 +21,23 @@
  *      
  * Revision History:
  *   $Log: DBString.h,v $
- *   Revision 1.1  2009-02-20 20:44:48  chen
+ *   Revision 1.2  2009-03-04 15:55:25  chen
+ *   Change Namespace from FFDB to FILEDB
+ *
+ *   Revision 1.1  2009/02/20 20:44:48  chen
  *   initial import
  *
  *
  *
  */
-#ifndef _FFDB_DB_STRING_H
-#define _FFDB_DB_STRING_H
+#ifndef _FILEDB_DB_STRING_H
+#define _FILEDB_DB_STRING_H
 
 #include "DBKey.h"
 #include "DBData.h"
-#include "FFDB.h"
+#include "FileDB.h"
 
-namespace FFDB
+namespace FILEDB
 {
   /**
    * Binary form of StringKey Class

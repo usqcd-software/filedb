@@ -19,13 +19,13 @@
 
 
 
-#ifndef INCLUDE_GENERALHASHFUNCTION_C_H
-#define INCLUDE_GENERALHASHFUNCTION_C_H
+#ifndef _FILEDB_INCLUDE_GENERALHASHFUNCTION_C_H
+#define _FILEDB_INCLUDE_GENERALHASHFUNCTION_C_H
 
 
 #include <cstdio>
 
-namespace FFDB {
+namespace FILEDB {
 
   typedef unsigned int (*hash_func) (char* str, unsigned int len);
 

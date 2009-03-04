@@ -1,4 +1,4 @@
-AM_CFLAGS = -D_FILE_OFFSET_BITS=64 -I@top_srcdir@/include -I@top_builddir@/include
+AM_CFLAGS = -D_FILE_OFFSET_BITS=64 @FILEHASH_DEBUG@ -I@top_srcdir@/include -I@top_builddir@/include
 
 lib_LIBRARIES = libfilehash.a
 

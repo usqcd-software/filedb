@@ -21,7 +21,10 @@
  *      
  * Revision History:
  *   $Log: VFloatData.h,v $
- *   Revision 1.1  2009-03-02 23:27:26  chen
+ *   Revision 1.2  2009-03-04 15:55:25  chen
+ *   Change Namespace from FFDB to FILEDB
+ *
+ *   Revision 1.1  2009/03/02 23:27:26  chen
  *   Test DBMerge Code
  *
  *
@@ -32,7 +35,7 @@
 #include <vector>
 #include "DBData.h"
 
-namespace FFDB
+namespace FILEDB
 {
   class VFloatData : public DBData 
   {

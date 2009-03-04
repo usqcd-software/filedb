@@ -25,7 +25,10 @@
  *      
  * Revision History:
  *   $Log: DBFunc.h,v $
- *   Revision 1.2  2009-03-02 23:58:21  chen
+ *   Revision 1.3  2009-03-04 15:55:25  chen
+ *   Change Namespace from FFDB to FILEDB
+ *
+ *   Revision 1.2  2009/03/02 23:58:21  chen
  *   Change implementation on keys iterator which get keys only
  *
  *   Revision 1.1  2009/02/20 20:44:48  chen
@@ -34,18 +37,18 @@
  *
  *
  */
-#ifndef _FFDB_DB_FUNC_H
-#define _FFDB_DB_FUNC_H
+#ifndef _FILEDB_DB_FUNC_H
+#define _FILEDB_DB_FUNC_H
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
 #include <sstream>
-#include "FFDB.h"
+#include "FileDB.h"
 #include "ffdb_db.h"
 
 
-namespace FFDB
+namespace FILEDB
 {
   /**
    * Return all keys and data to vectors in binary form of strings

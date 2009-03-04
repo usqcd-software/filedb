@@ -1,7 +1,7 @@
-# configure.ac file for FFDB package
-AC_INIT([ffdbfile],[0.95],[ffdbfile authors <chen@jlab.org>],[ffdbfile])
+# configure.ac file for FileDB package
+AC_INIT([filedb],[0.95],[filedb authors <chen@jlab.org>],[filedb])
 AC_COPYRIGHT([Jefferson Science Assoicates, LLC. Jefferson Lab])
-AC_MSG_NOTICE([Configuring ffdb-file])
+AC_MSG_NOTICE([Configuring filedb])
 
 AC_CONFIG_AUX_DIR(config)
 AM_INIT_AUTOMAKE([-Wall -Werror])
@@ -50,19 +50,42 @@ then
 fi
 
 # Check big/litte endian
-FFDB_BYTE_ORDER=UNKNOWN
-AC_C_BIGENDIAN([FFDB_BYTE_ORDER=BIG_ENDIAN],[FFDB_BYTE_ORDER=LITTLE_ENDIAN],[FFDB_BYTE_ORDER=UNKNOWN],[FFDB_BYTE_ORDER=UNIV])
+FILEDB_BYTE_ORDER=UNKNOWN
+AC_C_BIGENDIAN([FILEDB_BYTE_ORDER=BIG_ENDIAN],[FILEDB_BYTE_ORDER=LITTLE_ENDIAN],[FILEDB_BYTE_ORDER=UNKNOWN],[FILEDB_BYTE_ORDER=UNIV])
 
-if test "$FFDB_BYTE_ORDER" = BIG_ENDIAN
+if test "$FILEDB_BYTE_ORDER" = BIG_ENDIAN
 then
-	AC_MSG_NOTICE([Compile FFDB for big endian machines.])
-	AC_SUBST(FFDB_BYTE_ORDER_DEF,[-D_FFDB_BIG_ENDIAN])
-elif test "$FFDB_BYTE_ORDER" = LITTLE_ENDIAN
+	AC_MSG_NOTICE([Compile FileDB for big endian machines.])
+	AC_SUBST(FILEDB_BYTE_ORDER_DEF,[-D_FILEDB_BIG_ENDIAN])
+elif test "$FILEDB_BYTE_ORDER" = LITTLE_ENDIAN
 then
-	AC_MSG_NOTICE([Compile FFDB for little endian machines.])
-	AC_SUBST(FFDB_BYTE_ORDER_DEF,[-D_FFDB_LITTLE_ENDIAN])
+	AC_MSG_NOTICE([Compile FileDB for little endian machines.])
+	AC_SUBST(FILEDB_BYTE_ORDER_DEF,[-D_FILEDB_LITTLE_ENDIAN])
 else
 	AC_MSG_ERROR([Cannot determine endian type of this machine.])
+fi
+
+# Turn on massive debug information
+FILEDB_DEBUG_ON=NO
+AC_ARG_ENABLE([debug-hashdb],
+AC_HELP_STRING([--enable-debug-hashdb],[turn on low level debug verbose messages.]),
+[if test "$enableval" = yes; then FILEDB_DEBUG_ON=YES;fi])
+
+if test "$FILEDB_DEBUG_ON" = YES
+then
+	AC_MSG_NOTICE([Low level hash database debug message is on.])
+	AC_SUBST(FILEHASH_DEBUG,[-D_FFDB_DEBUG])
+fi
+
+FILEDB_TEMPLATE_COMPILE_TEST=NO
+AC_ARG_ENABLE([template-compile-test],
+AC_HELP_STRING([--enable-template-compile-test],[Test compile template headers through dumb instantiations.]),
+[if test "$enableval" = yes; then FILEDB_TEMPLATE_COMPILE_TEST=YES;fi])
+
+if test "$FILEDB_TEMPLATE_COMPILE_TEST" = YES
+then
+	AC_MSG_NOTICE([Testing compile template headers is on.])
+	AC_SUBST(FILEDB_TEMP_COMP_TEST,[-D_FILEDB_COMPILE_TEST])
 fi
 
 AC_CONFIG_FILES(Makefile)

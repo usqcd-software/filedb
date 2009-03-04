@@ -21,19 +21,22 @@
  *
  * Revision History:
  *   $Log: ConfigInfo.h,v $
- *   Revision 1.1  2009-02-20 20:44:48  chen
+ *   Revision 1.2  2009-03-04 15:55:25  chen
+ *   Change Namespace from FFDB to FILEDB
+ *
+ *   Revision 1.1  2009/02/20 20:44:48  chen
  *   initial import
  *
  *
  */
-#ifndef _FFDB_CONFIG_INFO_DATA_H
-#define _FFDB_CONFIG_INFO_DATA_H
+#ifndef _FILEDB_CONFIG_INFO_DATA_H
+#define _FILEDB_CONFIG_INFO_DATA_H
 
 #include <string>
 #include <iostream>
-#include "FFDB.h"
+#include "FileDB.h"
 
-namespace FFDB
+namespace FILEDB
 {
   class ConfigInfo
   {

@@ -55,47 +55,45 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 libLIBRARIES_INSTALL = $(INSTALL_DATA)
 LIBRARIES = $(lib_LIBRARIES)
 ARFLAGS = cru
-libffdbfile_a_AR = $(AR) $(ARFLAGS)
-libffdbfile_a_LIBADD =
-am_libffdbfile_a_OBJECTS = FFDB.$(OBJEXT) DBCursor.$(OBJEXT) \
+libfiledb_a_AR = $(AR) $(ARFLAGS)
+libfiledb_a_LIBADD =
+am_libfiledb_a_OBJECTS = FileDB.$(OBJEXT) DBCursor.$(OBJEXT) \
 	DBFunc.$(OBJEXT) DBString.$(OBJEXT) ConfDataStoreDB.$(OBJEXT) \
 	AllConfStoreDB.$(OBJEXT) ConfDataDBMerger.$(OBJEXT) \
 	ConfigInfo.$(OBJEXT) HashFunc.$(OBJEXT) VFloatData.$(OBJEXT)
-libffdbfile_a_OBJECTS = $(am_libffdbfile_a_OBJECTS)
+libfiledb_a_OBJECTS = $(am_libfiledb_a_OBJECTS)
 am_AllConfCreateTest_OBJECTS = AllConfCreateTest.$(OBJEXT)
 AllConfCreateTest_OBJECTS = $(am_AllConfCreateTest_OBJECTS)
 AllConfCreateTest_LDADD = $(LDADD)
-AllConfCreateTest_DEPENDENCIES = libffdbfile.a \
-	../filehash/libfilehash.a
+AllConfCreateTest_DEPENDENCIES = libfiledb.a ../filehash/libfilehash.a
 am_AllConfReadTest_OBJECTS = AllConfReadTest.$(OBJEXT)
 AllConfReadTest_OBJECTS = $(am_AllConfReadTest_OBJECTS)
 AllConfReadTest_LDADD = $(LDADD)
-AllConfReadTest_DEPENDENCIES = libffdbfile.a ../filehash/libfilehash.a
+AllConfReadTest_DEPENDENCIES = libfiledb.a ../filehash/libfilehash.a
 am_AllConfUpdateTest_OBJECTS = AllConfUpdateTest.$(OBJEXT)
 AllConfUpdateTest_OBJECTS = $(am_AllConfUpdateTest_OBJECTS)
 AllConfUpdateTest_LDADD = $(LDADD)
-AllConfUpdateTest_DEPENDENCIES = libffdbfile.a \
-	../filehash/libfilehash.a
+AllConfUpdateTest_DEPENDENCIES = libfiledb.a ../filehash/libfilehash.a
 am_ConfCreateTest_OBJECTS = ConfCreateTest.$(OBJEXT)
 ConfCreateTest_OBJECTS = $(am_ConfCreateTest_OBJECTS)
 ConfCreateTest_LDADD = $(LDADD)
-ConfCreateTest_DEPENDENCIES = libffdbfile.a ../filehash/libfilehash.a
+ConfCreateTest_DEPENDENCIES = libfiledb.a ../filehash/libfilehash.a
 am_ConfReadTest_OBJECTS = ConfReadTest.$(OBJEXT)
 ConfReadTest_OBJECTS = $(am_ConfReadTest_OBJECTS)
 ConfReadTest_LDADD = $(LDADD)
-ConfReadTest_DEPENDENCIES = libffdbfile.a ../filehash/libfilehash.a
+ConfReadTest_DEPENDENCIES = libfiledb.a ../filehash/libfilehash.a
 am_DBMergeTest_OBJECTS = DBMergeTest.$(OBJEXT)
 DBMergeTest_OBJECTS = $(am_DBMergeTest_OBJECTS)
 DBMergeTest_LDADD = $(LDADD)
-DBMergeTest_DEPENDENCIES = libffdbfile.a ../filehash/libfilehash.a
+DBMergeTest_DEPENDENCIES = libfiledb.a ../filehash/libfilehash.a
 am_SConfCreateTest_OBJECTS = SConfCreateTest.$(OBJEXT)
 SConfCreateTest_OBJECTS = $(am_SConfCreateTest_OBJECTS)
 SConfCreateTest_LDADD = $(LDADD)
-SConfCreateTest_DEPENDENCIES = libffdbfile.a ../filehash/libfilehash.a
+SConfCreateTest_DEPENDENCIES = libfiledb.a ../filehash/libfilehash.a
 am_SConfReadTest_OBJECTS = SConfReadTest.$(OBJEXT)
 SConfReadTest_OBJECTS = $(am_SConfReadTest_OBJECTS)
 SConfReadTest_LDADD = $(LDADD)
-SConfReadTest_DEPENDENCIES = libffdbfile.a ../filehash/libfilehash.a
+SConfReadTest_DEPENDENCIES = libfiledb.a ../filehash/libfilehash.a
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -108,12 +106,12 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libffdbfile_a_SOURCES) $(AllConfCreateTest_SOURCES) \
+SOURCES = $(libfiledb_a_SOURCES) $(AllConfCreateTest_SOURCES) \
 	$(AllConfReadTest_SOURCES) $(AllConfUpdateTest_SOURCES) \
 	$(ConfCreateTest_SOURCES) $(ConfReadTest_SOURCES) \
 	$(DBMergeTest_SOURCES) $(SConfCreateTest_SOURCES) \
 	$(SConfReadTest_SOURCES)
-DIST_SOURCES = $(libffdbfile_a_SOURCES) $(AllConfCreateTest_SOURCES) \
+DIST_SOURCES = $(libfiledb_a_SOURCES) $(AllConfCreateTest_SOURCES) \
 	$(AllConfReadTest_SOURCES) $(AllConfUpdateTest_SOURCES) \
 	$(ConfCreateTest_SOURCES) $(ConfReadTest_SOURCES) \
 	$(DBMergeTest_SOURCES) $(SConfCreateTest_SOURCES) \
@@ -149,7 +147,9 @@ ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
-FFDB_BYTE_ORDER_DEF = @FFDB_BYTE_ORDER_DEF@
+FILEDB_BYTE_ORDER_DEF = @FILEDB_BYTE_ORDER_DEF@
+FILEDB_TEMP_COMP_TEST = @FILEDB_TEMP_COMP_TEST@
+FILEHASH_DEBUG = @FILEHASH_DEBUG@
 GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -221,11 +221,11 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CXXFLAGS = @FFDB_BYTE_ORDER_DEF@ -I@top_srcdir@/filehash
-lib_LIBRARIES = libffdbfile.a
-libffdbfile_a_SOURCES = \
-	FFDB.cpp \
-	FFDB.h \
+AM_CXXFLAGS = @FILEDB_BYTE_ORDER_DEF@ @FILEDB_TEMP_COMP_TEST@ -I@top_srcdir@/filehash
+lib_LIBRARIES = libfiledb.a
+libfiledb_a_SOURCES = \
+	FileDB.cpp \
+	FileDB.h \
 	Serializable.h \
 	DBKey.h \
 	DBData.h \
@@ -249,7 +249,7 @@ libffdbfile_a_SOURCES = \
 	VFloatData.cpp
 
 include_HEADERS = \
-	FFDB.h \
+	FileDB.h \
 	Serializable.h \
 	DBKey.h \
 	DBData.h \
@@ -270,7 +270,7 @@ AllConfCreateTest_SOURCES = AllConfCreateTest.cpp
 AllConfReadTest_SOURCES = AllConfReadTest.cpp
 AllConfUpdateTest_SOURCES = AllConfUpdateTest.cpp
 DBMergeTest_SOURCES = DBMergeTest.cpp
-LDADD = libffdbfile.a ../filehash/libfilehash.a -lpthread
+LDADD = libfiledb.a ../filehash/libfilehash.a -lpthread
 all: all-am
 
 .SUFFIXES:
@@ -333,10 +333,10 @@ uninstall-libLIBRARIES:
 
 clean-libLIBRARIES:
 	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
-libffdbfile.a: $(libffdbfile_a_OBJECTS) $(libffdbfile_a_DEPENDENCIES) 
-	-rm -f libffdbfile.a
-	$(libffdbfile_a_AR) libffdbfile.a $(libffdbfile_a_OBJECTS) $(libffdbfile_a_LIBADD)
-	$(RANLIB) libffdbfile.a
+libfiledb.a: $(libfiledb_a_OBJECTS) $(libfiledb_a_DEPENDENCIES) 
+	-rm -f libfiledb.a
+	$(libfiledb_a_AR) libfiledb.a $(libfiledb_a_OBJECTS) $(libfiledb_a_LIBADD)
+	$(RANLIB) libfiledb.a
 
 clean-checkPROGRAMS:
 	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
@@ -384,7 +384,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DBFunc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DBMergeTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DBString.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FFDB.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FileDB.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HashFunc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SConfCreateTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SConfReadTest.Po@am__quote@

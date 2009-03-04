@@ -24,20 +24,23 @@
  *      
  * Revision History:
  *   $Log: ConfDataStoreDB.cpp,v $
- *   Revision 1.1  2009-02-20 20:44:48  chen
+ *   Revision 1.2  2009-03-04 15:55:25  chen
+ *   Change Namespace from FFDB to FILEDB
+ *
+ *   Revision 1.1  2009/02/20 20:44:48  chen
  *   initial import
  *
  *
  *
  */
-#ifdef _FFDB_COMPILE_TEST
+#ifdef _FILEDB_COMPILE_TEST
 
 #include "DBString.h"
 #include "ConfDataStoreDB.h"
 
 using namespace std;
 
-namespace FFDB
+namespace FILEDB
 {
   static void init_confdatastoredb_test (void)
   {

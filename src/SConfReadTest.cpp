@@ -21,7 +21,10 @@
  *      
  * Revision History:
  *   $Log: SConfReadTest.cpp,v $
- *   Revision 1.2  2009-03-02 23:58:21  chen
+ *   Revision 1.3  2009-03-04 15:55:25  chen
+ *   Change Namespace from FFDB to FILEDB
+ *
+ *   Revision 1.2  2009/03/02 23:58:21  chen
  *   Change implementation on keys iterator which get keys only
  *
  *   Revision 1.1  2009/03/02 23:27:26  chen
@@ -38,7 +41,7 @@
 #include "ConfDataStoreDB.h"
 
 using namespace std;
-using namespace FFDB;
+using namespace FILEDB;
 
 int
 main (int argc, char** argv)

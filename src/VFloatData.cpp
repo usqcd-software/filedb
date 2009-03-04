@@ -20,7 +20,10 @@
  *      
  * Revision History:
  *   $Log: VFloatData.cpp,v $
- *   Revision 1.1  2009-03-02 23:27:26  chen
+ *   Revision 1.2  2009-03-04 15:55:25  chen
+ *   Change Namespace from FFDB to FILEDB
+ *
+ *   Revision 1.1  2009/03/02 23:27:26  chen
  *   Test DBMerge Code
  *
  *
@@ -31,7 +34,7 @@
 
 using namespace std;
 
-namespace FFDB
+namespace FILEDB
 {
   /**
    * Constructor

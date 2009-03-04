@@ -20,7 +20,10 @@
  *      
  * Revision History:
  *   $Log: DBString.cpp,v $
- *   Revision 1.1  2009-02-20 20:44:48  chen
+ *   Revision 1.2  2009-03-04 15:55:25  chen
+ *   Change Namespace from FFDB to FILEDB
+ *
+ *   Revision 1.1  2009/02/20 20:44:48  chen
  *   initial import
  *
  *   Revision 1.4  2008/08/12 17:37:36  chen
@@ -46,7 +49,7 @@
 
 using namespace std;
 
-namespace FFDB
+namespace FILEDB
 {
   /**************************************************************************
    *      Implementation  StringKey Class                                   *

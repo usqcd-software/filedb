@@ -21,7 +21,10 @@
  *
  * Revision History:
  *   $Log: ConfDataDBMerger.cpp,v $
- *   Revision 1.2  2009-03-02 23:27:26  chen
+ *   Revision 1.3  2009-03-04 15:55:25  chen
+ *   Change Namespace from FFDB to FILEDB
+ *
+ *   Revision 1.2  2009/03/02 23:27:26  chen
  *   Test DBMerge Code
  *
  *   Revision 1.1  2009/02/20 20:44:48  chen
@@ -30,13 +33,15 @@
  *
  *
  */
+#ifdef _FILEDB_COMPILE_TEST
+
 #include <DBString.h>
 #include "AllConfStoreDB.h"
 #include "ConfDataDBMerger.h"
 
 using namespace std;
 
-namespace FFDB
+namespace FILEDB
 {
   static void test_merge_code (void)
   {
@@ -55,4 +60,5 @@ namespace FFDB
     m2.merge ();
   }
 }
+#endif
 

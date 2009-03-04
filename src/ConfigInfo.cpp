@@ -20,7 +20,10 @@
  *
  * Revision History:
  *   $Log: ConfigInfo.cpp,v $
- *   Revision 1.2  2009-02-24 04:22:55  edwards
+ *   Revision 1.3  2009-03-04 15:55:25  chen
+ *   Change Namespace from FFDB to FILEDB
+ *
+ *   Revision 1.2  2009/02/24 04:22:55  edwards
  *   Added include of time.h
  *
  *   Revision 1.1  2009/02/20 20:44:48  chen
@@ -36,11 +39,11 @@
 
 using namespace std;
 
-namespace FFDB
+namespace FILEDB
 {
   ConfigInfo::ConfigInfo (void)
     :config_ (0), index_ (0), inserted_ (0),
-     type_ (FFDB_FIX_DATA_SIZE), mtime_ (0), url_ ()
+     type_ (FILEDB_FIX_DATA_SIZE), mtime_ (0), url_ ()
   {
     // empty
   }
