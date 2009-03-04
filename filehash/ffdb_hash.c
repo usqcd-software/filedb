@@ -36,7 +36,10 @@
  *
  * Revision History:
  *     $Log: ffdb_hash.c,v $
- *     Revision 1.2  2009-03-02 23:27:26  chen
+ *     Revision 1.3  2009-03-04 18:03:13  chen
+ *     Add flush disk when doubling
+ *
+ *     Revision 1.2  2009/03/02 23:27:26  chen
  *     Test DBMerge Code
  *
  *     Revision 1.1  2009/02/20 20:44:47  chen
@@ -307,8 +310,6 @@ _ffdb_hdestroy (ffdb_htab_t* hashp)
     free(hashp->bigdata_buf);
   if (hashp->bigkey_buf)
     free(hashp->bigkey_buf);
-
-
 
   if (save_errno) {
     errno = save_errno;
@@ -989,7 +990,7 @@ static int
 _ffdb_expand_table (ffdb_htab_t* hashp)
 {
   unsigned int old_bucket, new_bucket;
-  int spare_indx, isdoubling;
+  int spare_indx, isdoubling, ret;
   pgno_t p;
 
 #ifdef _FFDB_STATISTICS
@@ -1039,8 +1040,14 @@ _ffdb_expand_table (ffdb_htab_t* hashp)
   fprintf (stderr, "Get a new expanded page at bucket %d split old bucket %d\n", new_bucket, old_bucket);
 #endif
 
-
-  return ffdb_split_bucket (hashp, old_bucket, new_bucket, isdoubling);
+  if (isdoubling) {
+    /* Write out meta header here */
+    _ffdb_flush_meta (hashp);
+    ffdb_pagepool_sync (hashp->mp); 
+  }
+  
+  ret = ffdb_split_bucket (hashp, old_bucket, new_bucket, isdoubling);
+  return ret;
 }
 
 
