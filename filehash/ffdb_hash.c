@@ -36,7 +36,10 @@
  *
  * Revision History:
  *     $Log: ffdb_hash.c,v $
- *     Revision 1.3  2009-03-04 18:03:13  chen
+ *     Revision 1.4  2009-03-04 19:12:28  edwards
+ *     Renamed DB_HASH and __db to avoid name collisions with Berkeley DB.
+ *
+ *     Revision 1.3  2009/03/04 18:03:13  chen
  *     Add flush disk when doubling
  *
  *     Revision 1.2  2009/03/02 23:27:26  chen
@@ -837,7 +840,7 @@ __ffdb_hash_open (const char* fname, int flags, int mode, const void* arg)
   dbp->put = _ffdb_hash_put;
   dbp->sync = _ffdb_hash_sync;
   dbp->cursor = _ffdb_hash_cursor;
-  dbp->type = DB_HASH;
+  dbp->type = FFDB_HASH;
 
 #ifdef _FFDB_DEBUG
   (void)fprintf(stderr,

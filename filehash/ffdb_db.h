@@ -34,7 +34,10 @@
  *
  * Revision History:
  *     $Log: ffdb_db.h,v $
- *     Revision 1.2  2009-03-02 23:58:21  chen
+ *     Revision 1.3  2009-03-04 19:12:28  edwards
+ *     Renamed DB_HASH and __db to avoid name collisions with Berkeley DB.
+ *
+ *     Revision 1.2  2009/03/02 23:58:21  chen
  *     Change implementation on keys iterator which get keys only
  *
  *     Revision 1.1  2009/02/20 20:44:47  chen
@@ -92,7 +95,7 @@ typedef unsigned short	indx_t;
 /*
  * We only have DB_HASH in this package
  */
-typedef enum {DB_HASH = 1} FFDB_DBTYPE;
+typedef enum {FFDB_HASH = 1} FFDB_DBTYPE;
 
 /*
  * Still use the key data pair structure
@@ -170,16 +173,16 @@ typedef struct _ffdb_cursor_
 
 
 /* Access method description structure. */
-typedef struct __db {
+typedef struct __ffdb {
   FFDB_DBTYPE   type;			/* Underlying db type. */
-  int (*close)	(struct __db *);
-  int (*del)	(const struct __db *, const FFDB_DBT *, unsigned int);
-  int (*get)	(const struct __db *, const FFDB_DBT *, FFDB_DBT *, unsigned int);
-  int (*put)	(const struct __db *, FFDB_DBT *, const FFDB_DBT *, unsigned int);
-  int (*sync)	(const struct __db *, unsigned int);
-  int (*cursor) (const struct __db *, ffdb_cursor_t **, unsigned int type);
+  int (*close)	(struct __ffdb *);
+  int (*del)	(const struct __ffdb *, const FFDB_DBT *, unsigned int);
+  int (*get)	(const struct __ffdb *, const FFDB_DBT *, FFDB_DBT *, unsigned int);
+  int (*put)	(const struct __ffdb *, FFDB_DBT *, const FFDB_DBT *, unsigned int);
+  int (*sync)	(const struct __ffdb *, unsigned int);
+  int (*cursor) (const struct __ffdb *, ffdb_cursor_t **, unsigned int type);
   void *internal;			/* Access method private. */
-  int (*fd)	(const struct __db *);
+  int (*fd)	(const struct __ffdb *);
 } FFDB_DB;
 
 /*
