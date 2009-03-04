@@ -26,7 +26,10 @@
  *      
  * Revision History:
  *   $Log: ConfDataStoreDB.h,v $
- *   Revision 1.9  2009-03-04 19:15:17  edwards
+ *   Revision 1.10  2009-03-04 19:31:33  chen
+ *   Change to 16384 default pagesize
+ *
+ *   Revision 1.9  2009/03/04 19:15:17  edwards
  *   Changed include guard to avoid collisions with ffdb-lite.
  *
  *   Revision 1.7  2009/03/04 15:55:25  chen
@@ -62,7 +65,7 @@
 #include "DBCursor.h"
 #include "DBFunc.h"
 
-#define FILEDB_DEFAULT_PAGESIZE 8192
+#define FILEDB_DEFAULT_PAGESIZE 16384
 #define FILEDB_DEFAULT_NUM_BUCKETS 32
 
 namespace FILEDB
