@@ -36,7 +36,10 @@
  *
  * Revision History:
  *     $Log: ffdb_page.c,v $
- *     Revision 1.2  2009-03-02 23:58:21  chen
+ *     Revision 1.3  2009-03-05 20:33:12  chen
+ *     release bucket page too early fixed
+ *
+ *     Revision 1.2  2009/03/02 23:58:21  chen
  *     Change implementation on keys iterator which get keys only
  *
  *     Revision 1.1  2009/02/20 20:44:47  chen
@@ -1428,11 +1431,8 @@ int ffdb_get_item (ffdb_htab_t* hashp,
   fprintf (stderr, "At offset %d\n", datap->offset);
   fprintf (stderr, "Length of data %d\n", datap->len);
   fprintf (stderr, "Checksum of data is 0x%x\n", datap->chksum);
+  fprintf (stderr, "freepage is = %d\n", freepage);
 #endif
-
- /* Now I do not need this page */
-  if (freepage)
-    ffdb_put_page (hashp, item->pagep, HASH_RAW_PAGE, 0);
 
   /* Now I have to hop to data page to get this data item */
   status = _ffdb_get_data (hashp, item, val, datap);
@@ -1441,6 +1441,10 @@ int ffdb_get_item (ffdb_htab_t* hashp,
 	     datap->first, datap->offset);
     return status;
   }
+
+ /* Now I do not need this page */
+  if (freepage)
+    ffdb_put_page (hashp, item->pagep, HASH_RAW_PAGE, 0);
 
   return 0;
 }
