@@ -22,7 +22,10 @@
  *      
  * Revision History:
  *   $Log: DBKey.h,v $
- *   Revision 1.3  2009-03-04 19:13:05  edwards
+ *   Revision 1.4  2009-03-05 00:40:05  edwards
+ *   Changed include path of filehash files back to no relative path.
+ *
+ *   Revision 1.3  2009/03/04 19:13:05  edwards
  *   Changed some include guards and paths to filehash to be relative.
  *
  *   Revision 1.2  2009/03/04 15:55:25  chen
@@ -38,7 +41,7 @@
 #define _FILEDB_DB_KEY_H
 
 #include "Serializable.h"
-#include "../filehash/ffdb_db.h"
+#include "ffdb_db.h"
 
 namespace FILEDB
 {
