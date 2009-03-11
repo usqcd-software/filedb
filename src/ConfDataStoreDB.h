@@ -26,7 +26,10 @@
  *      
  * Revision History:
  *   $Log: ConfDataStoreDB.h,v $
- *   Revision 1.10  2009-03-04 19:31:33  chen
+ *   Revision 1.11  2009-03-11 13:56:09  edwards
+ *   Changed default cache size back to 8192
+ *
+ *   Revision 1.10  2009/03/04 19:31:33  chen
  *   Change to 16384 default pagesize
  *
  *   Revision 1.9  2009/03/04 19:15:17  edwards
@@ -65,7 +68,7 @@
 #include "DBCursor.h"
 #include "DBFunc.h"
 
-#define FILEDB_DEFAULT_PAGESIZE 16384
+#define FILEDB_DEFAULT_PAGESIZE 8192
 #define FILEDB_DEFAULT_NUM_BUCKETS 32
 
 namespace FILEDB
