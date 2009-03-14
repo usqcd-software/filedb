@@ -36,7 +36,10 @@
  *
  * Revision History:
  *     $Log: ffdb_hash.c,v $
- *     Revision 1.4  2009-03-04 19:12:28  edwards
+ *     Revision 1.5  2009-03-14 15:41:36  edwards
+ *     Turned off some debugging output.
+ *
+ *     Revision 1.4  2009/03/04 19:12:28  edwards
  *     Renamed DB_HASH and __db to avoid name collisions with Berkeley DB.
  *
  *     Revision 1.3  2009/03/04 18:03:13  chen
@@ -335,10 +338,12 @@ _ffdb_init_hash(ffdb_htab_t* hashp, const char* file,
    * and we are using the native format
    */
   hashp->hdr.lorder = _ffdb_test_endian ();
+#if 0
   if (hashp->hdr.lorder == LITTLE_ENDIAN) 
     fprintf (stderr, "Info: Data will be stored in little endian format.\n");
   else
     fprintf (stderr, "Info: Data will be stored in big endian format.\n");
+#endif
 
   hashp->hdr.nkeys = 0;
   hashp->hdr.bsize = DEF_BUCKET_SIZE;
@@ -423,10 +428,12 @@ _ffdb_hget_header(ffdb_htab_t *hashp, unsigned int page_size)
     exit (1);
   }
 
+#if 0
   if (hashp->hdr.lorder == LITTLE_ENDIAN) 
     fprintf (stderr, "Info: Data are stored in little endian format.\n");
   else
     fprintf (stderr, "Info: Data are stored in big endian format.\n");
+#endif
 
   return num_copied;
 }
@@ -875,6 +882,8 @@ __ffdb_hash_open (const char* fname, int flags, int mode, const void* arg)
   }
 #endif
 
+
+#if 0
   (void)fprintf(stderr,
 		"%s\n%s%p\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%x\n%s%x\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n",
 		"init_htab:",
@@ -905,6 +914,7 @@ __ffdb_hash_open (const char* fname, int flags, int mode, const void* arg)
       fprintf(stderr,
 		    "freepages[%d] = %d\n", i, hashp->hdr.free_pages[i]);
   }
+#endif
 
 #ifdef _FFDB_STATISTICS
   hash_overflows = hash_accesses = hash_collisions = hash_expansions = 0;
@@ -921,8 +931,11 @@ __ffdb_hash_open (const char* fname, int flags, int mode, const void* arg)
   /* Otherwise the datapage assigned to new insert will start at wrong place */
   if (hashp->hdr.spares[hashp->hdr.ovfl_point + 1] > 0) {
     hashp->curr_dpage = ffdb_last_data_page (hashp, hashp->hdr.spares[hashp->hdr.ovfl_point + 1] - 1);
+
+#if 0
     fprintf (stderr, "Info: datapage will start at %d for level %d\n",
 	     hashp->curr_dpage, hashp->hdr.ovfl_point);
+#endif
   }
 
   /* finally intialize lock */
