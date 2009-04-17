@@ -34,7 +34,10 @@
  *
  * Revision History:
  *     $Log: ffdb_pagepool.h,v $
- *     Revision 1.2  2009-03-04 01:44:26  chen
+ *     Revision 1.3  2009-04-17 00:42:14  chen
+ *     add dump stack routine
+ *
+ *     Revision 1.2  2009/03/04 01:44:26  chen
  *     Combine multiple writes
  *
  *     Revision 1.1  2009/02/20 20:44:47  chen
@@ -406,6 +409,14 @@ ffdb_pagepool_delete (ffdb_pagepool_t* pgp, void* mem);
 extern void
 ffdb_pagepool_filter (ffdb_pagepool_t* pgp, ffdb_pgiofunc_t pgin,
 		      ffdb_pgiofunc_t pgout, void* cookie);
+
+
+/**
+ * Simple utility to dump stack trace
+ * Now it only has implementation on linux
+ */
+extern void 
+ffdb_dump_stack (void);
 
 
 #ifdef _FFDB_STATISTICS

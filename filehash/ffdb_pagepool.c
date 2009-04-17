@@ -35,7 +35,10 @@
  *
  * Revision History:
  *     $Log: ffdb_pagepool.c,v $
- *     Revision 1.3  2009-03-04 01:44:26  chen
+ *     Revision 1.4  2009-04-17 00:42:14  chen
+ *     add dump stack routine
+ *
+ *     Revision 1.3  2009/03/04 01:44:26  chen
  *     Combine multiple writes
  *
  *     Revision 1.2  2009/02/24 04:25:05  edwards
@@ -71,6 +74,40 @@
 #include <errno.h>
 #include <ffdb_db.h>
 #include "ffdb_pagepool.h"
+
+#ifdef __linux
+
+#include <execinfo.h>
+#define SBUF_SIZE 400
+
+void ffdb_dump_stack(void)
+{
+  int i, nptrs;
+  void *buffer[SBUF_SIZE];
+  char **strings;
+
+  nptrs = backtrace(buffer, SBUF_SIZE);
+  printf("backtrace() returned %d addresses\n", nptrs);
+
+  strings = backtrace_symbols(buffer, nptrs);
+  if (strings == NULL) {
+    perror("backtrace_symbols");
+    exit(EXIT_FAILURE);
+  }
+
+  fprintf (stderr, "[bt] Execution path: \n");
+  for (i = 0; i < nptrs; i++)
+    fprintf(stderr, "[bt] %s\n", strings[i]);
+
+  free (strings);
+}
+#else
+void ffdb_dump_stack (void)
+{
+  /* empty */
+}
+#endif
+
 
 /**
  * Flush out some pages in order of page numbers
@@ -1089,6 +1126,7 @@ ffdb_pagepool_put_page (ffdb_pagepool_t* pgp, void* mem,
 #ifdef _FFDB_STATISTICS
     ffdb_pagepool_stat (pgp);
 #endif
+    ffdb_dump_stack ();
     abort();
   }
 
@@ -1521,3 +1559,4 @@ ffdb_pagepool_stat (ffdb_pagepool_t* pgp)
   fprintf(stderr, "\n");
 }
 #endif
+
