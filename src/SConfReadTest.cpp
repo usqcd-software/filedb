@@ -21,7 +21,10 @@
  *      
  * Revision History:
  *   $Log: SConfReadTest.cpp,v $
- *   Revision 1.3  2009-03-04 15:55:25  chen
+ *   Revision 1.4  2009-04-21 18:52:18  chen
+ *   Minor change
+ *
+ *   Revision 1.3  2009/03/04 15:55:25  chen
  *   Change Namespace from FFDB to FILEDB
  *
  *   Revision 1.2  2009/03/02 23:58:21  chen
@@ -107,6 +110,7 @@ main (int argc, char** argv)
       return -1;
     }
     else {
+#if 0
       for (int i = 0; i < recv.numberOfElements(); i++)
 	cerr << ((vector<float>)recv)[i];
       cerr << endl;
@@ -114,6 +118,7 @@ main (int argc, char** argv)
       for (int i = 0; i < expected.numberOfElements(); i++)
 	cerr << ((vector<float>)expected)[i];
       cerr << endl;
+#endif
 
       if (recv != expected) {
 	cerr << "Retreive data error" << endl;

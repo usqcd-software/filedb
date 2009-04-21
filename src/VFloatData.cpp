@@ -20,7 +20,10 @@
  *      
  * Revision History:
  *   $Log: VFloatData.cpp,v $
- *   Revision 1.2  2009-03-04 15:55:25  chen
+ *   Revision 1.3  2009-04-21 18:52:24  chen
+ *   Minor change
+ *
+ *   Revision 1.2  2009/03/04 15:55:25  chen
  *   Change Namespace from FFDB to FILEDB
  *
  *   Revision 1.1  2009/03/02 23:27:26  chen
@@ -122,9 +125,10 @@ namespace FILEDB
   {
     float* vcfbuf;
     unsigned short id;
-    unsigned short num;
+    unsigned short pad;
+    unsigned int   num;
 
-    num = hton_short(data_.size ());
+    num = hton_int(data_.size ());
     id = hton_short(serialID());
     vcfbuf = new float[data_.size()];
 
@@ -136,7 +140,8 @@ namespace FILEDB
     ostringstream ostrm;
     try {
       ostrm.write ((const char *)&id, sizeof(unsigned short));
-      ostrm.write ((const char *)&num, sizeof(unsigned short));
+      ostrm.write ((const char *)&pad, sizeof(unsigned short));
+      ostrm.write ((const char *)&num, sizeof(unsigned int));
       ostrm.write ((const char *)vcfbuf, data_.size() * sizeof(float));
       if (ostrm.bad()) 
 	throw SerializeException ("VFloatData",
@@ -163,17 +168,17 @@ namespace FILEDB
   VFloatData::readObject (const std::string& input)  throw (SerializeException)
   {
     float* vcfbuf;
-    unsigned short id;
-    unsigned short num;
-    unsigned int hlen = 2 * sizeof(unsigned short);
+    unsigned short id, pad;
+    unsigned int   num;
+    unsigned int hlen = 2 * sizeof(unsigned short) + sizeof(unsigned int);
     unsigned int idlen = sizeof(unsigned short);
     
     const char* buf = input.data();
     ::memcpy (&id, buf, idlen);
-    ::memcpy (&num, &buf[idlen], sizeof(unsigned short));
+    ::memcpy (&num, &buf[2*idlen], sizeof(unsigned int));
 
     id = ntoh_short (id);
-    num = ntoh_short (num);
+    num = ntoh_int (num);
     
     if (id != serialID()) 
       throw SerializeException ("VFloatData", "Serial ID error");
