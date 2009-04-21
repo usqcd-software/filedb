@@ -36,7 +36,10 @@
  *
  * Revision History:
  *     $Log: ffdb_hash.c,v $
- *     Revision 1.5  2009-03-14 15:41:36  edwards
+ *     Revision 1.6  2009-04-21 18:51:19  chen
+ *     Fix bugs related to number of pages upon moving pages in addition to clean pages on disk when the pages has been moved
+ *
+ *     Revision 1.5  2009/03/14 15:41:36  edwards
  *     Turned off some debugging output.
  *
  *     Revision 1.4  2009/03/04 19:12:28  edwards
@@ -938,6 +941,14 @@ __ffdb_hash_open (const char* fname, int flags, int mode, const void* arg)
 #endif
   }
 
+
+#if 0
+  /**
+   * Display all page information
+   */
+  ffdb_disp_all_page_info (hashp);
+#endif
+
   /* finally intialize lock */
   FFDB_LOCK_INIT (hashp->lock);
   return dbp;
@@ -1139,9 +1150,11 @@ _ffdb_hash_put (const FFDB_DB* dbp, FFDB_DBT* key, const FFDB_DBT* data,
   unsigned int bucket;
   int status;
 
+#if 0
 #ifdef _FFDB_DEBUG
   fprintf (stderr, "ffdb_hash_put key %s data %s\n", (char *)key->data,
 	   (char *)data->data);
+#endif
 #endif
 
   hashp = (ffdb_htab_t *)dbp->internal;

@@ -36,7 +36,10 @@
  *
  * Revision History:
  *     $Log: ffdb_page.c,v $
- *     Revision 1.3  2009-03-05 20:33:12  chen
+ *     Revision 1.4  2009-04-21 18:51:20  chen
+ *     Fix bugs related to number of pages upon moving pages in addition to clean pages on disk when the pages has been moved
+ *
+ *     Revision 1.3  2009/03/05 20:33:12  chen
  *     release bucket page too early fixed
  *
  *     Revision 1.2  2009/03/02 23:58:21  chen
@@ -363,7 +366,7 @@ ffdb_pgout_routine (void* arg, pgno_t pgno, void* page)
   fprintf (stderr, "Write page %d memory %p\n", pgno, page);
   fprintf (stderr, "Page Information: PGNO %d PREV PGNO %d NEXT PGNO %d NUM_ENT %d\n",
 	   CURR_PGNO(page), PREV_PGNO(page),NEXT_PGNO(page), NUM_ENT(page));
-  fprintf (stderr, "Page TYPE 0x%x OFFSET %d\n", TYPE(page), OFFSET(page));
+  fprintf (stderr, "Page TYPE 0x%x OFFSET %d PAGE_SIGN 0x%x \n", TYPE(page), OFFSET(page), PAGE_SIGN(page));
 #endif
 
   /* First swap the header to disk */
@@ -1329,8 +1332,8 @@ int ffdb_find_item (ffdb_htab_t* hashp,
     return -1;
   }
 #ifdef _FFDB_DEBUG
-  fprintf (stderr, "Allocate page %d for bucket %d\n", item->pgno, 
-	   item->bucket);
+  fprintf (stderr, "Allocate page %d for bucket %d num entry %d\n", item->pgno, 
+	   item->bucket, NUM_ENT(item->pagep));
 #endif
 
   /* do a quick checksum on data */
@@ -2127,6 +2130,9 @@ _ffdb_move_pages (ffdb_htab_t* hashp, unsigned short type,
 	ffdb_put_page (hashp, pagep, HASH_DATA_PAGE, 0);
 	return dlast;
       }
+#ifdef _FFDB_DEBUG
+      fprintf (stderr, "Update primary page for data page %d %d page = %d page sign = 0x%x\n", page, rpage, CURR_PGNO(pagep), PAGE_SIGN(pagep));
+#endif
     }
     else if (type == HASH_BUCKET_PAGE) {
       /* Update the key page entry inside each data page pointed 
@@ -2140,12 +2146,11 @@ _ffdb_move_pages (ffdb_htab_t* hashp, unsigned short type,
 	ffdb_put_page (hashp, pagep, HASH_DATA_PAGE, 0);
 	return dlast;
       }
+#ifdef _FFDB_DEBUG
+      fprintf (stderr, "Update data page for primary page %d %d page = %d page sign = 0x%x\n", page, rpage, CURR_PGNO(pagep), PAGE_SIGN(pagep));
+#endif
     }
       
-
-#ifdef _FFDB_DEBUG
-    fprintf (stderr, "Update primary page for data page %d %d page = %d page sign = %d\n", page, rpage, CURR_PGNO(pagep), PAGE_SIGN(pagep));
-#endif
 
     /* Release this page and update page number */
     ffdb_pagepool_change_page (hashp->mp, pagep, CURR_PGNO(pagep));
@@ -2188,7 +2193,7 @@ ffdb_rearrage_pages_on_close (ffdb_htab_t* hashp)
   assert (dlast > 0);
   assert (dlast > lunused);
 
-#if 1
+#if 0
   fprintf (stderr, "Last data page = %d\n", dlast);
 #endif
 
@@ -2259,7 +2264,7 @@ ffdb_rearrage_pages_on_open (ffdb_htab_t* hashp)
   newlast = hashp->hdr.spares[hashp->hdr.ovfl_point + 1] - 1;
   newfirst = newlast - num_page_moved + 1;
 
-#ifdef _FFDB_DEBUG
+#if 1
   fprintf (stderr, "Page can be moved starting at page %d and end at %d on last level %d to page %d to %d\n",
 	   oldfirst, oldlast, hashp->hdr.ovfl_point, newfirst, newlast);
 #endif
@@ -2833,5 +2838,67 @@ ffdb_cursor_find_by_key (ffdb_htab_t* hashp, ffdb_crs_t* cursor,
     return ffdb_get_item (hashp, key, data, &cursor->item, 0);
   }
   return 0;
+}
+
+/**
+ * Dump out all page information for debug purpose
+ */
+void
+ffdb_disp_all_page_info (ffdb_htab_t* hashp)
+{
+  unsigned int k;
+  void *pagep;
+  pgno_t page, tp;
+  unsigned int numpages = hashp->mp->npages;
+
+  fprintf (stderr, "There are total of %d pages \n", numpages);
+
+  /**
+   * Dump header page first
+   */
+  (void)fprintf(stderr,
+		"%s\n%s%p\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%x\n%s%x\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n",
+		"init_htab:",
+		"TABLE POINTER   ", (void *)hashp,
+		"BUCKET SIZE     ", hashp->hdr.bsize,
+		"BUCKET SHIFT    ", hashp->hdr.bshift,
+		"FILL FACTOR     ", hashp->hdr.ffactor,
+		"MAX BUCKET      ", hashp->hdr.max_bucket,
+		"OVFL POINT      ", hashp->hdr.ovfl_point,
+		"HIGH MASK       ", hashp->hdr.high_mask,
+		"LOW  MASK       ", hashp->hdr.low_mask,
+		"NKEYS           ", hashp->hdr.nkeys,
+		"Num moved pages ", hashp->hdr.num_moved_pages,
+		"Header Pages    ", hashp->hdr.hdrpages,
+		"Uinfo start page ", hashp->hdr.uinfo_page,
+		"Uinfo Num pages ",  hashp->hdr.uinfo_npages,
+		"Config start at ",  hashp->hdr.cfig_page,
+		"Config Num pages ", hashp->hdr.cfig_npages,
+		"Number of configs ", hashp->hdr.num_cfigs,
+		"Data Page Start ", hashp->curr_dpage);
+  {
+    unsigned int i;
+    for (i = 0; i < NCACHED; i++)
+      fprintf(stderr,
+		    "spares[%d] = %d\n", i, hashp->hdr.spares[i]);
+
+    for (i = 0; i < NCACHED; i++)
+      fprintf(stderr,
+		    "freepages[%d] = %d\n", i, hashp->hdr.free_pages[i]);
+  } 
+
+  for (k = 1; k < numpages; k++) {
+    page = k;
+    pagep = ffdb_get_page (hashp, page,
+			   HASH_RAW_PAGE, 0, &tp);
+    if (pagep) {
+      fprintf (stderr, "Page Information: PGNO %d PREV PGNO %d NEXT PGNO %d PAGE SIGN 0x%x\n",
+	       CURR_PGNO(pagep), PREV_PGNO(pagep),NEXT_PGNO(pagep), PAGE_SIGN(pagep));
+      fprintf (stderr, "Page TYPE 0x%x OFFSET %d\n", TYPE(pagep), OFFSET(pagep));   
+      ffdb_put_page (hashp, pagep, TYPE(pagep), 0);
+    }
+    else
+      fprintf (stderr, "cannot get page %d\n", page);
+  }
 }
 

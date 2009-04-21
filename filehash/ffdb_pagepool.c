@@ -35,7 +35,10 @@
  *
  * Revision History:
  *     $Log: ffdb_pagepool.c,v $
- *     Revision 1.4  2009-04-17 00:42:14  chen
+ *     Revision 1.5  2009-04-21 18:51:20  chen
+ *     Fix bugs related to number of pages upon moving pages in addition to clean pages on disk when the pages has been moved
+ *
+ *     Revision 1.4  2009/04/17 00:42:14  chen
  *     add dump stack routine
  *
  *     Revision 1.3  2009/03/04 01:44:26  chen
@@ -270,6 +273,46 @@ _ffdb_pagepool_write(ffdb_pagepool_t* pgp,
 
   if (ret == 0)
     FFDB_FLAG_CLR(bp->flags, FFDB_PAGE_DIRTY);
+  return ret;
+}
+
+
+/*
+ * _ffdb_clean_page_ondisk
+ *	Clean a page on disk
+ * 
+ */
+static int
+_ffdb_clean_page_ondisk (ffdb_pagepool_t* pgp, pgno_t num)
+{
+  off_t offset;
+  int nbytes;
+  int ret = 0;
+  char *cleanbuf;
+
+#ifdef _FFDB_STATISTICS
+  ++pgp->pagewrite;
+#endif
+
+  /* allocate clean memory */
+  cleanbuf = (char *)calloc (pgp->pagesize, sizeof(char));
+  if (!cleanbuf) {
+    fprintf (stderr, "Cannot allocate a clean buffer for page %d\n", num);
+    exit (1);
+  }
+
+  offset =  (off_t)pgp->pagesize * num;
+
+  if (lseek(pgp->fd, offset, SEEK_SET) != offset) 
+    ret = -1;
+  else {
+    if ((nbytes = write(pgp->fd, cleanbuf, pgp->pagesize)) != pgp->pagesize) 
+      ret = -1;
+  }
+
+  /* free memory */
+  free (cleanbuf);
+
   return ret;
 }
 
@@ -823,12 +866,13 @@ _ffdb_pagepool_new_page_i (ffdb_pagepool_t* pgp, pgno_t* pageno,
     return -1;
   }
   if (FFDB_FLAG_ISSET (flags, FFDB_PAGE_REQUEST)) {
-    pgp->npages++;
     bp->pgno = *pageno;
+    /* new pages can be less than last page because there may be holes */
+    if (bp->pgno >= pgp->npages)
+      pgp->npages++;
   } else 
     bp->pgno = *pageno = pgp->npages++;
 
-  
   /* Now we have one thread holding this page */
   bp->ref = 1;
   /* now assign my thread to owner */
@@ -974,7 +1018,6 @@ ffdb_pagepool_get_page (ffdb_pagepool_t* pgp, pgno_t* pageno,
 #endif
 
   if (found) { /* Now I am still holding the lock */
-
     /**
      * If I am the owner, the bp will be returned
      */
@@ -1082,8 +1125,9 @@ ffdb_pagepool_get_page (ffdb_pagepool_t* pgp, pgno_t* pageno,
       ret = _ffdb_pagepool_new_page_i (pgp, pageno, 
 				       flags | FFDB_PAGE_REQUEST, mem);
     }
-    else 
+    else {
       ret = _ffdb_pagepool_load_new_page (pgp, *pageno, flags, mem);
+    }
 
 
     FFDB_UNLOCK (pgp->lock);
@@ -1188,6 +1232,7 @@ ffdb_pagepool_change_page (ffdb_pagepool_t* pgp, void* mem,
 {
   struct _ffdb_hqh* head;
   ffdb_bkt_t* bp;
+  unsigned int oldpagenum;
 
   FFDB_LOCK(pgp->lock);
 #ifdef _FFDB_STATISTICS
@@ -1240,6 +1285,11 @@ ffdb_pagepool_change_page (ffdb_pagepool_t* pgp, void* mem,
   FFDB_CIRCLEQ_REMOVE(&pgp->lqh, bp, lq);
 
   /**
+   * Remember old pagenumber
+   */
+  oldpagenum = bp->pgno;
+
+  /**
    * Change page number
    */
   bp->pgno = newpagenum;
@@ -1261,6 +1311,21 @@ ffdb_pagepool_change_page (ffdb_pagepool_t* pgp, void* mem,
   head = &pgp->hqh[FFDB_HASHKEY(bp->pgno)];
   FFDB_CIRCLEQ_INSERT_HEAD(head, bp, hq);
   FFDB_CIRCLEQ_INSERT_TAIL(&pgp->lqh, bp, lq);
+
+  /**
+   * Change number of pages if pages are moved back
+   */
+  if (newpagenum >= pgp->npages) {
+    pgp->npages = newpagenum + 1;
+#if 0
+    fprintf (stderr, "reset number of pages = %d\n", pgp->npages);
+#endif
+  }
+
+  /**
+   * Clean out old disk content
+   */
+  _ffdb_clean_page_ondisk (pgp, oldpagenum);
 
   FFDB_UNLOCK(pgp->lock);
   return 0;

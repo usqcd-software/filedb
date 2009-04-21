@@ -36,7 +36,10 @@
  *
  * Revision History:
  *     $Log: ffdb_hash.h,v $
- *     Revision 1.1  2009-02-20 20:44:47  chen
+ *     Revision 1.2  2009-04-21 18:51:20  chen
+ *     Fix bugs related to number of pages upon moving pages in addition to clean pages on disk when the pages has been moved
+ *
+ *     Revision 1.1  2009/02/20 20:44:47  chen
  *     initial import
  *
  *
@@ -508,6 +511,13 @@ extern int ffdb_get_uinfo (ffdb_htab_t* hashp, unsigned char data[],
 extern int ffdb_cursor_find_by_key (ffdb_htab_t* hashp, ffdb_crs_t* cursor,
 				    FFDB_DBT* key, FFDB_DBT* data,
 				    unsigned int flags);
+
+
+
+/**
+ * Get all page information and display them. This is for debug purpose
+ */
+extern void ffdb_disp_all_page_info (ffdb_htab_t* hashp);
 
 
 #endif
