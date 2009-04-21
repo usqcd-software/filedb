@@ -6,6 +6,8 @@ AC_MSG_NOTICE([Configuring filedb])
 AC_CONFIG_AUX_DIR(config)
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
+AC_CONFIG_HEADERS([src/filedb_config_internal.h])
+
 ## Get compiling host information
 BUILD_OS=linux
 AC_CANONICAL_BUILD

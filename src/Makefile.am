@@ -28,6 +28,7 @@ libfiledb_a_SOURCES = \
 	VFloatData.cpp
 
 include_HEADERS = \
+	filedb_config.h \
 	FileDB.h \
 	Serializable.h \
 	DBKey.h \
@@ -56,3 +57,5 @@ LDADD = libfiledb.a ../filehash/libfilehash.a -lpthread
 
 clean-local:
 	-rm -rf *~ core*
+
+nodist_include_HEADERS = filedb_config_internal.h
