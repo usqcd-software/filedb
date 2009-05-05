@@ -36,7 +36,10 @@
  *
  * Revision History:
  *     $Log: ffdb_hash.c,v $
- *     Revision 1.6  2009-04-21 18:51:19  chen
+ *     Revision 1.7  2009-05-05 17:55:07  chen
+ *     fix hdr->nkeys which over count when replace an existing keys
+ *
+ *     Revision 1.6  2009/04/21 18:51:19  chen
  *     Fix bugs related to number of pages upon moving pages in addition to clean pages on disk when the pages has been moved
  *
  *     Revision 1.5  2009/03/14 15:41:36  edwards
@@ -886,7 +889,7 @@ __ffdb_hash_open (const char* fname, int flags, int mode, const void* arg)
 #endif
 
 
-#if 0
+#if 1
   (void)fprintf(stderr,
 		"%s\n%s%p\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%x\n%s%x\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n",
 		"init_htab:",
@@ -935,7 +938,7 @@ __ffdb_hash_open (const char* fname, int flags, int mode, const void* arg)
   if (hashp->hdr.spares[hashp->hdr.ovfl_point + 1] > 0) {
     hashp->curr_dpage = ffdb_last_data_page (hashp, hashp->hdr.spares[hashp->hdr.ovfl_point + 1] - 1);
 
-#if 0
+#if 1
     fprintf (stderr, "Info: datapage will start at %d for level %d\n",
 	     hashp->curr_dpage, hashp->hdr.ovfl_point);
 #endif
@@ -1148,7 +1151,7 @@ _ffdb_hash_put (const FFDB_DB* dbp, FFDB_DBT* key, const FFDB_DBT* data,
   ffdb_htab_t* hashp;
   ffdb_hent_t item;
   unsigned int bucket;
-  int status;
+  int status, newkey;
 
 #if 0
 #ifdef _FFDB_DEBUG
@@ -1164,6 +1167,9 @@ _ffdb_hash_put (const FFDB_DB* dbp, FFDB_DBT* key, const FFDB_DBT* data,
   hash_accesses++;
   FFDB_UNLOCK (hashp->lock);
 #endif
+
+  /* This is a new key */
+  newkey = 1;
 
   /* check flags: if there is a flag it must be FFDB_NOOVERWRITE */
   if (flag && flag != FFDB_NOOVERWRITE) {
@@ -1234,6 +1240,7 @@ _ffdb_hash_put (const FFDB_DB* dbp, FFDB_DBT* key, const FFDB_DBT* data,
     /* Now I should have the data on the page */
   }
   else if (item.status == ITEM_OK) {
+    newkey = 0;
     /* This item already exists. Check flag to make sure it is 
      * a replace flag
      */
@@ -1249,7 +1256,8 @@ _ffdb_hash_put (const FFDB_DB* dbp, FFDB_DBT* key, const FFDB_DBT* data,
   }      	
 
   /* update number key information */
-  hashp->hdr.nkeys++;
+  if (newkey)
+    hashp->hdr.nkeys++;
 
   FFDB_UNLOCK (hashp->lock);  
   return 0;
