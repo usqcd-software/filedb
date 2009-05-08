@@ -36,7 +36,10 @@
  *
  * Revision History:
  *     $Log: ffdb_page.c,v $
- *     Revision 1.4  2009-04-21 18:51:20  chen
+ *     Revision 1.5  2009-05-08 17:37:31  chen
+ *     Fix a major bug (not clean out moved page inside page pool cache)
+ *
+ *     Revision 1.4  2009/04/21 18:51:20  chen
  *     Fix bugs related to number of pages upon moving pages in addition to clean pages on disk when the pages has been moved
  *
  *     Revision 1.3  2009/03/05 20:33:12  chen
@@ -2013,6 +2016,38 @@ _ffdb_update_key_pages_content (ffdb_htab_t* hashp, void *pagep,
   return 0;
 }
 
+/**
+ * Clean out range of pages from pagepool cache
+ * @param hashp hashtable pointer
+ * @param first the first page to be removed
+ * @param last the last page to be removed
+ */
+static void _ffdb_remove_pages (ffdb_htab_t* hashp, 
+				pgno_t first, pgno_t last)
+{
+  unsigned int numpages, i;
+  pgno_t page, tp;
+  void *pagep;
+
+  /* total number of pages to be removed */
+  numpages = last - first + 1;
+
+  page = first;
+  for (i = 0; i < numpages; i++) {
+    pagep = ffdb_get_page (hashp, page, HASH_RAW_PAGE, 0, &tp);
+    if (!pagep) {
+      fprintf (stderr, "Warning: cannot find moved old page %d \n",
+	       page);
+      page++;
+      continue;
+    }
+    if (ffdb_pagepool_delete (hashp->mp, pagep) != 0) 
+      fprintf (stderr, "Cannot delete a moved page %d\n", page);
+    page++;
+  }
+}
+  
+
 
 /**
  * Move pages when the file closes
@@ -2055,6 +2090,7 @@ _ffdb_move_pages (ffdb_htab_t* hashp, unsigned short type,
     if (TYPE(pagep) != type) {
       page++;
       rpage++;
+      ffdb_put_page (hashp, pagep, HASH_RAW_PAGE, 0);
       continue;
     }
 
@@ -2287,6 +2323,11 @@ ffdb_rearrage_pages_on_open (ffdb_htab_t* hashp)
 
   /* Reset the number of moved pages */
   hashp->hdr.num_moved_pages = 0;
+
+  /* Clean out those pages from page cache to make memory
+   * the same as if there are no pages have been here
+   */
+  _ffdb_remove_pages (hashp, oldfirst, oldlast);
 
   return 0;
 }

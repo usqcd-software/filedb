@@ -36,7 +36,10 @@
  *
  * Revision History:
  *     $Log: ffdb_hash.c,v $
- *     Revision 1.7  2009-05-05 17:55:07  chen
+ *     Revision 1.8  2009-05-08 17:37:31  chen
+ *     Fix a major bug (not clean out moved page inside page pool cache)
+ *
+ *     Revision 1.7  2009/05/05 17:55:07  chen
  *     fix hdr->nkeys which over count when replace an existing keys
  *
  *     Revision 1.6  2009/04/21 18:51:19  chen
@@ -888,6 +891,36 @@ __ffdb_hash_open (const char* fname, int flags, int mode, const void* arg)
   }
 #endif
 
+#ifdef _FFDB_STATISTICS
+  hash_overflows = hash_accesses = hash_collisions = hash_expansions = 0;
+  hash_bigpages = 0;
+#endif
+
+  /* Check whether I need to move data pages back to original places if
+   * new insert is expected
+   */
+  if (!new_table && hashp->save_file && hashp->rearrange_pages) 
+    ffdb_rearrage_pages_on_open (hashp);
+
+  /* Find out current data page which is the last data page we are using */
+  /* Otherwise the datapage assigned to new insert will start at wrong place */
+  if (hashp->hdr.spares[hashp->hdr.ovfl_point + 1] > 0) {
+    hashp->curr_dpage = ffdb_last_data_page (hashp, hashp->hdr.spares[hashp->hdr.ovfl_point + 1] - 1);
+
+#if 1
+    fprintf (stderr, "Info: datapage will start at %d for level %d\n",
+	     hashp->curr_dpage, hashp->hdr.ovfl_point);
+#endif
+  }
+
+
+#if 0
+  /**
+   * Display all page information
+   */
+  ffdb_disp_all_page_info (hashp);
+#endif
+
 
 #if 1
   (void)fprintf(stderr,
@@ -920,36 +953,6 @@ __ffdb_hash_open (const char* fname, int flags, int mode, const void* arg)
       fprintf(stderr,
 		    "freepages[%d] = %d\n", i, hashp->hdr.free_pages[i]);
   }
-#endif
-
-#ifdef _FFDB_STATISTICS
-  hash_overflows = hash_accesses = hash_collisions = hash_expansions = 0;
-  hash_bigpages = 0;
-#endif
-
-  /* Check whether I need to move data pages back to original places if
-   * new insert is expected
-   */
-  if (!new_table && hashp->save_file && hashp->rearrange_pages) 
-    ffdb_rearrage_pages_on_open (hashp);
-
-  /* Find out current data page which is the last data page we are using */
-  /* Otherwise the datapage assigned to new insert will start at wrong place */
-  if (hashp->hdr.spares[hashp->hdr.ovfl_point + 1] > 0) {
-    hashp->curr_dpage = ffdb_last_data_page (hashp, hashp->hdr.spares[hashp->hdr.ovfl_point + 1] - 1);
-
-#if 1
-    fprintf (stderr, "Info: datapage will start at %d for level %d\n",
-	     hashp->curr_dpage, hashp->hdr.ovfl_point);
-#endif
-  }
-
-
-#if 0
-  /**
-   * Display all page information
-   */
-  ffdb_disp_all_page_info (hashp);
 #endif
 
   /* finally intialize lock */
@@ -1006,6 +1009,7 @@ _ffdb_call_hash (ffdb_htab_t* hashp, const void* k, unsigned int len)
   if (bucket > hashp->hdr.max_bucket) {
     bucket = (n & hashp->hdr.low_mask); /* n mod 2^i */
   }
+
   return bucket;
 }
 
@@ -1212,6 +1216,9 @@ _ffdb_hash_put (const FFDB_DB* dbp, FFDB_DBT* key, const FFDB_DBT* data,
     /* There is no item found, we need to insert this item */
     /* Find out whether there is space on this page to fit this pair */
     if (PAIRFITS(item.pagep, key, data)) {
+#ifdef _FFDB_DEBUG
+      fprintf (stderr, "This data item bucket %d fit with page %d\n", bucket, item.pgno);
+#endif
       if ((status = ffdb_add_pair (hashp, key, data, &item, 0)) != 0) {
 	FFDB_UNLOCK (hashp->lock);  
 	return status;
@@ -1222,6 +1229,7 @@ _ffdb_hash_put (const FFDB_DB* dbp, FFDB_DBT* key, const FFDB_DBT* data,
 #ifdef _FFDB_DEBUG
       fprintf (stderr, "This data item will not fit in bucket %d with page %d: overflow page will be added\n", bucket, item.pgno);
 #endif
+
       /* First chain an overflow page */
       if ((status = ffdb_add_ovflpage (hashp, key, data, &item)) != 0) {
 	FFDB_UNLOCK (hashp->lock);  

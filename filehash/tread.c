@@ -54,7 +54,7 @@ typedef struct {		       /* info to be stored */
   int num, siz;
 } info;
 
-#define MAX_LEN 32768
+#define MAX_LEN 100000
 
 char	wp1[MAX_LEN];
 char	wp2[MAX_LEN];

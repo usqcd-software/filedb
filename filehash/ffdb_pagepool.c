@@ -35,7 +35,10 @@
  *
  * Revision History:
  *     $Log: ffdb_pagepool.c,v $
- *     Revision 1.5  2009-04-21 18:51:20  chen
+ *     Revision 1.6  2009-05-08 17:37:31  chen
+ *     Fix a major bug (not clean out moved page inside page pool cache)
+ *
+ *     Revision 1.5  2009/04/21 18:51:20  chen
  *     Fix bugs related to number of pages upon moving pages in addition to clean pages on disk when the pages has been moved
  *
  *     Revision 1.4  2009/04/17 00:42:14  chen
@@ -997,6 +1000,27 @@ ffdb_pagepool_get_page (ffdb_pagepool_t* pgp, pgno_t* pageno,
     return ret;
   }
 
+#if 0
+  {
+    ffdb_bkt_t* bk;
+
+    head = &pgp->hqh[FFDB_HASHKEY(*pageno)];
+    FFDB_CIRCLEQ_FOREACH(bk, head, hq) {
+      if (bk->pgno == *pageno ) {
+	fprintf (stderr, "Hash has this page %d alreay 0x%x\n", *pageno,
+		 bk->page);
+      }
+    }
+
+    FFDB_CIRCLEQ_FOREACH(bk, &pgp->lqh, lq) {
+      if (bk->pgno == *pageno) {
+	fprintf (stderr, "LRU has this page %d alreay 0x%x\n", *pageno,
+		 bk->page);
+      }
+    } 
+  }
+#endif
+
   /**
    * Try to find a page from existing cache. This page has to be
    * not pinned by other threads
@@ -1018,6 +1042,10 @@ ffdb_pagepool_get_page (ffdb_pagepool_t* pgp, pgno_t* pageno,
 #endif
 
   if (found) { /* Now I am still holding the lock */
+#ifdef _FFDB_DEBUG
+    fprintf (stderr, "Found page %d in pagepool at memory 0x%x\n", *pageno,
+	     bp->page);
+#endif
     /**
      * If I am the owner, the bp will be returned
      */
@@ -1304,7 +1332,6 @@ ffdb_pagepool_change_page (ffdb_pagepool_t* pgp, void* mem,
    */
   FFDB_FLAG_CLR(bp->flags, FFDB_PAGE_PINNED);
 
-
   /**
    * Now add this entry back to the lists
    */
@@ -1528,7 +1555,7 @@ ffdb_pagepool_delete (ffdb_pagepool_t* pgp, void* mem)
 
   }
   else {
-    fprintf (stderr, "ffdb_pagepool_delete: other threads are still using this page %d\n", bp->pgno);
+    fprintf (stderr, "ffdb_pagepool_delete: other threads are still using this page %d ref = %d\n", bp->pgno, bp->ref);
 
     FFDB_UNLOCK(pgp->lock);
 
