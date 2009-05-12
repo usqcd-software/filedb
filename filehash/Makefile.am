@@ -18,7 +18,7 @@ libfilehash_a_SOURCES = \
 include_HEADERS = \
 	ffdb_db.h
 
-check_PROGRAMS = tcreate twrite treplace tread tread-th tkeyseq createStrings replaceStrings
+check_PROGRAMS = tcreate twrite tdualwrite treplace tread tread-th tkeyseq tcheck createStrings replaceStrings
 
 LDADD = libfilehash.a -lpthread
 clean-local:

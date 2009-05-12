@@ -117,16 +117,27 @@ int main(int argc, char** argv)
 
   key.data = 0;
   key.size = 0;
+  res.data = 0;
+  res.size = 0;
 
   numkey = 0;
-  while ((stat = cur->get (cur, &key, 0, FFDB_NEXT)) == FFDB_SUCCESS) {
+  while ((stat = cur->get (cur, &key, &res, FFDB_NEXT)) == FFDB_SUCCESS) {
 #if 0
     fprintf (stderr, "Key len %d = %s\n", strlen((char *)(key.data)),(char *)(key.data));
     fprintf (stderr, "Data %s\n", (char *)(res.data));
 #endif
     numkey++;  
+
+    fprintf (stderr, "Key len = %d result len = %d\n", key.size, res.size);
+    if (key.size > 0)
+      free (key.data);
+    if (res.size > 0)
+      free (res.data);
+
     key.data = 0;
     key.size = 0;
+    res.data = 0;
+    res.size = 0;
   }
 
   fprintf (stderr, "Number of keys = %d\n", numkey);
