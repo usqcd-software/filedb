@@ -36,7 +36,10 @@
  *
  * Revision History:
  *     $Log: ffdb_hash.c,v $
- *     Revision 1.8  2009-05-08 17:37:31  chen
+ *     Revision 1.9  2009-06-03 02:26:39  edwards
+ *     Turn off some debugging.
+ *
+ *     Revision 1.8  2009/05/08 17:37:31  chen
  *     Fix a major bug (not clean out moved page inside page pool cache)
  *
  *     Revision 1.7  2009/05/05 17:55:07  chen
@@ -907,7 +910,7 @@ __ffdb_hash_open (const char* fname, int flags, int mode, const void* arg)
   if (hashp->hdr.spares[hashp->hdr.ovfl_point + 1] > 0) {
     hashp->curr_dpage = ffdb_last_data_page (hashp, hashp->hdr.spares[hashp->hdr.ovfl_point + 1] - 1);
 
-#if 1
+#if 0
     fprintf (stderr, "Info: datapage will start at %d for level %d\n",
 	     hashp->curr_dpage, hashp->hdr.ovfl_point);
 #endif
@@ -922,7 +925,7 @@ __ffdb_hash_open (const char* fname, int flags, int mode, const void* arg)
 #endif
 
 
-#if 1
+#if 0
   (void)fprintf(stderr,
 		"%s\n%s%p\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%x\n%s%x\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n",
 		"init_htab:",
