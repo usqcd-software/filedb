@@ -14,28 +14,52 @@ int
 main (int argc, char** argv)
 {
   struct timeval tv;
-  int num, maxksize, maxdsize, i, tmp, len, k;
+  int num, maxksize, maxdsize, i, tmp, len, k, fixed_size;
+  int dsize, ksize;
   char *kstr, *dstr;
 
+  fixed_size = 0;
   if (argc < 4) {
-    fprintf (stderr, "Usage: %s numstring largestkey largestdata\n", argv[0]);
+    fprintf (stderr, "Usage: %s numstring largestkey largestdata [fixed size 0/1]\n", argv[0]);
     return 1;
   }
-
+  
   num = atoi  (argv[1]);
   maxksize = atoi (argv[2]);
   maxdsize = atoi (argv[3]);
+
+  if (argc >= 4) 
+    fixed_size = atoi (argv[4]);
+  if (fixed_size != 0 && fixed_size != 1) {
+    fprintf (stderr, "Fixed size must be either 0 or 1.\n");
+    return -1;
+  }
   
   gettimeofday (&tv, 0);
   srand (tv.tv_sec);
 
-  kstr = (char *)malloc(maxksize + 1 + 32);
-  dstr = (char *)malloc(maxdsize + 1 + 32);
+  if (!fixed_size) {
+    ksize = maxksize + 1 + 32;
+    dsize = maxdsize + 1 + 32;
+
+    kstr = (char *)malloc(maxksize + 1 + 32);
+    dstr = (char *)malloc(maxdsize + 1 + 32);
+  }
+  else {
+    ksize = maxksize;
+    dsize = maxdsize;
+
+    kstr = (char *)malloc(maxksize);
+    dstr = (char *)malloc(maxdsize);
+  }
 
   for (i = 0; i < num; i++) {
     /* create key */
-    memset (kstr, 0, maxksize + 1 + 32);
-    len = rand() % maxksize;
+    memset (kstr, 0, ksize);
+    if (!fixed_size)
+      len = rand() % maxksize;
+    else
+      len = ksize - 1;
     if (len < MIN_LEN)
       len = MIN_LEN;
     
@@ -46,12 +70,18 @@ main (int argc, char** argv)
 	tmp += FIRST_CHAR;
       kstr[k] = (char)tmp;
     }
-    printf ("%s-%d\n",kstr, i);
+    if (!fixed_size)
+      printf ("%s-%d\n",kstr, i);
+    else
+      printf ("%s\n", kstr);
 
 
     /* create data */
-    memset (dstr, 0, maxdsize + 1 + 32);
-    len = rand() % maxdsize;
+    memset (dstr, 0, dsize);
+    if (!fixed_size)
+      len = rand() % maxdsize;
+    else
+      len = dsize - 1;
     if (len < MIN_LEN)
       len = MIN_LEN;
     
@@ -62,7 +92,10 @@ main (int argc, char** argv)
 	tmp += FIRST_CHAR;
       dstr[k] = (char)tmp;
     }
-    printf ("%s-%d\n",dstr, i);
+    if (!fixed_size)
+      printf ("%s-%d\n",dstr, i);
+    else
+      printf ("%s\n", dstr);
   }
   
   free (kstr);

@@ -36,7 +36,10 @@
  *
  * Revision History:
  *     $Log: ffdb_page.c,v $
- *     Revision 1.5  2009-05-08 17:37:31  chen
+ *     Revision 1.6  2009-07-18 21:02:52  chen
+ *     minor test code change
+ *
+ *     Revision 1.5  2009/05/08 17:37:31  chen
  *     Fix a major bug (not clean out moved page inside page pool cache)
  *
  *     Revision 1.4  2009/04/21 18:51:20  chen
@@ -2933,7 +2936,7 @@ ffdb_disp_all_page_info (ffdb_htab_t* hashp)
     pagep = ffdb_get_page (hashp, page,
 			   HASH_RAW_PAGE, 0, &tp);
     if (pagep) {
-      fprintf (stderr, "Page Information: PGNO %d PREV PGNO %d NEXT PGNO %d PAGE SIGN 0x%x\n",
+      fprintf (stderr, "Page Information: PGNO %d PREV PGNO %d NEXT PGNO %d PAGE SIGN 0x%x ",
 	       CURR_PGNO(pagep), PREV_PGNO(pagep),NEXT_PGNO(pagep), PAGE_SIGN(pagep));
       fprintf (stderr, "Page TYPE 0x%x OFFSET %d\n", TYPE(pagep), OFFSET(pagep));   
       ffdb_put_page (hashp, pagep, TYPE(pagep), 0);

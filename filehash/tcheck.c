@@ -128,7 +128,9 @@ int main(int argc, char** argv)
 #endif
     numkey++;  
 
+#if 0
     fprintf (stderr, "Key len = %d result len = %d\n", key.size, res.size);
+#endif
     if (key.size > 0)
       free (key.data);
     if (res.size > 0)

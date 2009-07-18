@@ -10,13 +10,15 @@
 #include <sys/file.h>
 #include <ffdb_db.h>
 
-#if 0
-#define INITIAL	    500000
-#define MAXWORDS    500000             /* # of elements in search table */
+#if 1
+#define INITIAL	    50000
+#define MAXWORDS    50000             /* # of elements in search table */
 #endif
 
+#if 0
 #define INITIAL	    25000
 #define MAXWORDS    25000	        /* # of elements in search table */
+#endif
 
 #define MAX_LEN 100000
 
@@ -70,7 +72,7 @@ int main(int argc, char** argv)
   argv++;
   ctl.hash = NULL;
   ctl.cmp = 0;
-  ctl.cachesize = 0;
+  ctl.cachesize = 1 * 1024 * 1024;
   ctl.bsize = atoi(*argv++);
   ctl.nbuckets = atoi(*argv++);
   ctl.rearrangepages = atoi(*argv++);

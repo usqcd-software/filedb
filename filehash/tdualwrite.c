@@ -110,7 +110,7 @@ int main(int argc, char** argv)
   argv++;
   ctl.hash = NULL;
   ctl.cmp = 0;
-  ctl.cachesize = 0;
+  ctl.cachesize = 5 * 1024 * 1024;
   ctl.bsize = atoi(*argv++);
   ctl.nbuckets = atoi(*argv++);
   ctl.rearrangepages = 0;
@@ -186,13 +186,13 @@ int main(int argc, char** argv)
     if ((dbp_nm->put)(dbp_nm, &key, &item, FFDB_NOOVERWRITE) != 0) {
       fprintf(stderr, "cannot enter to %s: key %s\n",
 	      dbase_nm, (char *)item.data);
-      exit(1);
+      continue;
     }
 
     if ((dbp_m->put)(dbp_m, &key, &item, FFDB_NOOVERWRITE) != 0) {
       fprintf(stderr, "cannot enter to %s: key %s\n",
 	      dbase_m, (char *)item.data);
-      exit(1);
+      continue;
     }
   }
 
