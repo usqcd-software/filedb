@@ -35,7 +35,10 @@
  *
  * Revision History:
  *     $Log: ffdb_pagepool.c,v $
- *     Revision 1.6  2009-05-08 17:37:31  chen
+ *     Revision 1.7  2009-07-18 21:02:36  chen
+ *     Fix a bug when cache size is not big enough by changing pgp->npages to be number of pages in the file and maxpgno to be maximum page number currently in use
+ *
+ *     Revision 1.6  2009/05/08 17:37:31  chen
  *     Fix a major bug (not clean out moved page inside page pool cache)
  *
  *     Revision 1.5  2009/04/21 18:51:20  chen
@@ -276,6 +279,12 @@ _ffdb_pagepool_write(ffdb_pagepool_t* pgp,
 
   if (ret == 0)
     FFDB_FLAG_CLR(bp->flags, FFDB_PAGE_DIRTY);
+
+  /* Update how many pages this file holds now */
+  if (bp->pgno >= pgp->npages) {
+    pgp->npages = bp->pgno + 1;
+  }
+
   return ret;
 }
 
@@ -603,6 +612,9 @@ ffdb_pagepool_open (ffdb_pagepool_t* pgp,
   /* number of pages I am holding */
   pgp->npages = sb.st_size / pagesize;
 
+  /* maximum page number this pagepool has now */
+  pgp->maxpgno = pgp->npages;
+
   /* unlock the code */
   FFDB_UNLOCK(pgp->lock);
   return 0;
@@ -684,6 +696,9 @@ ffdb_pagepool_open_fd (ffdb_pagepool_t* pgp,
 
   /* number of pages I am holding */
   pgp->npages = sb.st_size / pagesize;
+
+  /* maximum page number the pool has now */
+  pgp->maxpgno = pgp->npages;
 
   /* unlock the code */
   FFDB_UNLOCK(pgp->lock);
@@ -831,7 +846,7 @@ _ffdb_pagepool_new_page_i (ffdb_pagepool_t* pgp, pgno_t* pageno,
   struct _ffdb_hqh *head;
   ffdb_bkt_t *bp = 0;
 
-  if (pgp->npages == FFDB_MAX_PAGE_NUMBER) {
+  if (pgp->maxpgno == FFDB_MAX_PAGE_NUMBER) {
     (void)fprintf(stderr, "ffdb_pagepool_new_page: page allocation overflow.\n");
     abort();
   }
@@ -871,10 +886,12 @@ _ffdb_pagepool_new_page_i (ffdb_pagepool_t* pgp, pgno_t* pageno,
   if (FFDB_FLAG_ISSET (flags, FFDB_PAGE_REQUEST)) {
     bp->pgno = *pageno;
     /* new pages can be less than last page because there may be holes */
-    if (bp->pgno >= pgp->npages)
-      pgp->npages++;
-  } else 
-    bp->pgno = *pageno = pgp->npages++;
+    if (bp->pgno > pgp->maxpgno) 
+      pgp->maxpgno = bp->pgno;
+  } else {
+    pgp->maxpgno++;
+    bp->pgno = *pageno = pgp->maxpgno;
+  }
 
   /* Now we have one thread holding this page */
   bp->ref = 1;
@@ -995,6 +1012,7 @@ ffdb_pagepool_get_page (ffdb_pagepool_t* pgp, pgno_t* pageno,
 	FFDB_UNLOCK (pgp->lock);
 	return errno;
     }
+    fprintf (stderr, "calling new page i for page number %d\n", pageno);
     ret = _ffdb_pagepool_new_page_i (pgp, pageno, flags, mem);
     FFDB_UNLOCK (pgp->lock);    
     return ret;
@@ -1548,6 +1566,9 @@ ffdb_pagepool_delete (ffdb_pagepool_t* pgp, void* mem)
 
     FFDB_CIRCLEQ_REMOVE(head, bp, hq);
     FFDB_CIRCLEQ_REMOVE(&pgp->lqh, bp, lq);
+
+    /* Decrease number of pages in the cache */
+    --pgp->curcache;
 
     FFDB_UNLOCK(pgp->lock);
     /* free memory */

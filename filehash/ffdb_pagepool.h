@@ -34,7 +34,10 @@
  *
  * Revision History:
  *     $Log: ffdb_pagepool.h,v $
- *     Revision 1.3  2009-04-17 00:42:14  chen
+ *     Revision 1.4  2009-07-18 21:02:36  chen
+ *     Fix a bug when cache size is not big enough by changing pgp->npages to be number of pages in the file and maxpgno to be maximum page number currently in use
+ *
+ *     Revision 1.3  2009/04/17 00:42:14  chen
  *     add dump stack routine
  *
  *     Revision 1.2  2009/03/04 01:44:26  chen
@@ -206,6 +209,7 @@ typedef struct _ffdb_pagepool_
   pgno_t	curcache;		/* current number of cached pages */
   pgno_t	maxcache;		/* max number of cached pages */
   pgno_t	npages;			/* number of pages in the file */
+  pgno_t	maxpgno;		/* maximum pages number in use */
   unsigned int	pagesize;		/* file page size */
   unsigned int  fileflags;              /* file creation flag */
   int	        fd;		        /* file descriptor */
