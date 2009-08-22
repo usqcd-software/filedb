@@ -240,6 +240,7 @@ libfiledb_a_SOURCES = \
 	DBString.h \
 	ConfDataStoreDB.cpp \
 	ConfDataStoreDB.h \
+	ConfDataStoreMultipleDB.h \
 	AllConfStoreDB.h \
 	AllConfStoreDB.cpp \
 	ConfDataDBMerger.h \
