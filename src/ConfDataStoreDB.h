@@ -26,7 +26,10 @@
  *      
  * Revision History:
  *   $Log: ConfDataStoreDB.h,v $
- *   Revision 1.11  2009-03-11 13:56:09  edwards
+ *   Revision 1.12  2009-08-28 15:42:22  edwards
+ *   Added a fileExists function.
+ *
+ *   Revision 1.11  2009/03/11 13:56:09  edwards
  *   Changed default cache size back to 8192
  *
  *   Revision 1.10  2009/03/04 19:31:33  chen
@@ -203,6 +206,16 @@ namespace FILEDB
     
       return ffdb_num_configs (dbh_);
     }
+
+
+    /**
+     * Check if a DB file exists before opening.
+     */
+    virtual bool fileExists (const std::string& file) const
+    {
+      return FILEDB::fileExists(file);
+    }
+
 
     /**
      * Open

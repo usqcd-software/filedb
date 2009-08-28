@@ -25,7 +25,10 @@
  *      
  * Revision History:
  *   $Log: DBFunc.h,v $
- *   Revision 1.5  2009-03-05 00:40:05  edwards
+ *   Revision 1.6  2009-08-28 15:42:22  edwards
+ *   Added a fileExists function.
+ *
+ *   Revision 1.5  2009/03/05 00:40:05  edwards
  *   Changed include path of filehash files back to no relative path.
  *
  *   Revision 1.4  2009/03/04 19:13:05  edwards
@@ -533,5 +536,10 @@ namespace FILEDB
    */
   std::string unixDirectoryName (const std::string& filename);
 
+
+  /**
+   * Check if a file exists
+   */
+  bool fileExists (const std::string& filename);
 }
 #endif

@@ -23,7 +23,10 @@
  *      
  * Revision History:
  *   $Log: DBFunc.cpp,v $
- *   Revision 1.6  2009-03-04 15:55:25  chen
+ *   Revision 1.7  2009-08-28 15:42:22  edwards
+ *   Added a fileExists function.
+ *
+ *   Revision 1.6  2009/03/04 15:55:25  chen
  *   Change Namespace from FFDB to FILEDB
  *
  *   Revision 1.5  2009/02/28 21:08:29  edwards
@@ -45,6 +48,7 @@
  *
  */
 #include <string>
+#include <unistd.h>
 #include "DBFunc.h"
 
 using namespace std;
@@ -54,6 +58,12 @@ namespace FILEDB
   void flushDatabase (FFDB_DB* dbh)
   {
     dbh->sync (dbh, 0);
+  }
+
+  bool fileExists (const std::string& filename)
+  {
+    int ret = ::access(filename.c_str(), F_OK);
+    return (ret == 0) ? true : false;
   }
 
   std::string unixDirectoryName (const std::string& filename)
