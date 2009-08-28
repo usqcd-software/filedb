@@ -26,7 +26,10 @@
  *      
  * Revision History:
  *   $Log: ConfDataStoreMultipleDB.h,v $
- *   Revision 1.1  2009-08-22 12:32:30  edwards
+ *   Revision 1.2  2009-08-28 15:42:10  edwards
+ *   Added a fileExists function. Removed unsupported code.
+ *
+ *   Revision 1.1  2009/08/22 12:32:30  edwards
  *   Added a wrapper of multiple DBs.
  *
  *
@@ -78,15 +81,21 @@ namespace FILEDB
 
     
     /**
-     * Get maximum number of configurations
+     * Check if a DB file exists before opening.
      */
-//    virtual unsigned int getMaxNumberConfigs (void) const
-//    {
-//      if (!dbh_) 
-//	return options_.numconfigs;
-//    
-//      return ffdb_num_configs (dbh_);
-//    }
+    virtual bool fileExists (const std::vector<std::string>& files) const
+    {
+      int ret = false;
+      for(int i=0; i < dbs_.size(); ++i)
+      {
+	ret = dbs_[i].fileExists(files[i]);
+	if (! ret)
+	  return ret;
+      }
+
+      return ret;
+    }
+
 
     /**
      * Open
@@ -194,39 +203,6 @@ namespace FILEDB
       return ret;
     }
 
-    /**
-     * Return all available keys to user
-     * @param keys user suppled an empty vector which is populated
-     * by keys after this call.
-     */
-//    virtual void keys (std::vector<K>& keys)
-//    {
-//      allKeys< K, D >(dbh_, keys);
-//    }
-
-    /**
-     * Return all pairs of keys and data
-     * @param keys user supplied empty vector to hold all keys
-     * @param data user supplied empty vector to hold data
-     * @return keys and data in the vectors having the same size
-     */
-//    virtual void keysAndData (std::vector<K>& keys, std::vector<D>& values)
-//    {
-//      allPairs<K, D> (dbh_, keys, values);
-//    }
-
-
-    /**
-     * Return all pairs of keys and data in binary string form
-     * @param keys user supplied empty vector to hold all keys
-     * @param data user supplied empty vector to hold data
-     * @return keys and data in the vectors having the same size     
-     */
-//    virtual void binaryKeysAndData (std::vector<std::string>& keys,
-//				    std::vector<std::string>& values)
-//    {
-//      binaryAllPairs (dbh_, keys, values);
-//    }
 
     /**
      * Get user user data from the metadata database
