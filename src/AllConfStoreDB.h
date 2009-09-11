@@ -22,7 +22,10 @@
  *      
  * Revision History:
  *   $Log: AllConfStoreDB.h,v $
- *   Revision 1.5  2009-03-04 17:08:03  edwards
+ *   Revision 1.6  2009-09-11 03:39:56  edwards
+ *   Removed a debugging cerr statement.
+ *
+ *   Revision 1.5  2009/03/04 17:08:03  edwards
  *   Changed include of FFDB.h to FileDB.h
  *
  *   Revision 1.4  2009/03/04 15:55:25  chen
@@ -372,7 +375,6 @@ namespace FILEDB
 	dstr.append (elem);
       }
 
-      std::cerr << "dstr has size " << dstr.size () << std::endl;
       // now insert this string into database
       try {
 	ret = insertData< K > (this->dbh_, key, dstr);
