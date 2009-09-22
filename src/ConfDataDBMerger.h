@@ -22,7 +22,10 @@
  *
  * Revision History:
  *   $Log: ConfDataDBMerger.h,v $
- *   Revision 1.4  2009-03-04 15:55:25  chen
+ *   Revision 1.5  2009-09-22 14:56:44  edwards
+ *   Commented out some debugging.
+ *
+ *   Revision 1.4  2009/03/04 15:55:25  chen
  *   Change Namespace from FFDB to FILEDB
  *
  *   Revision 1.3  2009/03/02 23:27:26  chen
@@ -110,7 +113,9 @@ namespace FILEDB
 	felem = keys.size();
       
       for (i = ielem; i < felem; i++) {
+#if 0
 	std::cerr << "Element " << i << std::endl;
+#endif
 	std::vector< std::string > thr;
 	
 	thr.resize (numconfigs);
@@ -123,7 +128,9 @@ namespace FILEDB
 	
 	// insert data into the vector
 	bag.find (keys[i])->second[info.index()] = data[i];
+#if 0
 	std::cerr << "Init index " << info.index() << std::endl;
+#endif
       }    
     }
 
@@ -166,7 +173,7 @@ namespace FILEDB
 	if (felem > keys.size())
 	  felem = keys.size();
 
-#if 1
+#if 0
 	std::cerr << "initial item = " << ielem << " final item = " << felem << std::endl;
 #endif
 	// retrieve data for each key in this chunk
@@ -184,7 +191,9 @@ namespace FILEDB
 	    ::exit (143);
 	  }
 	  // insert data into the ensemble
+#if 0
 	  std::cerr << "Update index " << info.index() << std::endl;
+#endif
 	  bag.find (keys[i])->second[info.index()] = tdata;
 	}
 
@@ -388,8 +397,10 @@ namespace FILEDB
 	::exit (1);
       }
 
+#if 0
       std::cerr << "Number of keys and data = " << allkeys.size() << std::endl;
       std::cerr << "Data size = " << data0.size() << std::endl;
+#endif
 
       // calculate the number of elements we use in the above two vectors each
       // time we accumulate all configurations into memory before we
@@ -401,7 +412,7 @@ namespace FILEDB
 			       max_memory_,
 			       dcachesize);
 
-#if 1    
+#if 1
       std::cerr << "Keep " << chunk << " in memory for " << configs_.size() 
 		<< " of configurations" << std::endl;
 #endif
