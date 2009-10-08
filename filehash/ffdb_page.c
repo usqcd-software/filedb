@@ -36,7 +36,10 @@
  *
  * Revision History:
  *     $Log: ffdb_page.c,v $
- *     Revision 1.6  2009-07-18 21:02:52  chen
+ *     Revision 1.7  2009-10-08 18:19:54  edwards
+ *     Fixed printf message to be "%u".
+ *
+ *     Revision 1.6  2009/07/18 21:02:52  chen
  *     minor test code change
  *
  *     Revision 1.5  2009/05/08 17:37:31  chen
@@ -827,7 +830,7 @@ _ffdb_update_data_info (ffdb_htab_t* hashp, ffdb_datap_t* datap,
   /* Get data page given from datap */
   dpagep = ffdb_get_page (hashp, datap->first, HASH_DATA_PAGE, 0, &dpage);
   if (!dpagep) {
-    fprintf (stderr, "Cannot retrieve data page at %d\n", datap->first);
+    fprintf (stderr, "Cannot retrieve data page at %u\n", datap->first);
     return -1;
   }
 
