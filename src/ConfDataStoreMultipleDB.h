@@ -26,7 +26,11 @@
  *      
  * Revision History:
  *   $Log: ConfDataStoreMultipleDB.h,v $
- *   Revision 1.2  2009-08-28 15:42:10  edwards
+ *   Revision 1.3  2009-10-11 01:50:13  edwards
+ *   Changed the getBinary to actually call the internal getBinary. So far,
+ *   this has been unused in this wrapper class.
+ *
+ *   Revision 1.2  2009/08/28 15:42:10  edwards
  *   Added a fileExists function. Removed unsupported code.
  *
  *   Revision 1.1  2009/08/22 12:32:30  edwards
@@ -171,7 +175,7 @@ namespace FILEDB
       int ret = -1;
       for(int i=0; i < dbs_.size(); ++i)
       {
-	ret = dbs_[i].get(key, data);
+	ret = dbs_[i].getBinary(key, data);
 	if (ret == 0)
 	  break;
       }
