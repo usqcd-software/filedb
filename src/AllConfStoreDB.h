@@ -638,7 +638,7 @@ namespace FILEDB
      * Get all configuration information
      *
      */
-    int getAllConfigInfo (std::vector<ConfigInfo> configs)
+    int getAllConfigInfo (std::vector<ConfigInfo>& configs)
     {
       ffdb_all_config_info_t allcfigs;
       ConfigInfo cf;
