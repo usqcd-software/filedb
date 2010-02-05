@@ -19,6 +19,7 @@ libfiledb_a_SOURCES = \
 	ConfDataStoreMultipleDB.h \
 	AllConfStoreDB.h \
 	AllConfStoreDB.cpp \
+	AllConfStoreMultipleDB.h \
 	ConfDataDBMerger.h \
 	ConfDataDBMerger.cpp \
 	ConfigInfo.h \
@@ -38,7 +39,9 @@ include_HEADERS = \
 	DBFunc.h \
 	DBString.h \
 	ConfDataStoreDB.h \
+	ConfDataStoreMultipleDB.h \
 	AllConfStoreDB.h \
+	AllConfStoreMultipleDB.h \
 	ConfDataDBMerger.h \
 	ConfigInfo.h \
 	HashFunc.h
