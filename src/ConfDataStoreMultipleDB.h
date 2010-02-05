@@ -85,6 +85,17 @@ namespace FILEDB
 
     
     /**
+     * Get maximum number of configurations
+     */
+    virtual unsigned int getMaxNumberConfigs (void) const
+    {
+      int ret = dbs_[0].getMaxNumberConfigs();
+
+      return ret;
+    }
+
+
+    /**
      * Check if a DB file exists before opening.
      */
     virtual bool fileExists (const std::vector<std::string>& files) const
@@ -156,7 +167,7 @@ namespace FILEDB
 	}
       }
       catch (SerializeException& e) {
-	std::cerr << "ConfDataStoreDB get error: " << e.what () << std::endl;
+	std::cerr << "ConfDataStoreMultipleDB get error: " << e.what () << std::endl;
 	ret = -1;
       }
       return ret;
