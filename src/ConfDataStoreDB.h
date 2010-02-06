@@ -255,7 +255,7 @@ namespace FILEDB
      *
      * @return 0 on successful write, -1 on failure with proper errno set
      */
-    int insert (K& key, D& data)
+    int insert (const K& key, const D& data)
     {
       int ret = 0;
 
@@ -276,7 +276,7 @@ namespace FILEDB
      *
      * @return 0 on successful write, -1 on failure with proper errno set
      */
-    int insertBinary (std::string& key, std::string& data)
+    int insertBinary (const std::string& key, const std::string& data)
     {
       int ret = 0;
 
@@ -297,7 +297,7 @@ namespace FILEDB
      * @param data after the call data will be populated
      * @return 0 on success, otherwise the key not found
      */
-    int get (K& key, D& data)
+    int get (const K& key, D& data)
     {
       int ret = 0;
 
@@ -319,7 +319,7 @@ namespace FILEDB
      * @param data after the call data will be populated
      * @return 0 on success, otherwise the key not found
      */
-    int getBinary (std::string& key, std::string& data)
+    int getBinary (const std::string& key, std::string& data)
     {
       return getBinaryData (dbh_, key, data);
     }
@@ -329,7 +329,7 @@ namespace FILEDB
      * @param key a key object
      * @return true if the answer is yes
      */
-    virtual bool exist(K& key)
+    virtual bool exist(const K& key)
     {
       int ret;
 

@@ -60,7 +60,7 @@ namespace FILEDB
     /**
      * Return this object into a binary form
      */
-    virtual void writeObject (std::string& output) throw (SerializeException) = 0;
+    virtual void writeObject (std::string& output) const throw (SerializeException) = 0;
 
 
     /**

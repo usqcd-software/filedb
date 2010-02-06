@@ -154,7 +154,7 @@ namespace FILEDB
      * @param data after the call data will be populated
      * @return 0 on success, otherwise the key not found
      */
-    int get (K& key, D& data)
+    int get (const K& key, D& data)
     {
       int ret = -1;
 
@@ -181,7 +181,7 @@ namespace FILEDB
      * @param data after the call data will be populated
      * @return 0 on success, otherwise the key not found
      */
-    int getBinary (std::string& key, std::string& data)
+    int getBinary (const std::string& key, std::string& data)
     {
       int ret = -1;
       for(int i=0; i < dbs_.size(); ++i)
@@ -198,7 +198,7 @@ namespace FILEDB
      * @param key a key object
      * @return true if the answer is yes
      */
-    virtual bool exist(K& key)
+    virtual bool exist(const K& key)
     {
       bool ret = false;
       

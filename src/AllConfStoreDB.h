@@ -236,7 +236,7 @@ namespace FILEDB
      * @param vectors user supplied ensemble - here, an array single config corrs
      * @return 0 when there are something for this key. 1 wheen there are no
      */
-    int get (K& key, std::vector< D >& vs)
+    int get (const K& key, std::vector< D >& vs)
     {
       int ret;
       std::string cdata;
@@ -295,7 +295,7 @@ namespace FILEDB
      * @param vectors user supplied ensemble in string format
      * @return 0 when there are something for this key. 1 wheen there are no
      */
-    int getBinaryData (std::string& key, std::vector<std::string>& vs)
+    int getBinaryData (const std::string& key, std::vector<std::string>& vs)
     {
       int ret;
       std::string cdata;
@@ -337,7 +337,7 @@ namespace FILEDB
      * @param key a key provided by caller
      * @param v a vector containing all values
      */
-    int insert (K & key, std::vector < D > & v)
+    int insert (const K & key, const std::vector < D > & v)
     {
       int ret;
       // sanity check
@@ -391,8 +391,8 @@ namespace FILEDB
      * @param key a key provided by caller in string format
      * @param v a vector containing all values
      */
-    int insertBinaryData (std::string& key, 
-			  std::vector < std::string > & v)
+    int insertBinaryData (const std::string& key, 
+			  const std::vector < std::string > & v)
     {
       int ret = 0;
       // sanity check
@@ -428,7 +428,7 @@ namespace FILEDB
      * @param config configuration number of this pair
      * @param index when this data should be inside its ensemble
      */
-    int update (K& key, D& v, const int config, const int index)
+    int update (const K& key, const D& v, const int config, const int index)
     {
       int ret = 0;
 
@@ -566,7 +566,7 @@ namespace FILEDB
      * this routine will return quietly
      * @param key a provided key object
      */
-    void erase (K& key)
+    void erase (const K& key)
     {
       std::cerr << "erease not yet implemented " << std::endl;
     }

@@ -161,7 +161,7 @@ namespace FILEDB
      * @param vectors user supplied ensemble - here, an array single config corrs
      * @return 0 when there are something for this key. 1 wheen there are no
      */
-    int get (K& key, std::vector< D >& vs)
+    int get (const K& key, std::vector< D >& vs)
     {
       int ret = -1;
 
@@ -186,7 +186,7 @@ namespace FILEDB
      * @param key a key object
      * @return true if the answer is yes
      */
-    virtual bool exist(K& key)
+    virtual bool exist(const K& key)
     {
       bool ret = false;
       

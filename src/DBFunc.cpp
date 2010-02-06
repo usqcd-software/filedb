@@ -128,13 +128,13 @@ namespace FILEDB
       crp->close(crp);
   }
 
-  int getBinaryData (FFDB_DB* dbh, std::string& key, std::string& data) 
+  int getBinaryData (FFDB_DB* dbh, const std::string& key, std::string& data) 
   {
     int ret = 0;
 
     // create key
     FFDB_DBT dbkey;
-    dbkey.data = &key[0];
+    dbkey.data = const_cast<char*>(key.c_str());
     dbkey.size = key.size();
 
     // create and empty dbt data object
@@ -154,18 +154,18 @@ namespace FILEDB
   }  
   
 
-  int insertBinaryData (FFDB_DB* dbh, std::string& key, std::string& data)
+  int insertBinaryData (FFDB_DB* dbh, const std::string& key, const std::string& data)
   {
     int ret;
        
     // create key
     FFDB_DBT dbkey;
-    dbkey.data = &key[0];
+    dbkey.data = const_cast<char*>(key.c_str());
     dbkey.size = key.size();
           
     // create DBt object
     FFDB_DBT dbdata;
-    dbdata.data = &data[0];
+    dbdata.data = const_cast<char*>(data.c_str());
     dbdata.size = data.size();
 
     // now it is time to insert

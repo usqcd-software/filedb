@@ -108,7 +108,7 @@ namespace FILEDB
      * Convert this object into binary form stored in the internal buffer
      *
      */
-    void writeObject (std::string&) throw (SerializeException);
+    void writeObject (std::string&) const throw (SerializeException);
 
 
     /**
@@ -197,7 +197,7 @@ namespace FILEDB
      * Convert this object into binary form stored in the internal buffer
      *
      */
-    void writeObject (std::string&) throw (SerializeException);
+    void writeObject (std::string&) const throw (SerializeException);
 
 
     /**

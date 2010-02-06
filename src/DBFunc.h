@@ -77,7 +77,7 @@ namespace FILEDB
    *
    * @return 0 on success. Otherwise failure
    */
-  extern int getBinaryData (FFDB_DB* dbh, std::string& key, std::string& data);
+  extern int getBinaryData (FFDB_DB* dbh, const std::string& key, std::string& data);
 
 
   /**
@@ -89,7 +89,7 @@ namespace FILEDB
    *
    * @return 0 on success. Otherwise failure
    */
-  extern int insertBinaryData (FFDB_DB* dbh, std::string& key, std::string& data);
+  extern int insertBinaryData (FFDB_DB* dbh, const std::string& key, const std::string& data);
   
   /**
    * Open a database with name dbase. If this database does not exist,
@@ -140,7 +140,7 @@ namespace FILEDB
    * @return 0 on success. Otherwise failure
    */
   template <typename K, typename D>
-  int insertData (FFDB_DB* dbh, K& key, D& data,
+  int insertData (FFDB_DB* dbh, const K& key, const D& data,
 		  unsigned int flag = 0)
     throw (SerializeException)
   {
@@ -192,7 +192,7 @@ namespace FILEDB
    * @return 0 on success. Otherwise failure
    */
   template <typename K>
-  int insertData (FFDB_DB* dbh, K& key, std::string& data,
+  int insertData (FFDB_DB* dbh, const K& key, const std::string& data,
 		  unsigned int flag = 0)
     throw (SerializeException)
   {
@@ -209,12 +209,12 @@ namespace FILEDB
     
     // create key
     FFDB_DBT dbkey;
-    dbkey.data = &keyObj[0];
+    dbkey.data = const_cast<char*>(keyObj.c_str());
     dbkey.size = keyObj.size();
           
     // create DBt object
     FFDB_DBT dbdata;
-    dbdata.data = &data[0];
+    dbdata.data = const_cast<char*>(data.c_str());
     dbdata.size = data.size();
 
     // now it is time to insert
@@ -235,7 +235,7 @@ namespace FILEDB
    * @return 0 on success. Otherwise failure
    */
   template <typename K, typename D>
-  int getData (FFDB_DB* dbh, K& key, D& data) throw (SerializeException)
+  int getData (FFDB_DB* dbh, const K& key, D& data) throw (SerializeException)
   {
     int ret = 0;
 
@@ -290,7 +290,7 @@ namespace FILEDB
    * @return 0 on success. Otherwise failure
    */
   template <typename K, typename D>
-  int getData (FFDB_DB* dbh, K& key, std::string& data) throw (SerializeException)
+  int getData (FFDB_DB* dbh, const K& key, std::string& data) throw (SerializeException)
   {
     int ret = 0;
 
@@ -488,7 +488,7 @@ namespace FILEDB
    * @return 1 if this key exists. return 0 not there
    */
   template <typename K>
-  int keyExist (FFDB_DB* dbh, K& arg) 
+  int keyExist (FFDB_DB* dbh, const K& arg) 
     throw (SerializeException)
   {
     int ret;
