@@ -1,5 +1,5 @@
 # configure.ac file for FileDB package
-AC_INIT([filedb],[1.1],[filedb authors <chen@jlab.org>],[filedb])
+AC_INIT([filedb],[1.2],[filedb authors <chen@jlab.org>],[filedb])
 AC_COPYRIGHT([Jefferson Science Assoicates, LLC. Jefferson Lab])
 AC_MSG_NOTICE([Configuring filedb])
 
