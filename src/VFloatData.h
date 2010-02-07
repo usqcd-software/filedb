@@ -93,7 +93,7 @@ namespace FILEDB
      * Convert this object to a buffer
      *
      */
-    void writeObject (std::string& output) throw (SerializeException);
+    void writeObject (std::string& output) const throw (SerializeException);
 
 
     /**
