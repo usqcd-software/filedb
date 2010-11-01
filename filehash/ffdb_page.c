@@ -1819,8 +1819,10 @@ _ffdb_add_key_datap_to_bucket (ffdb_htab_t* hashp, FFDB_DBT* key,
     NEXT_PGNO (pagep) = ovflpage;
     PREV_PGNO (opagep) = page;
 
-    /* release the previous page */
-    ffdb_put_page (hashp, pagep, TYPE(pagep), 0); 
+    /* release the previous page , but the head is changed so 
+     * we have to write it to disk
+     */
+    ffdb_put_page (hashp, pagep, TYPE(pagep), 1); 
 
     /* add key and data pointer to this page */
     _ffdb_write_key_datap_to_page (hashp, key, datap, opagep, ovflpage);
