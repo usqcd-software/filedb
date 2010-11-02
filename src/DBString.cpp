@@ -168,6 +168,7 @@ namespace FILEDB
 	string msg = string("Read magic number error.");
 	throw SerializeException ("StringKey", msg);
       }
+
       // check magic number
       magicnum = ntoh_short (magicnum);
       if (magicnum != StringKey::MAGIC) {

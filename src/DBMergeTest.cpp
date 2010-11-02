@@ -223,8 +223,8 @@ main (int argc, char** argv)
   for (int i = 0; i < keys.size(); i++) {
     cerr << "Key " << i << endl;
     cerr << (string)keys[i] << endl;
-    
     cerr << "value " << i << endl;
+
     for (int k = 0; k < data[i].size(); k++) {
       cerr << "config " << k << endl;
       for (int m = 0; m < ((vector<float>)(data[i][k])).size(); m++) 
@@ -232,6 +232,7 @@ main (int argc, char** argv)
       cerr << endl;
     }
   }	     	     
+
   return 0;
 }
 

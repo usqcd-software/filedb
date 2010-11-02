@@ -2721,7 +2721,8 @@ ffdb_cursor_find_by_key (ffdb_htab_t* hashp, ffdb_crs_t* cursor,
       nextp = NEXT_PGNO(cursor->item.pagep);
       /* put back this page */
       ffdb_put_page (hashp, cursor->item.pagep, TYPE(cursor->item.pagep), 0);
-      if (cursor->item.bucket >= hashp->hdr.max_bucket) {
+      if (cursor->item.bucket >= hashp->hdr.max_bucket &&
+	  nextp == INVALID_PGNO) {
 	/* We are done */
 	cursor->item.status = ITEM_NO_MORE;
 	cursor->item.pagep = 0;
@@ -2792,7 +2793,7 @@ ffdb_cursor_find_by_key (ffdb_htab_t* hashp, ffdb_crs_t* cursor,
       nextp = NEXT_PGNO(cursor->item.pagep);
       /* put this page out */
       ffdb_put_page (hashp, cursor->item.pagep, TYPE(cursor->item.pagep), 0);
-      if (cursor->item.bucket == 0) {
+      if (cursor->item.bucket == 0 && nextp == INVALID_PGNO) {
 	/* We are done */
 	cursor->item.status = ITEM_NO_MORE;
 	cursor->item.pagep = 0;
