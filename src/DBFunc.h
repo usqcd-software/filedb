@@ -118,7 +118,7 @@ namespace FILEDB
     // other information elements have been set before calling this one
     // open database
     std::cerr << "Open store database " << dbase << std::endl;
-    
+
     // turn off umask
     ::umask (0);
 

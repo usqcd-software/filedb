@@ -205,7 +205,7 @@ typedef struct __ffdb {
 typedef struct {
   unsigned int	bsize;		 /* bucket size */
   unsigned int	nbuckets;	 /* number of buckets */
-  unsigned int	cachesize;	 /* bytes to cache */
+  unsigned long	cachesize;	 /* bytes to cache */
   int           rearrangepages;  /* to rearrange page on open/close to save
 				  * space
 				  */

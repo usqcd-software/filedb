@@ -129,6 +129,34 @@ namespace FILEDB
       options_.cachesize = size;
     }
 
+    /**
+     * How much data and keys should be kept in memory in megabytes
+     *
+     * This should be called before the open is called
+     * @param max_cache_size number of bytes of data and keys should be kept
+     * in memory
+     */
+    virtual void setCacheSizeMB (const unsigned int size)
+    {
+      if (sizeof(unsigned long) == sizeof(int)) {
+	// this is a 32 bit machine, we need to make sure
+	// we do not overflow the 32 bit integer here
+	int i = 1;
+	unsigned int tsize = size;
+	while (i <= 20) {
+	  tsize = (tsize << 1);
+	  if (i < 20 && tsize >= (unsigned int)0x80000000) {
+	    std::cerr << "Database cache size exceeds maximum unsigned int" << std::endl;
+	    tsize = 0xFFFFFFFF;
+	    break;
+	  }
+	  i++;
+	}
+	options_.cachesize = tsize;
+      }
+      else 
+	options_.cachesize = ((unsigned long)size) << 20;
+    }
     
     /**
      * Page size used when a new data based is created

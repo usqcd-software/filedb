@@ -630,8 +630,9 @@ __ffdb_hash_open (const char* fname, int flags, int mode, const void* arg)
   struct stat statbuf;
   FFDB_DB *dbp;
   ffdb_htab_t *hashp;
-  int csize, new_table;
-  int ret;
+  unsigned int csize;
+  unsigned long tcsize;
+  int ret, new_table;
   FFDB_HASHINFO *info = (FFDB_HASHINFO *)arg;
 
   /**
@@ -761,10 +762,20 @@ __ffdb_hash_open (const char* fname, int flags, int mode, const void* arg)
    * Get ready to open pagepool
    * cachesize from info is in bytes. We converted into number of pages
    */
-  if (info && info->cachesize)
-    csize = info->cachesize / hashp->hdr.bsize;
-  else
+  if (info && info->cachesize) {
+    // need to check the number of cache pages not exceeding the 
+    // maximum number of integers
+    tcsize = info->cachesize / hashp->hdr.bsize;
+    if (tcsize > 0x7FFFFFFF) {
+      fprintf (stderr, "Number of desired cache pages exceeds the maximum of integer due to rediculous large cache memory request of %lu MBytes.\n",
+	       (info->cachesize >> 20));
+      exit (1);
+    }
+    csize = tcsize;
+  }
+  else 
     csize = DEF_CACHESIZE / hashp->hdr.bsize;
+
 
   /**
    * Create page pool first

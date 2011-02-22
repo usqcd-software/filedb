@@ -70,7 +70,8 @@ main (int argc, char** argv)
   // Open database
   ConfDataStoreDB<StringKey, UserData> dbtest;
 
-  dbtest.setCacheSize (100000000);
+  // 8 GB cache
+  dbtest.setCacheSizeMB (8*1024);
   dbtest.setPageSize (pagesize);
   dbtest.setNumberBuckets (nbuckets);
   if  (rearrange)
