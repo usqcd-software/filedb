@@ -74,6 +74,12 @@
 #define __LARGEFILE64_SOURCE
 #endif
 
+// BJ: Added these to fix the compiler which complained when 
+// I tried to compile this file with -std=c99
+// See also: http://www.openwall.com/lists/owl-dev/2012/02/14/1
+#ifndef __USE_XOPEN2K8
+#define __USE_XOPEN2K8
+#endif
 #ifndef __USE_GNU
 #define __USE_GNU
 #endif
