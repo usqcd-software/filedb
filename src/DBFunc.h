@@ -60,6 +60,14 @@
 namespace FILEDB
 {
   /**
+   * Return all keys to vectors in binary form of strings
+   *
+   */
+  extern void binaryAllKeys (FFDB_DB* dbh, 
+			     std::vector<std::string>& keys)
+    throw (FileHashDBException);
+
+  /**
    * Return all keys and data to vectors in binary form of strings
    *
    */

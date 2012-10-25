@@ -383,6 +383,16 @@ namespace FILEDB
     }
 
     /**
+     * Return all keys in binary string form
+     * @param keys user suppled an empty vector which is populated
+     * by keys after this call.
+     */
+    virtual void binaryKeys (std::vector<std::string>& keys)
+    {
+      binaryAllKeys (dbh_, keys);
+    }
+
+    /**
      * Return all pairs of keys and data
      * @param keys user supplied empty vector to hold all keys
      * @param data user supplied empty vector to hold data

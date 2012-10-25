@@ -76,6 +76,50 @@ namespace FILEDB
     return ret;
   }
 
+  void binaryAllKeys (FFDB_DB* dbh, 
+		      std::vector<std::string>& keys)
+    throw (FileHashDBException)
+  {
+    FFDB_DBT  dbkey, dbdata;
+    ffdb_cursor_t* crp;
+    int  ret;
+    
+    try {
+      // create cursor
+      ret = dbh->cursor (dbh, &crp, FFDB_KEY_CURSOR);
+      if (ret != 0) 
+	throw FileHashDBException ("DBFunc binaryAllKeys", "Create Cursor Error");
+
+      // get everything from meta data
+      dbkey.data = dbdata.data = 0;
+      dbkey.size = dbdata.size = 0;
+
+      while ((ret = crp->get (crp, &dbkey, &dbdata, FFDB_NEXT)) == 0) 
+      {
+	// convert into key object
+	std::string keyObj;
+	keyObj.assign((char*)dbkey.data, dbkey.size);
+
+	// put this new key into the vector
+	keys.push_back (keyObj);
+	
+	// free memory
+	free (dbkey.data); free (dbdata.data);
+	dbkey.data = dbdata.data = 0;
+	dbkey.size = dbdata.size = 0;
+      }
+      if (ret != FFDB_NOT_FOUND) 
+	throw FileHashDBException ("DBFunc binaryAllKeys", "Cursor Next Error");
+    }
+    catch (SerializeException& e) {
+      throw;
+    }
+    
+    // close cursor
+    if (crp != NULL)
+      crp->close(crp);
+  }
+
   void binaryAllPairs (FFDB_DB* dbh, 
 		       std::vector<std::string>& keys, 
 		       std::vector<std::string>& data) 
