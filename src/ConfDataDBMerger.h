@@ -49,7 +49,7 @@
 #include "AllConfStoreDB.h"
 #include "HashFunc.h"
 
-#include <tr1/unordered_map>
+#include <unordered_map>
 
 namespace FILEDB
 {
@@ -61,7 +61,7 @@ namespace FILEDB
      * In memory hash table for key and data
      * default == operator and default hash function are used
      */
-    typedef std::tr1::unordered_map< std::string, std::vector< std::string > > MemMap_t;
+    typedef std::unordered_map< std::string, std::vector< std::string > > MemMap_t;
 
 
     /**
