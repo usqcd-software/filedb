@@ -498,6 +498,8 @@ namespace FILEDB
 
 	return ret;
       }
+
+      return ret;
     }
 
     void keysAndData (std::vector<K>& keys, 
