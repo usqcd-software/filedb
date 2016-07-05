@@ -1,4 +1,4 @@
-AM_CFLAGS = -D_FILE_OFFSET_BITS=64 @FILEHASH_DEBUG@ -I@top_srcdir@/filehash/include -I@top_builddir@/filehash/include
+AM_CFLAGS = -D_FILE_OFFSET_BITS=64 @FILEHASH_DEBUG@ @FILEHASH_HUGE_DATA@ -I@top_srcdir@/filehash/include -I@top_builddir@/filehash/include
 
 lib_LIBRARIES = libfilehash.a
 
@@ -18,7 +18,7 @@ libfilehash_a_SOURCES = \
 include_HEADERS = \
 	ffdb_db.h
 
-check_PROGRAMS = tcreate twrite tdualwrite treplace tread tread-th tkeyseq tcheck createStrings replaceStrings
+check_PROGRAMS = tcreate twrite tdualwrite treplace tread tread-th tkeyseq tcheck createStrings replaceStrings twrite_huge treplace_huge
 
 LDADD = libfilehash.a -lpthread
 clean-local:

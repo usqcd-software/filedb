@@ -249,9 +249,7 @@ _ffdb_flush_meta (ffdb_htab_t* hashp)
   if (!hashp->save_file)
     return 0;
 
-  /* just rewrite the first three items */
-  hashp->hdr.magic = FFDB_HASHMAGIC;
-  hashp->hdr.version = FFDB_HASHVERSION;
+  /* flush out all the header page */
   hashp->hdr.h_charkey = hashp->hash(CHARKEY, sizeof(CHARKEY));
 
   return _ffdb_hput_header (hashp);
@@ -616,6 +614,12 @@ _ffdb_init_htab (ffdb_htab_t* hashp, int nb, FFDB_HASHINFO* info)
   hashp->hdr.max_bucket = hashp->hdr.high_mask = nbuckets - 1;
   hashp->hdr.low_mask = (nbuckets >> 1) - 1;
 
+  /* set hash version and flag */
+  hashp->hdr.magic = FFDB_HASHMAGIC;
+  hashp->hdr.version = FFDB_VERSION;
+  hashp->data_valid_flag = DATA_VALID;
+  hashp->data_invalid_flag = DATA_INVALID;
+
   return 0;
 }
 
@@ -632,7 +636,7 @@ __ffdb_hash_open (const char* fname, int flags, int mode, const void* arg)
   ffdb_htab_t *hashp;
   unsigned int csize;
   unsigned long tcsize;
-  int ret, new_table;
+  int ret, new_table, version_correct;
   FFDB_HASHINFO *info = (FFDB_HASHINFO *)arg;
 
   /**
@@ -742,7 +746,32 @@ __ffdb_hash_open (const char* fname, int flags, int mode, const void* arg)
     }
     
     /* check hash version */
-    if (hashp->hdr.version != FFDB_HASHVERSION) {
+    version_correct = 1;
+    hashp->data_valid_flag = DATA_VALID;
+    hashp->data_invalid_flag = DATA_INVALID;
+
+    if (hashp->hdr.version != FFDB_VERSION) {
+      if (hashp->hdr.version < FFDB_VERSION) {
+        fprintf (stderr, "Opening a file %s with hash version %d using current library version %d\n",
+                 fname, hashp->hdr.version, FFDB_VERSION);
+        if (hashp->hdr.version ==  FFDB_VERSION_5) {
+          hashp->data_valid_flag = DATA_VALID_5;
+          hashp->data_invalid_flag = DATA_INVALID_5;
+        }
+        else {
+          fprintf (stderr, "Cannot open file %s that has an unsupport hash version %d \n",
+                   fname, hashp->hdr.version);
+          version_correct = 0;
+        }
+      }
+      else {
+        fprintf (stderr, "Cannot open an existing file %s with hash version %d using current library version %d\n",
+                 fname, hashp->hdr.version, FFDB_VERSION);
+        version_correct = 0;
+      }
+    }
+
+    if (!version_correct) {
       close (hashp->fp);
       free (hashp);
       errno = EFTYPE;
@@ -1171,13 +1200,6 @@ _ffdb_hash_put (const FFDB_DB* dbp, FFDB_DBT* key, const FFDB_DBT* data,
   unsigned int bucket;
   int status, newkey;
 
-#if 0
-#ifdef _FFDB_DEBUG
-  fprintf (stderr, "ffdb_hash_put key %s data %s\n", (char *)key->data,
-	   (char *)data->data);
-#endif
-#endif
-
   hashp = (ffdb_htab_t *)dbp->internal;
 
 #ifdef _FFDB_STATISTICS
@@ -1185,6 +1207,22 @@ _ffdb_hash_put (const FFDB_DB* dbp, FFDB_DBT* key, const FFDB_DBT* data,
   hash_accesses++;
   FFDB_UNLOCK (hashp->lock);
 #endif
+
+#if defined(_FFDB_HUGE_DATA)
+  /* check data size */
+  if (data->size > FFDB_MAX_DATASIZE) {
+    fprintf (stderr, "Requested data size %ld is greater than the maximum allowed data size of %ld \n",
+             data->size, FFDB_MAX_DATASIZE);
+    return -1;
+  }
+
+  /* check key size */
+  if (key->size > FFDB_MAX_KEYSIZE(hashp)) {
+    fprintf (stderr, "Requested key size %u is greater than the maximum allowed key size of %u \n",
+             (unsigned int)key->size,  FFDB_MAX_KEYSIZE(hashp));
+    return -1;
+  }
+#endif  
 
   /* This is a new key */
   newkey = 1;
@@ -1211,7 +1249,7 @@ _ffdb_hash_put (const FFDB_DB* dbp, FFDB_DBT* key, const FFDB_DBT* data,
   item.seek_size = PAIRSIZE(key, data);
 
   /* calculate hash value for this key */
-  bucket = _ffdb_call_hash (hashp, key->data, key->size);
+  bucket = _ffdb_call_hash (hashp, key->data, (unsigned int)key->size);
   item.bucket = bucket;
 
 #ifdef _FFDB_DEBUG
@@ -1232,6 +1270,7 @@ _ffdb_hash_put (const FFDB_DB* dbp, FFDB_DBT* key, const FFDB_DBT* data,
     if (PAIRFITS(item.pagep, key, data)) {
 #ifdef _FFDB_DEBUG
       fprintf (stderr, "This data item bucket %d fit with page %d\n", bucket, item.pgno);
+      fprintf (stderr, "data and key fits on the page data length = %ld \n", data->size);
 #endif
       if ((status = ffdb_add_pair (hashp, key, data, &item, 0)) != 0) {
 	FFDB_UNLOCK (hashp->lock);  

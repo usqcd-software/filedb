@@ -418,7 +418,8 @@ _ffdb_get_data (ffdb_htab_t* hashp, ffdb_hent_t* item,
   pgno_t next, tp;
   void* pagep;
   ffdb_data_header_t* header;
-  unsigned int start, rlen, idx, copylen, newchksum;
+  unsigned int start, newchksum, roff, hrstatus;
+  long rlen, copylen, datalen, hdatalen, idx;
   int needfree = 0;
 
   /* Get first page where the data item resides */
@@ -432,33 +433,61 @@ _ffdb_get_data (ffdb_htab_t* hashp, ffdb_hent_t* item,
   assert (datap->first == CURR_PGNO(pagep));
   assert (NUM_ENT(pagep) >= 1);
 
-  /* Jump to the offset pointed by datap */
-  header = BIG_DATA_HEADER(pagep,datap->offset);
- 
-  assert (header->len == datap->len);
-  assert (header->status == DATA_VALID);
+  if (hashp->hdr.version > FFDB_VERSION_5) {
+    datalen = REAL_DATA_LEN(datap->len, datap->offset);
+    roff = GET_PGOFFSET (datap->offset);
+    /* Jump to the offset pointed by datap */
+    header = BIG_DATA_HEADER(pagep,roff);
+
+    /* get real data length and status */
+    hdatalen = REAL_DATA_LEN(header->len, header->status);
+    hrstatus = GET_STATUS(header->status);
+
+#ifdef _FFDB_DEBUG
+    fprintf (stderr, "%d: %s %s datalen = %ld header datalen = %ld header status = 0x%x\n",
+	     __LINE__, __FILE__, __FUNCTION__, datalen, hdatalen, hrstatus);
+#endif    
+    
+    assert (hdatalen == datalen);
+    assert (hrstatus == hashp->data_valid_flag);    
+  }
+  else {
+    datalen = datap->len;
+    roff = datap->offset;
+    /* Jump to the offset pointed by datap */
+    header = BIG_DATA_HEADER(pagep,datap->offset);    
+    assert (header->len == datap->len);
+    assert (header->status == hashp->data_valid_flag);    
+  }
+
+
   assert (header->key_page == item->pgno);
   assert (header->key_idx == item->pgndx);
 
   /* Now check whether I have allocated space to data */
   if (val->data && val->size > 0) {
-    if (val->size < header->len) {
-      fprintf (stderr, "Warning: application allocated space %d < data size %d\n",
-	       val->size, header->len);
+    if (val->size < datalen) {
+      fprintf (stderr, "Warning: application allocated space %ld < data size %ld\n",
+	       (long)val->size, datalen);
       return -1;
     }
     else
-      val->size = header->len;
+      val->size = datalen;
   }
   else {
-    val->data = (char *)malloc(header->len * sizeof (char));
-    val->size = header->len;
+    val->data = (char *)malloc(datalen * sizeof (char));
+    if (!val->data) {
+      fprintf (stderr, "Cannot allocate space to get data back for size of %ld bytes. \n",
+	       datalen);
+      return -1;
+    }
+    val->size = datalen;
     needfree = 1;
   }
   
   /* Now I am ready to copy */
   rlen = val->size;
-  start = datap->offset + sizeof(ffdb_data_header_t);
+  start = roff + sizeof(ffdb_data_header_t);
   next = NEXT_PGNO(pagep);
   while (rlen > 0) {
     /* where copy starts in val->data */
@@ -495,9 +524,9 @@ _ffdb_get_data (ffdb_htab_t* hashp, ffdb_hent_t* item,
   newchksum = __ffdb_crc32_checksum (newchksum, val->data,
 				     val->size);
 
-  if (val->size == header->len) {
+  if (val->size == datalen) {
     if (newchksum != datap->chksum) {
-      fprintf (stderr, "Val = %s size = %d\n", (char *)val->data, val->size);
+      /* fprintf (stderr, "Val = %s size = %d\n", (char *)val->data, val->size); */
       fprintf (stderr, "Get data checksum mismatch 0x%x (calculated) != 0x%x (stored)\n", newchksum, datap->chksum);
       if (needfree) {
 	free (val->data);
@@ -528,11 +557,12 @@ _ffdb_add_data (ffdb_htab_t *hashp, pgno_t key_page, pgno_t key_index,
 		const FFDB_DBT* val, void* mem, pgno_t pnum,
 		ffdb_datap_t* datap)
 {
-  unsigned int start, fspace, npages, idx, copylen;
+  unsigned int start, fspace, npages;
   ffdb_data_header_t header;
   pgno_t tp, cpage, currp, prevp, fp;
   void *cpagep, *currpagep;
-  int reuse, rlen;
+  int reuse, fit_on_page;
+  long rlen, copylen, idx;
 
   /* Go to start of the free byte which is 4 byte aligned 
    * The Highest_Free result can be 0 because the previous write 
@@ -585,14 +615,42 @@ _ffdb_add_data (ffdb_htab_t *hashp, pgno_t key_page, pgno_t key_index,
   /* The following has to be true */
   assert (fspace >= BIG_DATA_OVERHEAD);
 
-  header.len = val->size;
-  header.status = DATA_VALID;
-  header.key_page = key_page;
-  header.key_idx = key_index;
-  header.next = 0;
+  if (hashp->hdr.version > FFDB_VERSION_5) {
+    if (!IS_HUGE_DATA(val->size)) {
+      header.len = val->size;
+      header.status = hashp->data_valid_flag;
+    }
+    else {
+      header.len = (unsigned int)val->size;
+      header.status = hashp->data_valid_flag;
+      /* put high 32-40 bits into status flag */
+      INSERT_LEN_TO_STATUS(val->size, header.status);
+    }
+    header.key_page = key_page;
+    header.key_idx = key_index;
+    header.next = 0;
+  }
+  else {
+    header.len = val->size;
+    header.status = hashp->data_valid_flag;
+    header.key_page = key_page;
+    header.key_idx = key_index;
+    header.next = 0;
+  }
 
-  if (BIG_DATA_TOTAL_SIZE(val) <= fspace) {
-    header.next = start + BIG_DATA_TOTAL_SIZE(val);
+  fit_on_page = 0;
+  if (hashp->hdr.version == FFDB_VERSION_5 || !IS_HUGE_DATA(val->size)) {
+    if (BIG_DATA_TOTAL_SIZE(val) <= fspace) 
+      fit_on_page = 1;
+    else
+      fit_on_page = 0;
+  }
+  else {
+      fit_on_page = 0;
+  }
+
+  if (fit_on_page) {
+    header.next = start + (pgno_t)BIG_DATA_TOTAL_SIZE(val);
     /* align the address */
     ALIGN_ADDR(header.next);
 
@@ -652,13 +710,13 @@ _ffdb_add_data (ffdb_htab_t *hashp, pgno_t key_page, pgno_t key_index,
       /* check whether this page is enough for this datum */
       if (rlen <= hashp->hdr.bsize - BIG_PAGE_OVERHEAD - BIG_DATA_OVERHEAD) {
 	/* Free Memory and First Data Position must be aligned */
-	HIGHEST_FREE(currpagep) = BIG_PAGE_OVERHEAD + rlen;
+	HIGHEST_FREE(currpagep) = BIG_PAGE_OVERHEAD + (unsigned int)rlen;
 	ALIGN_ADDR(HIGHEST_FREE(currpagep));
 	FIRST_DATA_POS(currpagep) = (BIG_PAGE_OVERHEAD + rlen);
 	ALIGN_ADDR(FIRST_DATA_POS(currpagep));
 	
 	/* we copy remaining part of data */
-	copylen = rlen;
+	copylen = (unsigned int)rlen;
       }
       else {
 	/* there is no space for another data */
@@ -715,7 +773,12 @@ _ffdb_add_data (ffdb_htab_t *hashp, pgno_t key_page, pgno_t key_index,
   
   /* Update data header */
   datap->first = cpage;
-  datap->offset = start;
+  if (hashp->hdr.version > FFDB_VERSION_5) {
+    datap->offset = start;      
+    INSERT_LEN_TO_PGOFFSET(val->size, datap->offset);
+  }
+  else
+    datap->offset = start;      
   
   return 0;
 }
@@ -737,26 +800,34 @@ _ffdb_replace_data (ffdb_htab_t* hashp, const FFDB_DBT* val,
 		    ffdb_datap_t* datap)
 {
   ffdb_data_header_t* header;
-  unsigned int fspace, copylen, idx;
-  pgno_t tp, currp;
+  unsigned int fspace, plen;
+  pgno_t tp, currp, roffset;
   void *currpagep;
-  int rlen;
+  long rlen, copylen, idx;
 
   /* Get old data header. The new data header is at the same place */
-  header = BIG_DATA_HEADER(mem, datap->offset);
+  if (hashp->hdr.version > FFDB_VERSION_5)
+    roffset = GET_PGOFFSET(datap->offset);
+  else
+    roffset = datap->offset;
+  
+  header = BIG_DATA_HEADER(mem, roffset);
 
   /* data header length need to be changed and header next stays the same */
   header->len = datap->len;
-
+  if (hashp->hdr.version > FFDB_VERSION_5) {
+    /* get length information from value size and insert to status */
+    INSERT_LEN_TO_STATUS(val->size,header->status);
+  }
   /* copy data on to data pages */
-  fspace = hashp->hdr.bsize - datap->offset;
+  fspace = hashp->hdr.bsize - roffset;
   /* The following has to be true */
   assert (fspace >= BIG_DATA_OVERHEAD);
 
   /* Data can fit in the page */
   if (BIG_DATA_TOTAL_SIZE(val) <= fspace) {
     /* Copy data onto the page, header is changed already in memory */
-    memmove (mem + datap->offset + BIG_DATA_OVERHEAD, val->data,
+    memmove (mem + roffset + BIG_DATA_OVERHEAD, val->data,
 	     val->size);
 
     /* Put data page away */
@@ -769,7 +840,7 @@ _ffdb_replace_data (ffdb_htab_t* hashp, const FFDB_DBT* val,
     /* Copy part of data to this page */
     if (fspace - BIG_DATA_OVERHEAD > 0) {
     /* copy part of data onto this page */
-      memmove (mem + datap->offset + BIG_DATA_OVERHEAD, val->data, 
+      memmove (mem + roffset + BIG_DATA_OVERHEAD, val->data, 
 	       fspace - BIG_DATA_OVERHEAD);
       rlen = val->size - (fspace - BIG_DATA_OVERHEAD); 
     }
@@ -824,7 +895,7 @@ _ffdb_update_data_info (ffdb_htab_t* hashp, ffdb_datap_t* datap,
 			pgno_t kpage, unsigned int kpgindx)
 {
   void* dpagep;
-  pgno_t dpage;
+  pgno_t dpage, roff;
   ffdb_data_header_t* data_header;
 
   /* Get data page given from datap */
@@ -835,7 +906,15 @@ _ffdb_update_data_info (ffdb_htab_t* hashp, ffdb_datap_t* datap,
   }
 
   /* Access this data item and update header information */
-  data_header = BIG_DATA_HEADER (dpagep, datap->offset);
+  roff = datap->offset;
+  if (hashp->hdr.version > FFDB_VERSION_5) {
+    roff = GET_PGOFFSET(datap->offset);
+#ifdef _FFDB_DEBUG
+    fprintf (stderr, "%d: %s %s get datapointer at offset %d given offset %d\n",
+	     __LINE__, __FILE__, __FUNCTION__, roff, datap->offset);
+#endif    
+  }
+  data_header = BIG_DATA_HEADER (dpagep, roff);
   data_header->key_page = kpage;
   data_header->key_idx = kpgindx;
 
@@ -938,7 +1017,7 @@ _ffdb_data_page (ffdb_htab_t* hashp, int new_page, int* reuse)
     num = _ffdb_reuse_free_ovflpage (hashp);
     if (num > 0) {
 #ifdef _FFDB_DEBUG
-      fprintf (stderr, "Reuse previously freed overflow page %d\n", num);
+      fprintf (stderr, "Reuse previously freed overflow page %u\n", num);
 #endif
       *reuse = 1;
     }
@@ -1434,16 +1513,34 @@ int ffdb_get_item (ffdb_htab_t* hashp,
 {
   int status;
   ffdb_datap_t* datap;
+  unsigned int roff;
+  long rlen;
 
   /* first get data pointer */
   datap = DATAP(item->pagep, item->pgndx);
+  if (hashp->hdr.version > FFDB_VERSION_5) {
+    rlen = REAL_DATA_LEN(datap->len, datap->offset);
+    roff = GET_PGOFFSET (datap->offset);
+  }
 #ifdef _FFDB_DEBUG
-  fprintf (stderr, "Found Key %s information: \n", (char *)key->data);
-  fprintf (stderr, "At first page %d\n", datap->first);
-  fprintf (stderr, "At offset %d\n", datap->offset);
-  fprintf (stderr, "Length of data %d\n", datap->len);
-  fprintf (stderr, "Checksum of data is 0x%x\n", datap->chksum);
-  fprintf (stderr, "freepage is = %d\n", freepage);
+  if (hashp->hdr.version > FFDB_VERSION_5) {
+    rlen = REAL_DATA_LEN(datap->len, datap->offset);
+    roff = GET_PGOFFSET (datap->offset);
+    fprintf (stderr, "Found Key %s information: \n", (char *)key->data);
+    fprintf (stderr, "At first page %d\n", datap->first);
+    fprintf (stderr, "At offset %u and datap->offset %u \n", roff, datap->offset);
+    fprintf (stderr, "Length of data %ld with datap->len = %u \n", rlen, datap->len);
+    fprintf (stderr, "Checksum of data is 0x%x\n", datap->chksum);
+    fprintf (stderr, "freepage is = %d\n", freepage);
+  }
+  else {
+    fprintf (stderr, "Found Key %s information: \n", (char *)key->data);
+    fprintf (stderr, "At first page %d\n", datap->first);
+    fprintf (stderr, "At offset %d\n", datap->offset);
+    fprintf (stderr, "Length of data %d\n", datap->len);
+    fprintf (stderr, "Checksum of data is 0x%x\n", datap->chksum);
+    fprintf (stderr, "freepage is = %d\n", freepage);
+  }
 #endif
 
   /* Now I have to hop to data page to get this data item */
@@ -1464,6 +1561,8 @@ int ffdb_get_item (ffdb_htab_t* hashp,
 /**
  * Add a pair of key and data onto a page (hash page) represented by
  * page address and page number
+ *
+ * This page is hash page: all data pointers are on this type of page
  */
 static int
 _ffdb_add_item_on_page (ffdb_htab_t* hashp, void* pagep, pgno_t page,
@@ -1478,12 +1577,12 @@ _ffdb_add_item_on_page (ffdb_htab_t* hashp, void* pagep, pgno_t page,
   
   n = NUM_ENT(pagep);
   /* Find place to put the key */
-  off = OFFSET(pagep) - key->size + 1;
-  memmove (pagep + off, key->data, key->size);
+  off = OFFSET(pagep) - (unsigned int)key->size + 1;
+  memmove (pagep + off, key->data, (unsigned int)key->size);
 
   /* Set Key Offset Value */
   KEY_OFF(pagep, n) = off;
-  KEY_LEN(pagep, n) = key->size;
+  KEY_LEN(pagep, n) = (unsigned int)key->size;
 
   /*  Find place to put data pointer value */
   off -= sizeof(ffdb_datap_t);
@@ -1517,9 +1616,13 @@ _ffdb_add_item_on_page (ffdb_htab_t* hashp, void* pagep, pgno_t page,
   
 
   /* Now Put data on this page: this data can expand multiple pages */
+
+  /* the datap offset value will be changed inside the following add_data routine
+   * to reflect the real length 
+   */
   datap.first = fpage;
   datap.offset = 0;
-  datap.len = val->size;
+  datap.len = (unsigned int)val->size;
   datap.chksum = data_chksum;
 
   /* add data to data page provided key page and key index in the page
@@ -1531,10 +1634,19 @@ _ffdb_add_item_on_page (ffdb_htab_t* hashp, void* pagep, pgno_t page,
 	     dpage);
     return -1;
   }
+  
 #ifdef _FFDB_DEBUG
-  fprintf (stderr, "Data len %d is stored at page %d offset %d checksum 0x%x\n",
-	   datap.len, datap.first, datap.offset, datap.chksum);
+  if (hashp->hdr.version > FFDB_VERSION_5) {
+    fprintf (stderr, "Real Data len %ld and datap.len %u is stored at page %u offset %u datap.offset 0x%x checksum 0x%x\n",
+	     REAL_DATA_LEN(datap.len, datap.offset), datap.len, datap.first, GET_PGOFFSET(datap.offset), datap.offset,
+	     datap.chksum);
+  }
+  else
+    fprintf (stderr, "Data len %d is stored at page %d offset %d checksum 0x%x\n",
+	     datap.len, datap.first, datap.offset, datap.chksum);
 #endif
+
+  /* copy data pointer to hash page right location */
   memmove (pagep + off, &datap, sizeof(ffdb_datap_t));
   DATAP_OFF(pagep, n) = off;
 
@@ -1560,20 +1672,46 @@ _ffdb_replace_item_on_page (ffdb_htab_t* hashp,
   pgno_t dpage;
   void* memp;
 
+#if defined (_FFDB_HUGE_DATA)  
+  long datasize;
+#else
+  unsigned int datasize;
+#endif  
+
   /* Get current data pointer information of this key */
   datap = DATAP (item->pagep, item->pgndx);
   
 #ifdef _FFDB_DEBUG
   fprintf (stderr, "Replace Key %s information: \n", (char *)key->data);
   fprintf (stderr, "At first page %d\n", datap->first);
-  fprintf (stderr, "At offset %d\n", datap->offset);
-  fprintf (stderr, "Length of data %d\n", datap->len);
   fprintf (stderr, "Checksum of data is 0x%x\n", datap->chksum);
+#if defined(_FFDB_HUGE_DATA)  
+  fprintf (stderr, "At offset %d\n", GET_PGOFFSET(datap->offset));
+  fprintf (stderr, "Length of data %ld\n", REAL_DATA_LEN(datap->len, datap->offset));
+  fprintf (stderr, "With new data size of %ld\n", val->size);
+#else
+  fprintf (stderr, "At offset %d\n", datap->offset);
+  fprintf (stderr, "Length of data %d\n", datap->len);  
   fprintf (stderr, "With new data size of %d\n", val->size);
+#endif  
   fprintf (stderr, "new check sum = 0x%x\n", item->data_chksum);
+
+  if (hashp->hdr.version > FFDB_VERSION_5) {
+    fprintf (stderr, "Real datalength = %ld\n",  REAL_DATA_LEN(datap->len, datap->offset));
+  }
 #endif
-  if (val->size > datap->len) {
-    fprintf (stderr, "Replacement data size %d is larger than the existing data size %d\n", val->size, datap->len);
+  
+  if (hashp->hdr.version > FFDB_VERSION_5) 
+    datasize = REAL_DATA_LEN(datap->len, datap->offset);
+  else
+    datasize = datap->len;
+  
+  if (val->size > datasize) {
+#if defined (_FFDB_HUGE_DATA)      
+    fprintf (stderr, "Replacement data size %ld is larger than the existing data size %ld\n", val->size, datasize);
+#else
+    fprintf (stderr, "Replacement data size %d is larger than the existing data size %d\n", val->size, datasize);
+#endif    
     return -1;
   }
   
@@ -1581,13 +1719,26 @@ _ffdb_replace_item_on_page (ffdb_htab_t* hashp,
   memp = ffdb_get_page (hashp, datap->first, HASH_DATA_PAGE, 0,
 			&dpage);
   if (!memp) {
-    fprintf (stderr, "Cannot get data page %d to replace data at offset %d\n",	     datap->first, datap->offset);
+    if (hashp->hdr.version > FFDB_VERSION_5)     
+      fprintf (stderr, "Cannot get data page %d to replace data at offset %d\n",
+               datap->first, GET_PGOFFSET(datap->offset));
+    else
+      fprintf (stderr, "Cannot get data page %d to replace data at offset %d\n",
+               datap->first, datap->offset);      
     return -1;
   }
 
   /* Change data pointer value */
-  datap->len = val->size;
-  datap->chksum = item->data_chksum;
+  if (hashp->hdr.version > FFDB_VERSION_5 && IS_HUGE_DATA(val->size)) {
+    /* insert ncessary length information to offset */
+    INSERT_LEN_TO_PGOFFSET(val->size, datap->offset);
+    datap->len = (unsigned int)val->size;
+    datap->chksum = item->data_chksum;
+  }
+  else {
+    datap->len = (unsigned int)val->size;
+    datap->chksum = item->data_chksum;
+  }
 
   status = _ffdb_replace_data (hashp, val, memp, dpage, datap);
 
@@ -1692,7 +1843,8 @@ _ffdb_write_key_datap_to_page (ffdb_htab_t* hashp, FFDB_DBT* key,
 			       ffdb_datap_t *datap,
 			       void* pagep, pgno_t page)
 {
-  unsigned int n, off, soff;
+  unsigned int n, off, soff, roff;
+  long rlen;
   int status;
   
   n = NUM_ENT(pagep);
@@ -1716,6 +1868,9 @@ _ffdb_write_key_datap_to_page (ffdb_htab_t* hashp, FFDB_DBT* key,
     memset (pagep + off + sizeof(ffdb_datap_t), 0, soff - off);
 
   /* write data pointer value */
+  /* data pointer value will not change, Offset value above is for offset
+   * to this data pointer not the offset of the data inside a data page
+   */
   memmove (pagep + off, datap, sizeof(ffdb_datap_t));
   DATAP_OFF(pagep, n) = off;
 
@@ -1725,6 +1880,8 @@ _ffdb_write_key_datap_to_page (ffdb_htab_t* hashp, FFDB_DBT* key,
 
   /* Update this page information */
   NUM_ENT(pagep) = n + 1;
+
+  /* this is for the page offset, we do not need to change it for version 6 */
   OFFSET(pagep) = off - 1;
 
   return status;
@@ -1941,7 +2098,11 @@ _ffdb_update_data_pages_content (ffdb_htab_t* hashp, void *pagep,
     }
     
     /* change information on the key page */
-    header = BIG_DATA_HEADER(dpagep, datap->offset);
+    if (hashp->hdr.version > FFDB_VERSION_5) {
+      header = BIG_DATA_HEADER(dpagep, GET_PGOFFSET(datap->offset));
+    }
+    else
+      header = BIG_DATA_HEADER(dpagep, datap->offset);
 
     assert (header->key_page == oldpage);
 
@@ -2874,6 +3035,11 @@ ffdb_cursor_find_by_key (ffdb_htab_t* hashp, ffdb_crs_t* cursor,
   }
   else {
     key->data = (unsigned char *)malloc(eksize * sizeof(unsigned char));
+    if (!key->data) {
+      fprintf (stderr, "Cannot allocate space for cursor_get to retrieve key of size %u \n",
+	       eksize);
+      return -1;
+    }
     key->size = eksize;
   }
   memcpy (key->data, ekdata, eksize);
