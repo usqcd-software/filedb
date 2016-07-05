@@ -1018,7 +1018,7 @@ ffdb_pagepool_get_page (ffdb_pagepool_t* pgp, pgno_t* pageno,
 	FFDB_UNLOCK (pgp->lock);
 	return errno;
     }
-    fprintf (stderr, "calling new page i for page number %d\n", pageno);
+    
     ret = _ffdb_pagepool_new_page_i (pgp, pageno, flags, mem);
     FFDB_UNLOCK (pgp->lock);    
     return ret;

@@ -123,6 +123,9 @@ typedef struct htab {		/* Memory resident data structure */
   int   rearrange_pages;        /* rearrange pages to save disk space */
   ffdb_pagepool_t *mp;		/* mpool for buffer management */
   pthread_mutex_t lock;		/* lock */
+                                /* we changed the valid and invalid flag from version 5 to 6 */
+  int data_valid_flag;          /* data valid flag used */
+  int data_invalid_flag;        /* data invalid flag used */
 } ffdb_htab_t;
 
 

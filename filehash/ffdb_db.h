@@ -100,10 +100,24 @@ typedef enum {FFDB_HASH = 1} FFDB_DBTYPE;
 /*
  * Still use the key data pair structure
  */
+
+/*
+ * maximum data length for huge data 2^40 - 1
+ * data length is encoded as 40 bit long integer
+ */
+#define FFDB_MAX_DATASIZE  ((long)1099511627775)
+
+#if defined(_FFDB_HUGE_DATA)
+typedef struct _ffdb_dbt_{
+  void *data;                          /* data                 */
+  long size;                           /* data length in bytes */
+}FFDB_DBT;
+#else
 typedef struct _ffdb_dbt_{
   void *data;                          /* data                 */
   unsigned int size;                   /* data length in bytes */
 }FFDB_DBT;
+#endif
 
 /*
  * DB access method and cursor operation values.  Each value is an operation
@@ -189,7 +203,15 @@ typedef struct __ffdb {
  * Hash database magic number and version
  */
 #define FFDB_HASHMAGIC 0xcece3434
-#define FFDB_HASHVERSION 5
+
+#if defined(_FFDB_HUGE_DATA)
+#define FFDB_VERSION 6
+#else
+#define FFDB_VERSION 5
+#endif
+
+#define FFDB_VERSION_5 5
+#define FFDB_VERSION_6 6
 
 /*
  * How do we store key and data on a page

@@ -54,15 +54,58 @@
  * A single data is pointed by the following structure
  * On the page where the data is stored, the data len is the first
  * 4 bytes stored.
+ *
+ * data pointers are stored on the hash page along with keys
+ * offset is the data offset in a data page.
+ *
+ * This offset is different from the page offset where free space starts from high to low
  */
 typedef struct _ffdb_datap_
 {
   pgno_t first;          /* First page where the data resides */
   pgno_t offset;         /* Offset within the page            */
+                         /* limiting the page size to 1 MB, so
+                            we can use the extra 8 bit combine
+                            with the following len field to
+                            construct a data field length of
+                            40 bits long                      */
   pgno_t len;            /* total length of data              */
   unsigned int chksum;   /* crc checksum                      */
 }ffdb_datap_t;
 
+/**
+ * check whether we have to do the combine the data length and offset
+ */
+#define IS_HUGE_DATA(len) ((len) > 0xffffffffL)
+
+/* retrieve high 8 bit from 32-40 of data size */
+#define DLEN_HIGH_BITS(l) ((unsigned int)(((long)(l) >> 32) & (0xff)))
+
+/**
+ * Set bit 20 - 27 of offset using 8 bit from data length field
+ */
+#define INSERT_LEN_TO_PGOFFSET(l,o) ((o) = (((DLEN_HIGH_BITS(l)) << 20) | ((o) & 0xfffff) ) )
+
+/**
+ * Retrieve bit 20 -27 from offset so we can combine it to form
+ * a real length
+ */
+#define GET_LEN_FROM_PGOFFSET(o) (((o) >> 20) & 0xff)
+
+/**
+ * Get real length by combining two fields len and offset
+ */
+#define REAL_DATA_LEN(l, o) ((long)((GET_LEN_FROM_PGOFFSET((long)o) << 32) | (long)(l) ))
+
+/**
+ * Assign new offset: only last 0-19 bits are used
+ */
+#define SET_PGOFFSET(o,val) ((o) |= ((val) & 0xfffff))
+
+/**
+ * Retrieve offset value: only last 0 - 19 bits are used
+ */
+#define GET_PGOFFSET(o) ((o) & 0xfffff)
 
 /**
  * Alignment for the data pointer value
@@ -255,17 +298,35 @@ typedef struct _ffdb_datap_
  * This is the definition of the header of each data item to allow 
  * easy reversal lookup of the key
  */
+#if defined (_FFDB_HUGE_DATA)
+#define DATA_VALID    0x0000ffee
+#define DATA_INVALID  0x00001122
+#else
 #define DATA_VALID    0xffeeffee
 #define DATA_INVALID  0x11221122
+#endif
+
+#define DATA_VALID_6    0x0000ffee
+#define DATA_INVALID_6  0x00001122
+#define DATA_VALID_5    0xffeeffee
+#define DATA_INVALID_5  0x11221122
 
 typedef struct _ffdb_data_header_
 {
   pgno_t  len;                /* Length of this data item          */
+                              /* we will steal 8 bits from status
+                                 field to combine with the len field
+                                 to construct real data length
+                                 of 2^40 - 1                       */
   pgno_t  status;             /* data is deleted or not            */
   pgno_t  next;               /* next data item on this page       */
   pgno_t  key_page;           /* page number where the key resides */
   pgno_t  key_idx;            /* index within the key page to find key */
 }ffdb_data_header_t;
+
+#define INSERT_LEN_TO_STATUS(l,s) (INSERT_LEN_TO_PGOFFSET(l,s))
+#define GET_LEN_FROM_STATUS(s)    (GET_LEN_FROM_PGOFFSET(s))
+#define GET_STATUS(s)             (GET_PGOFFSET(s))
 
 #define I_FIRST_DATA_POS   28
 
@@ -284,7 +345,7 @@ typedef struct _ffdb_data_header_
 /**
  * Total big data size including header information
  */
-#define BIG_DATA_TOTAL_SIZE(val)(BIG_DATA_OVERHEAD + (val)->size)
+#define BIG_DATA_TOTAL_SIZE(val) (BIG_DATA_OVERHEAD + (val)->size )
 
 /**
  * Get data header pointed by offset on a page
@@ -296,7 +357,7 @@ typedef struct _ffdb_data_header_
  * we are not dealing with the case that a single key cannot be fit
  * into a page
  */
-#define FFDB_MAX_KEYSIZE(h) ((h->hdr.bsize) - PAGE_OVERHEAD - PAIROVERHEAD - sizeof(ffdb_datap_t))
+#define FFDB_MAX_KEYSIZE(h) ((h->hdr.bsize) - PAGE_OVERHEAD - PAIR_OVERHEAD - sizeof(ffdb_datap_t))
 
 #define PAIRFITS(P,K,D)	((PAIRSIZE((K),(D))) <= FREESPACE((P)))
 
