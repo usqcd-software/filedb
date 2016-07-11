@@ -151,7 +151,7 @@ namespace FILEDB
      */
     UserData (const std::string& str);
     UserData (const char* str);
-    UserData (const char* str, unsigned int size);
+    UserData (const char* str, long size);
 
     /**
      * Copy Constructor

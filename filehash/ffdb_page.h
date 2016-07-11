@@ -58,7 +58,8 @@
  * data pointers are stored on the hash page along with keys
  * offset is the data offset in a data page.
  *
- * This offset is different from the page offset where free space starts from high to low
+ * This offset is different from the page offset where 
+ * free space starts from high to low
  */
 typedef struct _ffdb_datap_
 {
@@ -177,7 +178,6 @@ typedef struct _ffdb_datap_
 #define PAGE_OVERHEAD	(I_HF_OFFSET + sizeof(pgno_t))
 
 /* overhead for one key and one data: two offsets + one key len */
-/* Here is the reason limiting page size: the offset is a unsigned short */
 #define PAIR_OVERHEAD (3*sizeof(pgno_t))
 
 /* macro to retrive a value of Type Y from page P at offset F */

@@ -940,10 +940,11 @@ __ffdb_hash_open (const char* fname, int flags, int mode, const void* arg)
 #endif
 
   /* Check whether I need to move data pages back to original places if
-   * new insert is expected
+   * new insert is expected or some pages was moved previously
    */
-  if (!new_table && hashp->save_file && hashp->rearrange_pages) 
+  if (!new_table && hashp->save_file && (hashp->rearrange_pages || hashp->hdr.num_moved_pages > 0)) 
     ffdb_rearrage_pages_on_open (hashp);
+
 
   /* Find out current data page which is the last data page we are using */
   /* Otherwise the datapage assigned to new insert will start at wrong place */
@@ -1208,22 +1209,34 @@ _ffdb_hash_put (const FFDB_DB* dbp, FFDB_DBT* key, const FFDB_DBT* data,
   FFDB_UNLOCK (hashp->lock);
 #endif
 
-#if defined(_FFDB_HUGE_DATA)
-  /* check data size */
-  if (data->size > FFDB_MAX_DATASIZE) {
-    fprintf (stderr, "Requested data size %ld is greater than the maximum allowed data size of %ld \n",
-             data->size, FFDB_MAX_DATASIZE);
-    return -1;
+#if defined(_FFDB_HUGE_DATA)  
+  if (hashp->hdr.version > FFDB_VERSION_5) {
+    /* check data size */
+    if (data->size > FFDB_MAX_DATASIZE) {
+      fprintf (stderr, "Requested data size %ld is greater than the maximum allowed data size of %ld \n",
+               data->size, FFDB_MAX_DATASIZE);
+      return -1;
+    }
   }
+  else {
+    fprintf (stderr, "datasize = %ld maxsize = %ld\n", data->size, (long)0xffffffff);
+    /* datasize is limited by unsigned integer */
+    if (data->size > (long)0xffffffff) {
+      fprintf (stderr, "Requested data size %ld is greater than the maximum allowed data size of %ld \n",
+               data->size, (long)0xffffffff);
+      return -1;
+    }
+  }
+#endif
 
   /* check key size */
   if (key->size > FFDB_MAX_KEYSIZE(hashp)) {
-    fprintf (stderr, "Requested key size %u is greater than the maximum allowed key size of %u \n",
+    fprintf (stderr, "Requested key size %u is greater than the maximum allowed key size of %ld \n",
              (unsigned int)key->size,  FFDB_MAX_KEYSIZE(hashp));
     return -1;
   }
-#endif  
 
+  
   /* This is a new key */
   newkey = 1;
 

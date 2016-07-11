@@ -19,6 +19,7 @@
 #define INITIAL	500000
 #define MAXWORDS 500000	       /* # of elements in search table */
 
+#define MAX_LEN 2000000
 
 static void
 read_user_info (FFDB_DB* dbp, unsigned char string[], unsigned int* len)
@@ -54,18 +55,15 @@ typedef struct {		       /* info to be stored */
   int num, siz;
 } info;
 
-#define MAX_LEN 100000
-
-char	wp1[MAX_LEN];
-char	wp2[MAX_LEN];
+static char wp1[MAX_LEN];
 
 int main(int argc, char** argv)
 {
-  FFDB_DBT item, key, res;
+  FFDB_DBT key, res;
   FFDB_DB	*dbp;
   FFDB_HASHINFO ctl;
   int	stat, i;
-  char *p1, *p2, *dbase;
+  char *p1,  *dbase;
   unsigned char userdata[4096];
   unsigned int len = 4096;
   unsigned char line[MAX_LEN];
@@ -75,7 +73,7 @@ int main(int argc, char** argv)
     fprintf (stderr, "Usage: %s cachesize rearrange(0|1) dbase\n", argv[0]);
     exit (1);
   }
-
+  
   i = 0;
   
   argv++;
@@ -85,6 +83,7 @@ int main(int argc, char** argv)
   ctl.bsize = 64;
   ctl.cachesize = atoi(*argv++);
   ctl.rearrangepages = atoi(*argv++);
+  
   dbase = *argv++;
   fprintf (stderr, "dbase = %s\n", dbase);
   if (!(dbp = ffdb_dbopen(dbase, O_RDWR, 0600, &ctl))) {
@@ -99,9 +98,7 @@ int main(int argc, char** argv)
   read_config_info (dbp, &acf);
 
   key.data = wp1;
-  item.data = wp2;
   while ( fgets(wp1, MAX_LEN, stdin) &&
-	  fgets(wp2, MAX_LEN, stdin) &&
 	  i++ < MAXWORDS) {
     /*
      * put info in structure, and structure in the item
@@ -111,13 +108,7 @@ int main(int argc, char** argv)
       p1++;
     *p1 = '\0';
 
-    p2 = wp2;
-    while (p2 && *p2 != '\n')
-      p2++;
-    *p2 = '\0';
-
     key.size = strlen(wp1) + 1;
-    item.size = strlen(wp2) + 1;
 
 #if 0
     /* clear out result */
@@ -130,15 +121,13 @@ int main(int argc, char** argv)
     stat = (dbp->get)(dbp, &key, &res, 0);
     if (stat < 0) {
       fprintf ( stderr, "Error retrieving %s\n", (char *)key.data );
-      exit(1);
+      break;
     } else if ( stat > 0 ) {
       fprintf ( stderr, "%s not found\n", (char *)key.data );
-      exit(1);
+      break;
     }
     else {
-      if (strcmp ((char *)item.data, (char *)res.data) != 0) 
-	fprintf (stderr, "Retriving data mismatch %s != %s (expeced)\n",
-		 (char *)res.data, (char *)item.data);
+      fprintf (stderr, "Found data for key %s\n", (char *)key.data );
 #if 0
       free (res.data);
 #endif

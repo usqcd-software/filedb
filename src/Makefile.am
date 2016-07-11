@@ -46,7 +46,7 @@ include_HEADERS = \
 	ConfigInfo.h \
 	HashFunc.h
 
-check_PROGRAMS = ConfCreateTest SConfCreateTest SConfReadTest ConfReadTest AllConfCreateTest AllConfReadTest AllConfUpdateTest DBMergeTest
+check_PROGRAMS = ConfCreateTest SConfCreateTest SConfReadTest ConfReadTest AllConfCreateTest AllConfReadTest AllConfUpdateTest DBMergeTest AllConfCreateTestHuge AllConfReadTestHuge AllConfUpdateTestHuge
 
 ConfCreateTest_SOURCES=ConfCreateTest.cpp
 SConfCreateTest_SOURCES=SConfCreateTest.cpp
@@ -56,6 +56,9 @@ AllConfCreateTest_SOURCES=AllConfCreateTest.cpp
 AllConfReadTest_SOURCES=AllConfReadTest.cpp
 AllConfUpdateTest_SOURCES=AllConfUpdateTest.cpp
 DBMergeTest_SOURCES=DBMergeTest.cpp
+AllConfCreateTestHuge_SOURCES=AllConfCreateTestHuge.cpp
+AllConfReadTestHuge_SOURCES=AllConfReadTestHuge.cpp
+AllConfUpdateTestHuge_SOURCES=AllConfUpdateTestHuge.cpp
 
 LDADD = libfiledb.a ../filehash/libfilehash.a -lpthread
 
