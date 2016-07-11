@@ -86,16 +86,16 @@ init_config_info (FFDB_DB* dbp, unsigned int numconfig)
   free (acf.allconfigs);
 }
 
-#define MAX_LEN 100000
+#define MAX_LEN 1000000
 
 int main(int argc, char** argv)
 {
   struct timeval tv;
-  int num, maxksize, maxdsize, k;
+  int num, maxksize, maxdsize;
   FFDB_DBT item, key;
   FFDB_DB	*dbp;
   FFDB_HASHINFO ctl;
-  char *p1, *p2, *dbase;
+  char *dbase;
   char kstr[MAX_LEN], vstr[MAX_LEN];
 
   if (argc < 8) {

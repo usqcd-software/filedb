@@ -96,11 +96,11 @@ init_config_info (FFDB_DB* dbp, unsigned int numconfig)
 int main(int argc, char** argv)
 {
   struct timeval tv;
-  int num, maxksize, k;
+  int num, maxksize;
   FFDB_DBT item, key;
   FFDB_DB	*dbp;
   FFDB_HASHINFO ctl;
-  char *p1, *p2, *dbase;
+  char *dbase;
   char kstr[MAX_LEN];
   long maxdsize;
   char *vstr, *end;
@@ -175,7 +175,7 @@ int main(int argc, char** argv)
      */
     if ((dbp->put)(dbp, &key, &item, FFDB_NOOVERWRITE) != 0) {
       fprintf(stderr, "cannot enter: key %s\n",
-	      (char *)item.data);
+	      (char *)key.data);
       exit(1);
     }
   }

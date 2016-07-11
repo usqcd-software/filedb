@@ -175,7 +175,11 @@ struct _ffdb_crs_
 /**
  * Constants
  */
+#if 0
 #define	MAX_BSIZE		262144		/* 2^18 */
+#endif
+#define	MAX_BSIZE		1048576		/* 2^20 */
+
 #define MIN_BUFFERS		6
 #define MINHDRSIZE		512
 #define DEF_CACHESIZE	        134217728       /* 2^27 default cache */

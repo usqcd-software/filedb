@@ -56,15 +56,11 @@ char	wp2[MAX_LEN];
 
 int main(int argc, char** argv)
 {
-  FFDB_DBT item, key, res;
+  FFDB_DBT key, res;
   FFDB_DB	*dbp;
   FFDB_HASHINFO ctl;
   int	stat, i, numkey;
-  char *p1, *p2, *dbase;
-  unsigned char userdata[4096];
-  unsigned int len = 4096;
-  unsigned char line[MAX_LEN];
-  ffdb_all_config_info_t acf;
+  char *dbase;
   ffdb_cursor_t* cur;
 
   if (argc < 3) {
@@ -122,6 +118,8 @@ int main(int argc, char** argv)
 
   numkey = 0;
   while ((stat = cur->get (cur, &key, &res, FFDB_NEXT)) == FFDB_SUCCESS) {
+    fprintf (stderr, "Key len %d = %s\n", strlen((char *)(key.data)),(char *)(key.data));
+    
 #if 0
     fprintf (stderr, "Key len %d = %s\n", strlen((char *)(key.data)),(char *)(key.data));
     fprintf (stderr, "Data %s\n", (char *)(res.data));

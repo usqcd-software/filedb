@@ -1,7 +1,14 @@
+7/9/2016	Jie Chen
+	Version 1.1: Added support for hige data item (> 4GB). Fixed a few bugs. One
+	major bug fixed is move pages upon opening a file when the file has number
+	of moved pages > 0 and this file is opened for write even if the rearrange page 
+	flag is not set.
+	Largest data item is not at 2^40. The largest page is 1MB (2^20).
 9/28/2009	Robert Edwards
 	Version 1.1: Added some fileExists functions. Jie fixed some critical bugs
         in V1.0. Also added a multiple DB wrapper over one DB - used only in RDONLY.
 
 2/19/2009	Jie Chen
 	Version 0.95 (Beta): First beta release
+
 

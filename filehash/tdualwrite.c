@@ -92,11 +92,11 @@ init_config_info (FFDB_DB* dbp, unsigned int numconfig)
 int main(int argc, char** argv)
 {
   struct timeval tv;
-  int num, maxksize, maxdsize, k;
+  int num, maxksize, maxdsize;
   FFDB_DBT item, key;
   FFDB_DB	*dbp_m, *dbp_nm;
   FFDB_HASHINFO ctl;
-  char *p1, *p2, *dbase;
+  char *dbase;
   char dbase_m[128], dbase_nm[128];
   char kstr[MAX_LEN], vstr[MAX_LEN];
 

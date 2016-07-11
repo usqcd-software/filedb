@@ -73,7 +73,7 @@ namespace FILEDB
     /**
      * byte size of each element of a configuration
      */
-    int bytesize_;
+    long bytesize_;
 
     /**
      * Configuration information
@@ -270,7 +270,7 @@ namespace FILEDB
 
       // now split this data blob into a vector
       char *rdata = (char *)&cdata[0];
-      for (unsigned int i = 0; i < cdata.length(); i += bytesize_) {
+      for (long i = 0; i < cdata.length(); i += bytesize_) {
 	D elem;
 	std::string tmp;
 	tmp.assign (&rdata[i], bytesize_);
@@ -322,7 +322,7 @@ namespace FILEDB
 
       // now split this data blob into a vector
       char *rdata = (char *)&cdata[0];
-      for (unsigned int i = 0; i < cdata.length(); i += bytesize_) {
+      for (long i = 0; i < cdata.length(); i += bytesize_) {
 	std::string tmp;
 	tmp.assign (&rdata[i], bytesize_);
 	// add to array
@@ -510,7 +510,7 @@ namespace FILEDB
 
       this->binaryKeysAndData (binkeys, bvalues);
 
-      for (unsigned int i = 0; i < binkeys.size(); i++) {
+      for (long i = 0; i < binkeys.size(); i++) {
 	K tkey;
 	try {
 	  tkey.readObject (binkeys[i]);
@@ -523,7 +523,7 @@ namespace FILEDB
       }
 
       // walk through each vector of string convert it into vector of D
-      for (unsigned int i = 0; i < bvalues.size(); i++) {
+      for (long i = 0; i < bvalues.size(); i++) {
 	if (bvalues[i].length() % nbin_ != 0) {
 	  std::cerr << "Data element size " << bvalues[i].length() << " is not multiple of number of configuration " << nbin_ << std::endl;
 	  abort ();
@@ -532,7 +532,7 @@ namespace FILEDB
 	// this is the beginning of the string buffer
 	char* dbuf = (char *)&bvalues[i][0];
 	std::vector<D> vals;
-	unsigned int bsize = bvalues[i].length()/nbin_;
+	long bsize = bvalues[i].length()/nbin_;
 	if (bytesize_ == 0)
 	  bytesize_ = bsize;
 	
@@ -541,7 +541,7 @@ namespace FILEDB
 	  abort ();
 	}
 
-	for (unsigned int k = 0; k < bvalues[i].length(); k += bsize) {
+	for (long k = 0; k < bvalues[i].length(); k += bsize) {
 	  D elem;
 	  std::string tmp;
 	  tmp.assign (&dbuf[k], bsize);

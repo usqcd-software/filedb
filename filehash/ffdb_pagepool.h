@@ -136,7 +136,12 @@
  * Maximum and minimum page size
 */
 #define	FFDB_MIN_PGSIZE	0x000200   /* Minimum page size (512). */
+
+#if 0
 #define	FFDB_MAX_PGSIZE	0x040000   /* Maximum page size (262144). */
+#endif
+
+#define	FFDB_MAX_PGSIZE	0x100000   /* Maximum page size (1048576). */
 
 
 /*

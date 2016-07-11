@@ -227,8 +227,8 @@ namespace FILEDB
     // empty
   }
 
-  UserData::UserData (const char* buf, unsigned int len)
-    :DBData(), str_ (buf, len)
+  UserData::UserData (const char* buf, long len)
+    :DBData(), str_ (buf, (size_t)len)
   {
     // empty
   }
@@ -295,7 +295,7 @@ namespace FILEDB
       }
 
       // finally write out our string
-      ostrm.write ((const char *)&(str_[0]), str_.length());
+      ostrm.write (str_.c_str(), str_.length());      
       if (ostrm.bad()) {
 	string msg("writing internal string error.");
 	throw SerializeException ("UserData", msg);

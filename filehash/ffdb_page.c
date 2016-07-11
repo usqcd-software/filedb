@@ -800,7 +800,7 @@ _ffdb_replace_data (ffdb_htab_t* hashp, const FFDB_DBT* val,
 		    ffdb_datap_t* datap)
 {
   ffdb_data_header_t* header;
-  unsigned int fspace, plen;
+  unsigned int fspace;
   pgno_t tp, currp, roffset;
   void *currpagep;
   long rlen, copylen, idx;
@@ -1410,7 +1410,6 @@ int ffdb_find_item (ffdb_htab_t* hashp,
   unsigned char *ekdata = 0;
   ffdb_datap_t* datap = 0;
 
-
   /* first get page for this bucket */
   item->pagep = ffdb_get_page (hashp, item->bucket, HASH_BUCKET_PAGE,
 			       FFDB_PAGE_CREATE, &item->pgno);
@@ -1843,8 +1842,7 @@ _ffdb_write_key_datap_to_page (ffdb_htab_t* hashp, FFDB_DBT* key,
 			       ffdb_datap_t *datap,
 			       void* pagep, pgno_t page)
 {
-  unsigned int n, off, soff, roff;
-  long rlen;
+  unsigned int n, off, soff;
   int status;
   
   n = NUM_ENT(pagep);
@@ -3026,8 +3024,8 @@ ffdb_cursor_find_by_key (ffdb_htab_t* hashp, ffdb_crs_t* cursor,
   if (key->data && key->size > 0) {
     /* User supplied space */
     if (key->size < eksize) {
-      fprintf (stderr, "Warning: application provided key space %d < key stored on disk with size %d\n",
-	       key->size, eksize);
+      fprintf (stderr, "Warning: application provided key space %ld < key stored on disk with size %ld\n",
+	       (long)key->size, (long)eksize);
       return -1;
     }
     else
