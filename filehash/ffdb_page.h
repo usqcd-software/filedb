@@ -298,13 +298,8 @@ typedef struct _ffdb_datap_
  * This is the definition of the header of each data item to allow 
  * easy reversal lookup of the key
  */
-#if defined (_FFDB_HUGE_DATA)
 #define DATA_VALID    0x0000ffee
 #define DATA_INVALID  0x00001122
-#else
-#define DATA_VALID    0xffeeffee
-#define DATA_INVALID  0x11221122
-#endif
 
 #define DATA_VALID_6    0x0000ffee
 #define DATA_INVALID_6  0x00001122

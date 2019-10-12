@@ -1209,12 +1209,11 @@ _ffdb_hash_put (const FFDB_DB* dbp, FFDB_DBT* key, const FFDB_DBT* data,
   FFDB_UNLOCK (hashp->lock);
 #endif
 
-#if defined(_FFDB_HUGE_DATA)  
   if (hashp->hdr.version > FFDB_VERSION_5) {
     /* check data size */
     if (data->size > FFDB_MAX_DATASIZE) {
-      fprintf (stderr, "Requested data size %ld is greater than the maximum allowed data size of %ld \n",
-               data->size, FFDB_MAX_DATASIZE);
+      fprintf (stderr, "Requested data size %zi is greater than the maximum allowed data size of %zi \n",
+               (size_t)data->size, (size_t)FFDB_MAX_DATASIZE);
       return -1;
     }
   }
@@ -1222,17 +1221,16 @@ _ffdb_hash_put (const FFDB_DB* dbp, FFDB_DBT* key, const FFDB_DBT* data,
     fprintf (stderr, "datasize = %ld maxsize = %ld\n", data->size, (long)0xffffffff);
     /* datasize is limited by unsigned integer */
     if (data->size > (long)0xffffffff) {
-      fprintf (stderr, "Requested data size %ld is greater than the maximum allowed data size of %ld \n",
-               data->size, (long)0xffffffff);
+      fprintf (stderr, "Requested data size %zi is greater than the maximum allowed data size of %zi \n",
+               (size_t)data->size, (size_t)(long)0xffffffff);
       return -1;
     }
   }
-#endif
 
   /* check key size */
   if (key->size > FFDB_MAX_KEYSIZE(hashp)) {
-    fprintf (stderr, "Requested key size %u is greater than the maximum allowed key size of %ld \n",
-             (unsigned int)key->size,  FFDB_MAX_KEYSIZE(hashp));
+    fprintf (stderr, "Requested key size %zi is greater than the maximum allowed key size of %zi \n",
+             (size_t)key->size,  (size_t)FFDB_MAX_KEYSIZE(hashp));
     return -1;
   }
 

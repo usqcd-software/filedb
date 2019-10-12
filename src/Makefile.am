@@ -1,4 +1,4 @@
-AM_CXXFLAGS = @FILEDB_BYTE_ORDER_DEF@ @FILEDB_TEMP_COMP_TEST@ @FILEHASH_HUGE_DATA@ -std=c++0x -I@top_srcdir@/filehash
+AM_CXXFLAGS = @FILEDB_BYTE_ORDER_DEF@ @FILEDB_TEMP_COMP_TEST@ -std=c++0x -I@top_srcdir@/filehash
 
 lib_LIBRARIES = libfiledb.a
 

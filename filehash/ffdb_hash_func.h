@@ -57,15 +57,8 @@ extern int (*__ffdb_default_cmp)(const FFDB_DBT *a, const FFDB_DBT *b);
 
 extern void __ffdb_crc32_init (void);
 
-#if defined(_FFDB_HUGE_DATA)
 extern unsigned int  __ffdb_crc32_checksum (unsigned int crc, 
 					    const unsigned char* buffer,
 					    long len);
-#else
-extern unsigned int  __ffdb_crc32_checksum (unsigned int crc, 
-					    const unsigned char* buffer,
-					    unsigned int len);
-#endif
-
 
 #endif

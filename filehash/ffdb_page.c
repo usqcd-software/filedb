@@ -1671,11 +1671,7 @@ _ffdb_replace_item_on_page (ffdb_htab_t* hashp,
   pgno_t dpage;
   void* memp;
 
-#if defined (_FFDB_HUGE_DATA)  
   long datasize;
-#else
-  unsigned int datasize;
-#endif  
 
   /* Get current data pointer information of this key */
   datap = DATAP (item->pagep, item->pgndx);
@@ -1684,15 +1680,9 @@ _ffdb_replace_item_on_page (ffdb_htab_t* hashp,
   fprintf (stderr, "Replace Key %s information: \n", (char *)key->data);
   fprintf (stderr, "At first page %d\n", datap->first);
   fprintf (stderr, "Checksum of data is 0x%x\n", datap->chksum);
-#if defined(_FFDB_HUGE_DATA)  
   fprintf (stderr, "At offset %d\n", GET_PGOFFSET(datap->offset));
   fprintf (stderr, "Length of data %ld\n", REAL_DATA_LEN(datap->len, datap->offset));
   fprintf (stderr, "With new data size of %ld\n", val->size);
-#else
-  fprintf (stderr, "At offset %d\n", datap->offset);
-  fprintf (stderr, "Length of data %d\n", datap->len);  
-  fprintf (stderr, "With new data size of %d\n", val->size);
-#endif  
   fprintf (stderr, "new check sum = 0x%x\n", item->data_chksum);
 
   if (hashp->hdr.version > FFDB_VERSION_5) {
@@ -1706,11 +1696,7 @@ _ffdb_replace_item_on_page (ffdb_htab_t* hashp,
     datasize = datap->len;
   
   if (val->size > datasize) {
-#if defined (_FFDB_HUGE_DATA)      
     fprintf (stderr, "Replacement data size %ld is larger than the existing data size %ld\n", val->size, datasize);
-#else
-    fprintf (stderr, "Replacement data size %d is larger than the existing data size %d\n", val->size, datasize);
-#endif    
     return -1;
   }
   

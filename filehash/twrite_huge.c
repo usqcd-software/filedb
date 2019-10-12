@@ -1,7 +1,6 @@
 /**
  * Write huge data item (> 4GB) into database
  */
-#if defined(_FFDB_HUGE_DATA)
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -186,9 +185,3 @@ int main(int argc, char** argv)
 
   exit(0);
 }
-#else
-int main(int argc, char** argv)
-{
-  return 0;
-}
-#endif

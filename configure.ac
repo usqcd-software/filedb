@@ -91,18 +91,6 @@ then
 	AC_SUBST(FILEDB_TEMP_COMP_TEST,[-D_FILEDB_COMPILE_TEST])
 fi
 
-# Turn on huge data item support
-FILEDB_HUGE_DATA=NO
-AC_ARG_ENABLE([hugedata],
-AC_HELP_STRING([--enable-hugedata],[allow data item greater than 4GB.]),
-[if test "$enableval" = yes; then FILEDB_HUGE_DATA=YES;fi])
-
-if test "$FILEDB_HUGE_DATA" = YES
-then
-	AC_MSG_NOTICE([Allow data item greater than 4GB.])
-	AC_SUBST(FILEHASH_HUGE_DATA,[-D_FFDB_HUGE_DATA])
-fi
-
 AC_CONFIG_FILES(Makefile)
 AC_CONFIG_FILES(filehash/Makefile)
 AC_CONFIG_FILES(src/Makefile)

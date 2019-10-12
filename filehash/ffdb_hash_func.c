@@ -353,15 +353,9 @@ void __ffdb_crc32_init (void)
   /**
    * Caculate crc32 checksum for a buffer with length len
    */
-#if defined(_FFDB_HUGE_DATA)
 unsigned int 
 __ffdb_crc32_checksum (unsigned int crc, const unsigned char* buf, 
 		       long len)
-#else
-unsigned int  
-__ffdb_crc32_checksum (unsigned int crc, const unsigned char* buf, 
-		       unsigned int len)
-#endif  
 {
   crc ^= 0xffffffff;
   while (len--)
