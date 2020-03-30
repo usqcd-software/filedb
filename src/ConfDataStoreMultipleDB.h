@@ -85,6 +85,20 @@ namespace FILEDB
 
     
     /**
+     * How much data and keys should be kept in memory in bytes
+     *
+     * This should be called before the open is called
+     * @param max_cache_size number of bytes of data and keys should be kept
+     * in memory
+     */
+    virtual void setCacheSizeMB (const unsigned int size)
+    {
+      for(int i=0; i < dbs_.size(); ++i)
+	dbs_[i].setCacheSizeMB(size);
+    }
+
+    
+    /**
      * Get maximum number of configurations
      */
     virtual unsigned int getMaxNumberConfigs (void) const
