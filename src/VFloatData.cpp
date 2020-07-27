@@ -121,7 +121,7 @@ namespace FILEDB
    * routine is returned, the len contains the object actual length
    */
   void 
-  VFloatData::writeObject (std::string& output) const throw (SerializeException)
+  VFloatData::writeObject (std::string& output) const noexcept (false)
   {
     float* vcfbuf;
     unsigned short id;
@@ -165,7 +165,7 @@ namespace FILEDB
    * @param object a new populated object
    */
   void 
-  VFloatData::readObject (const std::string& input)  throw (SerializeException)
+  VFloatData::readObject (const std::string& input)  noexcept (false)
   {
     float* vcfbuf;
     unsigned short id, pad;
