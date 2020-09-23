@@ -108,14 +108,14 @@ namespace FILEDB
      * Convert this object into binary form stored in the internal buffer
      *
      */
-    void writeObject (std::string&) const throw (SerializeException);
+    void writeObject (std::string&) const noexcept(false);
 
 
     /**
      * Convert a buffer into an object
      *
      */
-    void readObject (const std::string&)  throw (SerializeException);
+    void readObject (const std::string&)  noexcept(false);
 
 
     /**
@@ -197,14 +197,14 @@ namespace FILEDB
      * Convert this object into binary form stored in the internal buffer
      *
      */
-    void writeObject (std::string&) const throw (SerializeException);
+    void writeObject (std::string&) const noexcept(false);
 
 
     /**
      * Convert a buffer into an object
      *
      */
-    void readObject (const std::string&)  throw (SerializeException);
+    void readObject (const std::string&)  noexcept(false);
    
   private:
     static const unsigned short MAGIC= (unsigned short)0x11ff;

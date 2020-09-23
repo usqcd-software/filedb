@@ -69,7 +69,7 @@ namespace FILEDB {
   /**
    * Desstructor
    */
-  SerializeException::~SerializeException (void) throw ()
+  SerializeException::~SerializeException (void) noexcept(true)
   {
     // empty
   }
@@ -78,7 +78,7 @@ namespace FILEDB {
    * Return the reason of this exception
    */
   const char* 
-  SerializeException::what (void) const throw ()
+  SerializeException::what (void) const noexcept(true)
   {
     return (cls_ + ": " + reason_).c_str();
   }
@@ -120,7 +120,7 @@ namespace FILEDB {
   /**
    * Desstructor
    */
-  FileHashDBException::~FileHashDBException (void) throw ()
+  FileHashDBException::~FileHashDBException (void) noexcept(true)
   {
     // empty
   }
@@ -129,7 +129,7 @@ namespace FILEDB {
    * Return the reason of this exception
    */
   const char* 
-  FileHashDBException::what (void) const throw ()
+  FileHashDBException::what (void) const noexcept(true)
   {
     return (cls_ + ": " + reason_).c_str();
   }

@@ -78,7 +78,7 @@ namespace FILEDB
 
   void binaryAllKeys (FFDB_DB* dbh, 
 		      std::vector<std::string>& keys)
-    throw (FileHashDBException)
+    noexcept(false)
   {
     FFDB_DBT  dbkey, dbdata;
     ffdb_cursor_t* crp;
@@ -123,7 +123,7 @@ namespace FILEDB
   void binaryAllPairs (FFDB_DB* dbh, 
 		       std::vector<std::string>& keys, 
 		       std::vector<std::string>& data) 
-    throw (FileHashDBException)
+    noexcept(false)
   {
     FFDB_DBT  dbkey, dbdata;
     ffdb_cursor_t* crp;

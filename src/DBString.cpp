@@ -120,7 +120,7 @@ namespace FILEDB
 
   // A string object is preceded by a magic number and an ID number
   void
-  StringKey::writeObject (std::string& output) const throw (SerializeException)
+  StringKey::writeObject (std::string& output) const noexcept(false)
   {
     ostringstream ostrm;
     unsigned short magicnum = hton_short(StringKey::MAGIC);
@@ -156,7 +156,7 @@ namespace FILEDB
 
   // again we need to retrive magic and serial id for security reason
   void
-  StringKey::readObject (const std::string& input) throw (SerializeException)
+  StringKey::readObject (const std::string& input) noexcept(false)
   {
     istringstream istrm (input);
     unsigned short magicnum, sid;
@@ -274,7 +274,7 @@ namespace FILEDB
   }
 
   void
-  UserData::writeObject (std::string& output) const throw (SerializeException)
+  UserData::writeObject (std::string& output) const noexcept(false)
   {
     ostringstream ostrm;
     unsigned short magicnum = hton_short(UserData::MAGIC);
@@ -309,7 +309,7 @@ namespace FILEDB
   }
 
   void
-  UserData::readObject (const std::string& input) throw (SerializeException)
+  UserData::readObject (const std::string& input) noexcept(false)
   {
     istringstream istrm (input);
     unsigned short magicnum, sid;

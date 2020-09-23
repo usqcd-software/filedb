@@ -65,7 +65,7 @@ namespace FILEDB
    */
   extern void binaryAllKeys (FFDB_DB* dbh, 
 			     std::vector<std::string>& keys)
-    throw (FileHashDBException);
+    noexcept(false);
 
   /**
    * Return all keys and data to vectors in binary form of strings
@@ -74,7 +74,7 @@ namespace FILEDB
   extern void binaryAllPairs (FFDB_DB* dbh, 
 			      std::vector<std::string>& keys, 
 			      std::vector<std::string>& data) 
-    throw (FileHashDBException);
+    noexcept(false);
 
   /**
    * get key and data pair from a database pointed by pointer dbh
@@ -150,7 +150,7 @@ namespace FILEDB
   template <typename K, typename D>
   int insertData (FFDB_DB* dbh, const K& key, const D& data,
 		  unsigned int flag = 0)
-    throw (SerializeException)
+    noexcept(false)
   {
     int ret;
        
@@ -202,7 +202,7 @@ namespace FILEDB
   template <typename K>
   int insertData (FFDB_DB* dbh, const K& key, const std::string& data,
 		  unsigned int flag = 0)
-    throw (SerializeException)
+    noexcept(false)
   {
     int ret;
        
@@ -243,7 +243,7 @@ namespace FILEDB
    * @return 0 on success. Otherwise failure
    */
   template <typename K, typename D>
-  int getData (FFDB_DB* dbh, const K& key, D& data) throw (SerializeException)
+  int getData (FFDB_DB* dbh, const K& key, D& data) noexcept(false)
   {
     int ret = 0;
 
@@ -298,7 +298,7 @@ namespace FILEDB
    * @return 0 on success. Otherwise failure
    */
   template <typename K, typename D>
-  int getData (FFDB_DB* dbh, const K& key, std::string& data) throw (SerializeException)
+  int getData (FFDB_DB* dbh, const K& key, std::string& data) noexcept(false)
   {
     int ret = 0;
 
@@ -340,7 +340,7 @@ namespace FILEDB
    */
   template <typename K, typename D>
   void allKeys (FFDB_DB* dbh, std::vector<K>& keys) 
-    throw (SerializeException, FileHashDBException)
+    noexcept(false)
   {
     FFDB_DBT  dbkey;
     ffdb_cursor_t *crp;
@@ -391,7 +391,7 @@ namespace FILEDB
    */
   template <typename K, typename D>
   void allPairs (FFDB_DB* dbh, std::vector<K>& keys, std::vector<D>& data) 
-    throw (SerializeException, FileHashDBException)
+    noexcept(false)
   {
     FFDB_DBT  dbkey, dbdata;
     ffdb_cursor_t* crp;
@@ -449,7 +449,7 @@ namespace FILEDB
    */
   template <typename K>
   int isDatabaseEmpty (FFDB_DB* dbh)
-    throw (SerializeException, FileHashDBException)
+    noexcept(false)
   {
     FFDB_DBT dbkey, dbdata;
     ffdb_cursor_t* crp;
@@ -497,7 +497,7 @@ namespace FILEDB
    */
   template <typename K>
   int keyExist (FFDB_DB* dbh, const K& arg) 
-    throw (SerializeException)
+    noexcept(false)
   {
     int ret;
     
