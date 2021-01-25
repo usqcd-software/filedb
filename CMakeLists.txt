@@ -5,21 +5,28 @@ project(FileDB VERSION 1.2
 
 
 # Basic Includes
+# Helps with installig
 include(GNUInstallDirs)
+
+# Can run CTest Tests if any
 include(CTest)
+
+# Helps with Exporting and Creating XXXConfig.cmake scripts
 include(CMakePackageConfigHelpers)
-include(CheckIncludeFile)
+
 
 # Set yes/no options 
 # OFF is default value
 option(FileDB_ENABLE_DEBUG_HASHDB "Turn on low level debug verbose messages." OFF)
 option(FileDB_ENABLE_TEMPLATE_COMPILE_TEST "Test compile template headers through dumb instantiations." OFF)
 
-
+# Get Pthread options
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-# Check files
+
+# Check for include files -- I am using the set from the filedb_config_internal.h.in file
+include(CheckIncludeFile)
 check_include_file(inttypes.h HAVE_INTTYPES_H)
 check_include_file(memory.h HAVE_MEMORY_H)
 check_include_file(stdint.h HAVE_STDINT_H)
@@ -30,6 +37,7 @@ check_include_file(sys/stat.h HAVE_SYS_STAT_H)
 check_include_file(sys/types.h HAVE_SYS_TYPES_H)
 check_include_file(unistd.h HAVE_UNISTD_H)
 
+# Set appropriate variables in generated header
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/filedb_config_internal.h.cmake.in
 			   ${CMAKE_CURRENT_BINARY_DIR}/src/filedb_config_internal.h)
 			   
@@ -42,24 +50,25 @@ else()
   message(STATUS "System is little endian")
 endif()
 
-# Check include file
-
-# Set C++ standard to 14
-
+# Configure Filehash
 add_subdirectory(filehash)
+
+# Configure src/
 add_subdirectory(src)
 
 #install generated header file:
 install( FILES ${CMAKE_CURRENT_BINARY_DIR}/src/filedb_config_internal.h DESTINATION include )
 
+#Install the filedb.cmake file which contains the exports for importing
 install(EXPORT filedb NAMESPACE filedb:: DESTINATION lib/cmake/filedb )
 
+#Create a packageConfig.cmake file
 configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/filedbConfig.cmake"
   INSTALL_DESTINATION "lib/cmake/filedb"
 )
 
-# install the configuration file
+# install it
 install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/filedbConfig.cmake
   DESTINATION lib/cmake/filedb
@@ -72,10 +81,13 @@ write_basic_package_version_file(
   COMPATIBILITY AnyNewerVersion
 )
 
-# install the configuration file
+# install it
 install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/filedbConfigVersion.cmake
   DESTINATION lib/cmake/filedb
 )
 
+# export package. Does nothing by default, but
+# can have uses in specially set up configurations
+export(PACKAGE FileDB)
 
