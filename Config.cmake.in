@@ -1,5 +1,4 @@
 @PACKAGE_INIT@
 
-include("${CMAKE_CURRENT_LIST_DIR}/filedb.cmake")
-
+include("${CMAKE_CURRENT_LIST_DIR}/FileDBTargets.cmake")
 check_required_components(FileDB)
