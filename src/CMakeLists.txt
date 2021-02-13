@@ -1,5 +1,4 @@
-# Collect the library sources & headers
-set( FILEDB_SRCS
+add_library(filedb 
         FileDB.cpp
         FileDB.h
         Serializable.h
@@ -46,9 +45,6 @@ set(FILEDB_HEADERS
 	HashFunc.h
 )
 	
-# Add sources to the library
-add_library(filedb ${FILEDB_SRCS})
-
 # Add appropriate Endianness option
 if( FileDB_BIG_ENDIAN )
   target_compile_definitions(filedb PUBLIC -D_FILEDB_BIG_ENDIAN)
@@ -111,10 +107,10 @@ install( FILES ${FILEDB_HEADERS} DESTINATION include)
 
 # Install filedb into the target
 install( TARGETS filedb
-		 EXPORT filedb 
+		 EXPORT FileDBTargets
 		 ARCHIVE DESTINATION lib 
 		 LIBRARY DESTINATION lib
 		 RUNTIME DESTINATION bin)
 		 
-
+add_library(FileDB::filedb ALIAS filedb)
 	

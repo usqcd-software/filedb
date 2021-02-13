@@ -60,7 +60,9 @@ install( FILES ffdb_db.h DESTINATION include)
 
 # write the target into the filedb export 
 install( TARGETS filehash
-		 EXPORT filedb
+		 EXPORT FileDBTargets
 		 ARCHIVE DESTINATION lib 
 		 LIBRARY DESTINATION lib
 		 RUNTIME DESTINATION bin)
+
+add_library(FileDB::filehash ALIAS filehash)

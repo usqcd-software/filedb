@@ -39,7 +39,7 @@ check_include_file(unistd.h HAVE_UNISTD_H)
 
 # Set appropriate variables in generated header
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/filedb_config_internal.h.cmake.in
-			   ${CMAKE_CURRENT_BINARY_DIR}/src/filedb_config_internal.h)
+ 	       ${CMAKE_CURRENT_BINARY_DIR}/src/filedb_config_internal.h)
 			   
 # Check endianness
 include(TestBigEndian)
@@ -60,31 +60,26 @@ add_subdirectory(src)
 install( FILES ${CMAKE_CURRENT_BINARY_DIR}/src/filedb_config_internal.h DESTINATION include )
 
 #Install the filedb.cmake file which contains the exports for importing
-install(EXPORT filedb NAMESPACE filedb:: DESTINATION lib/cmake/filedb )
+install(EXPORT FileDBTargets NAMESPACE FileDB:: DESTINATION lib/cmake/FileDB )
 
 #Create a packageConfig.cmake file
 configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
-  "${CMAKE_CURRENT_BINARY_DIR}/filedbConfig.cmake"
-  INSTALL_DESTINATION "lib/cmake/filedb"
-)
-
-# install it
-install(FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/filedbConfig.cmake
-  DESTINATION lib/cmake/filedb
+  "${CMAKE_CURRENT_BINARY_DIR}/FileDBConfig.cmake"
+  INSTALL_DESTINATION "lib/cmake/FileDB"
 )
 
 # generate the version file for the config file
 write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/filedbConfigVersion.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/FileDBConfigVersion.cmake"
   VERSION "${FileDB_VERSION_MAJOR}.${FileDB_VERSION_MINOR}"
   COMPATIBILITY AnyNewerVersion
 )
 
 # install it
 install(FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/filedbConfigVersion.cmake
-  DESTINATION lib/cmake/filedb
+  ${CMAKE_CURRENT_BINARY_DIR}/FileDBConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/FileDBConfigVersion.cmake
+  DESTINATION lib/cmake/FileDB
 )
 
 # export package. Does nothing by default, but
