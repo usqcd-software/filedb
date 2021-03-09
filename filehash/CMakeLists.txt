@@ -21,6 +21,11 @@ if( FileDB_ENABLE_DEBUG_HASHDB )
   target_compile_definitions(filehash PUBLIC -D_FFDB_DEBUG)
 endif()
 
+if( FileDB_SANITIZER_OPTS )
+  target_compile_options(filehash PUBLIC ${FileDB_SANITIZER_OPTS})
+  target_link_options(filehash PUBLIC ${FileDB_SANITIZER_OPTS})
+endif() 
+
 # Set the include dirs, to the current dir (for building) and include/ for 
 # post install
 target_include_directories( filehash PUBLIC

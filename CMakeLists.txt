@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.17)
 project(FileDB VERSION 1.2
               DESCRIPTION "File DB"
               LANGUAGES CXX;C )
@@ -19,6 +19,8 @@ include(CMakePackageConfigHelpers)
 # OFF is default value
 option(FileDB_ENABLE_DEBUG_HASHDB "Turn on low level debug verbose messages." OFF)
 option(FileDB_ENABLE_TEMPLATE_COMPILE_TEST "Test compile template headers through dumb instantiations." OFF)
+# Enable Address address and undefined behaviour sanitizers
+option(FileDB_ENABLE_SANITIZERS "Enable Address and Undefined Behaviour Sanitizers" OFF)
 
 # Get Pthread options
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -49,6 +51,17 @@ if( FileDB_BIG_ENDIAN )
 else()
   message(STATUS "System is little endian")
 endif()
+
+# Deal with Sanitizer
+if( FileDB_ENABLE_SANITIZERS )
+  if( ( CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 3.1)
+     OR ( CMAKE_CXX_COMPILER_ID MATCHES "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8) )
+      message(STATUS "FileDB: Setting Sanitizer options")
+      set(FileDB_SANITIZER_OPTS "-fsanitize=address,undefined")
+  else()
+    message(STATUS "Don't know how to enable sanitizers for ${CMAKE_CXX_COMPILER_ID}... Ignoring")
+  endif()
+endif() 
 
 # Configure Filehash
 add_subdirectory(filehash)

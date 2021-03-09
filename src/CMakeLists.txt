@@ -76,6 +76,11 @@ set_target_properties(filedb PROPERTIES CXX_STANDARD 14)
 # Disallow extensions to the standard
 set_target_properties(filedb PROPERTIES CXX_EXTENSIONS OFF)
 
+if( FileDB_SANITIZER_OPTS )
+  target_compile_options(filedb PUBLIC ${FileDB_SANITIZER_OPTS})
+  target_link_options(filedb PUBLIC ${FileDB_SANITIZER_OPTS})
+endif() 
+
 # Macro to build the exeictables
 macro(add_test_cpp EXECNAME)
     # Make the executable
