@@ -1408,7 +1408,6 @@ int ffdb_find_item (ffdb_htab_t* hashp,
   unsigned int chksum = 0;
   FFDB_DBT ekey;
   unsigned char *ekdata = 0;
-  ffdb_datap_t* datap = 0;
 
   /* first get page for this bucket */
   item->pagep = ffdb_get_page (hashp, item->bucket, HASH_BUCKET_PAGE,
@@ -1456,8 +1455,6 @@ int ffdb_find_item (ffdb_htab_t* hashp,
       ekdata = KEY(item->pagep, i);
       ekey.data = ekdata;
       ekey.size = KEY_LEN(item->pagep, i);
-      /* get data for this index */
-      datap = DATAP(item->pagep, i);
 
       /* We do not allow duplicated keys */
       if (hashp->h_compare(key, &ekey) == 0) {
@@ -1540,6 +1537,9 @@ int ffdb_get_item (ffdb_htab_t* hashp,
     fprintf (stderr, "Checksum of data is 0x%x\n", datap->chksum);
     fprintf (stderr, "freepage is = %d\n", freepage);
   }
+#else
+  (void)roff;
+  (void)rlen;
 #endif
 
   /* Now I have to hop to data page to get this data item */

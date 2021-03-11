@@ -406,11 +406,10 @@ _ffdb_init_hash(ffdb_htab_t* hashp, const char* file,
 unsigned int
 _ffdb_hget_header(ffdb_htab_t *hashp, unsigned int page_size)
 {
-  unsigned num_copied, i, newchksum;
+  unsigned num_copied, newchksum;
   unsigned char *hdr_dest;
 
   num_copied = 0;
-  i = 0;
 
   hdr_dest = (unsigned char *)&hashp->hdr;
   
