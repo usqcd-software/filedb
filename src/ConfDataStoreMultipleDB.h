@@ -232,6 +232,16 @@ namespace FILEDB
       return ret;
     }
 
+    /**
+     * Return all available keys to user
+     * @param keys user suppled an empty vector which is populated
+     * by keys after this call.
+     */
+    virtual void keys (std::vector<K>& keys)
+    {
+      for(int i=0; i < dbs_.size(); ++i)
+        dbs_[i].keys(keys);
+    }
 
     /**
      * Get user user data from the metadata database
