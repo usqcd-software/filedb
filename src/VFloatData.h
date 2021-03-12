@@ -86,7 +86,7 @@ namespace FILEDB
     /**
      * Get the serial id of this class
      */
-    const unsigned short serialID (void) const {return 0x6677;}
+    unsigned short serialID (void) const {return 0x6677;}
     
 
     /**

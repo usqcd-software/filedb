@@ -92,7 +92,7 @@ namespace FILEDB
     /**
      * Serial ID or class id 
      */
-    const unsigned short serialID (void) const {return 102;}
+    unsigned short serialID (void) const {return 102;}
 
     /**
      * I am going to use default hash string function
@@ -191,7 +191,7 @@ namespace FILEDB
     /**
      * Serial ID or class id 
      */
-    const unsigned short serialID (void) const {return 0x1144;}
+    unsigned short serialID (void) const {return 0x1144;}
 
     /**
      * Convert this object into binary form stored in the internal buffer
