@@ -77,12 +77,12 @@ namespace FILEDB
     /**
      * Destructor
      */
-    virtual ~SerializeException (void) throw ();
+    virtual ~SerializeException (void);
 
     /**
      * Return reason of the exception
      */
-    virtual const char* what (void) const throw ();
+    virtual const char* what (void) const noexcept;
 
   protected:
     std::string cls_;
@@ -120,12 +120,12 @@ namespace FILEDB
     /**
      * Destructor
      */
-    virtual ~FileHashDBException (void) throw ();
+    virtual ~FileHashDBException (void);
 
     /**
      * Return reason of the exception
      */
-    virtual const char* what (void) const throw ();
+    virtual const char* what (void) const noexcept;
 
   protected:
     std::string cls_;
