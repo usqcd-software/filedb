@@ -100,7 +100,7 @@ namespace FILEDB
      */
     virtual bool fileExists (const std::vector<std::string>& files) const
     {
-      int ret = false;
+      int ret = true;
       for(int i=0; i < dbs_.size(); ++i)
       {
 	ret = dbs_[i].fileExists(files[i]);
