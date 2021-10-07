@@ -54,13 +54,9 @@ endif()
 
 # Deal with Sanitizer
 if( FileDB_ENABLE_SANITIZERS )
-  if( ( CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 3.1)
-     OR ( CMAKE_CXX_COMPILER_ID MATCHES "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8) )
-      message(STATUS "FileDB: Setting Sanitizer options")
-      set(FileDB_SANITIZER_OPTS "-fsanitize=address,undefined")
-  else()
-    message(STATUS "Don't know how to enable sanitizers for ${CMAKE_CXX_COMPILER_ID}... Ignoring")
-  endif()
+  include(cmake/CheckSanitizeOpts.cmake)
+  check_sanitizer_options( "${FileDB_ENABLE_SANITIZERS}" FileDB_SANITIZER_OPTS )
+  message(STATUS "FileDB: Setting Sanitizer options: ${FileDB_SANITIZER_OPTS}")
 endif() 
 
 # Configure Filehash

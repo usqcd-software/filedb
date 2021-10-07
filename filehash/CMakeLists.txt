@@ -22,7 +22,7 @@ if( FileDB_ENABLE_DEBUG_HASHDB )
 endif()
 
 if( FileDB_SANITIZER_OPTS )
-  target_compile_options(filehash PUBLIC ${FileDB_SANITIZER_OPTS})
+  target_compile_options(filehash PRIVATE ${FileDB_SANITIZER_OPTS})
   target_link_options(filehash PUBLIC ${FileDB_SANITIZER_OPTS})
 endif() 
 

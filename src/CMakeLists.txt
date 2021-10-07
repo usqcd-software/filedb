@@ -77,7 +77,7 @@ set_target_properties(filedb PROPERTIES CXX_STANDARD 14)
 set_target_properties(filedb PROPERTIES CXX_EXTENSIONS OFF)
 
 if( FileDB_SANITIZER_OPTS )
-  target_compile_options(filedb PUBLIC ${FileDB_SANITIZER_OPTS})
+  target_compile_options(filedb PRIVATE  ${FileDB_SANITIZER_OPTS})
   target_link_options(filedb PUBLIC ${FileDB_SANITIZER_OPTS})
 endif() 
 
