@@ -80,7 +80,7 @@ namespace FILEDB
     /**
      * Return number of elements inside this vector
      */
-    const int numberOfElements (void) const;
+    int numberOfElements (void) const;
 
 
     /**

@@ -153,6 +153,7 @@ namespace FILEDB
 			     unsigned int dbasecachesize,
 			     MemMap_t& bag)
     {
+      (void)numconfigs;
       unsigned int i, ielem, felem;
 
       // check whether this config info has valid urlname
@@ -422,7 +423,7 @@ namespace FILEDB
 	(allkeys.size () == allkeys.size()/chunk * chunk) ? allkeys.size()/chunk : allkeys.size()/chunk + 1;
 
       MemMap_t bag;
-      for (int loop = 0; loop < numloops; loop++) {
+      for (unsigned int loop = 0; loop < numloops; loop++) {
 	// clear the bag
 	bag.clear ();
 
@@ -430,7 +431,7 @@ namespace FILEDB
 	initBag (configs_[i], allkeys, data0, chunk, loop, configs_.size(), bag);
 
 	// retrieve all information from each configuration
-	for (int c = 0; c < configs_.size(); c++) {
+	for (std::size_t c = 0; c < configs_.size(); c++) {
 	  // populate bag for each configurations
 	  if (c != i)
 	    populateBag (configs_[c], allkeys, chunk, loop, 

@@ -33,7 +33,6 @@
  *
  *
  */
-#if defined(_FFDB_HUGE_DATA)
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -50,7 +49,7 @@ using namespace FILEDB;
 int
 main (int argc, char** argv)
 {
-  char keystr[80], datastr[128];
+  char keystr[80];
   char* end;
   if (argc < 8) {
     cerr << "Usage: " << argv[0] << " pagesize numpages numconfigs rearrange(0|1) dbasename numkeys datasize" << endl;
@@ -71,7 +70,7 @@ main (int argc, char** argv)
 
   vector<int> configs;
 
-  for (int i = 0; i < numconfigs; i++)
+  for (unsigned int i = 0; i < numconfigs; i++)
     configs.push_back(i);
   
   // Open database
@@ -101,14 +100,14 @@ main (int argc, char** argv)
     ::sprintf (keystr, "Key Test Loop %d", i);
     StringKey key(keystr);
     char** datav = new char*[numconfigs];
-    for (int k = 0; k < numconfigs; k++) {
+    for (unsigned int k = 0; k < numconfigs; k++) {
       datav[k] = new char[datasize];      
       for (long m = 0; m < datasize; m++)
         datav[k][m] = (i + k + m) % 127;
     }
     
     vector<UserData> tdata;
-    for (int k = 0; k < numconfigs; k++) {
+    for (unsigned int k = 0; k < numconfigs; k++) {
       UserData tmp(datav[k], datasize);
       tdata.push_back (tmp);
     }
@@ -120,7 +119,7 @@ main (int argc, char** argv)
       return -1;
     }
 
-    for (int k = 0; k < numconfigs; k++) 
+    for (unsigned int k = 0; k < numconfigs; k++) 
       delete []datav[k];
     delete []datav;
   }
@@ -129,9 +128,3 @@ main (int argc, char** argv)
 
   return 0;
 }
-#else
-int main (int argc, char** argv)
-{
-  return 0;
-}
-#endif  

@@ -366,6 +366,7 @@ _ffdb_swap_page_metainfo_out (void *p)
 void
 ffdb_pgout_routine (void* arg, pgno_t pgno, void* page)
 {
+  (void)pgno;
   ffdb_htab_t* hashp;
   unsigned int chksumval;
 
@@ -449,7 +450,7 @@ _ffdb_get_data (ffdb_htab_t* hashp, ffdb_hent_t* item,
 #endif    
     
     assert (hdatalen == datalen);
-    assert (hrstatus == hashp->data_valid_flag);    
+    assert (hrstatus == (unsigned int)hashp->data_valid_flag);    
   }
   else {
     datalen = datap->len;
@@ -457,7 +458,7 @@ _ffdb_get_data (ffdb_htab_t* hashp, ffdb_hent_t* item,
     /* Jump to the offset pointed by datap */
     header = BIG_DATA_HEADER(pagep,datap->offset);    
     assert (header->len == datap->len);
-    assert (header->status == hashp->data_valid_flag);    
+    assert (header->status == (pgno_t)hashp->data_valid_flag);    
   }
 
 
@@ -557,7 +558,7 @@ _ffdb_add_data (ffdb_htab_t *hashp, pgno_t key_page, pgno_t key_index,
 		const FFDB_DBT* val, void* mem, pgno_t pnum,
 		ffdb_datap_t* datap)
 {
-  unsigned int start, fspace, npages;
+  unsigned int start, fspace;
   ffdb_data_header_t header;
   pgno_t tp, cpage, currp, prevp, fp;
   void *cpagep, *currpagep;
@@ -655,7 +656,7 @@ _ffdb_add_data (ffdb_htab_t *hashp, pgno_t key_page, pgno_t key_index,
     ALIGN_ADDR(header.next);
 
     /* If there is no space for header, jump to next page */
-    if (header.next + BIG_DATA_OVERHEAD >= hashp->hdr.bsize)
+    if (header.next + BIG_DATA_OVERHEAD >= (size_t)hashp->hdr.bsize)
       header.next = 0;
 
     /* now copy header on to memory */
@@ -685,7 +686,6 @@ _ffdb_add_data (ffdb_htab_t *hashp, pgno_t key_page, pgno_t key_index,
       rlen = val->size - (fspace - BIG_DATA_OVERHEAD); 
     }
     /* Now copy data to each page */
-    npages = 0;
     
     /* get a free page or a new page */
     /* fp is the first page of the chain */
@@ -708,7 +708,7 @@ _ffdb_add_data (ffdb_htab_t *hashp, pgno_t key_page, pgno_t key_index,
        * of data on this page, header is on another page 
        */
       /* check whether this page is enough for this datum */
-      if (rlen <= hashp->hdr.bsize - BIG_PAGE_OVERHEAD - BIG_DATA_OVERHEAD) {
+      if ((size_t)rlen <= hashp->hdr.bsize - BIG_PAGE_OVERHEAD - BIG_DATA_OVERHEAD) {
 	/* Free Memory and First Data Position must be aligned */
 	HIGHEST_FREE(currpagep) = BIG_PAGE_OVERHEAD + (unsigned int)rlen;
 	ALIGN_ADDR(HIGHEST_FREE(currpagep));
@@ -748,9 +748,6 @@ _ffdb_add_data (ffdb_htab_t *hashp, pgno_t key_page, pgno_t key_index,
 
       /* put this page out */
       ffdb_put_page (hashp, currpagep, HASH_DATA_PAGE, 1);
-
-      /* update number of pages */
-      npages++;
     }
 
     
@@ -799,6 +796,7 @@ _ffdb_replace_data (ffdb_htab_t* hashp, const FFDB_DBT* val,
 		    void* mem, pgno_t pnum,
 		    ffdb_datap_t* datap)
 {
+  (void)pnum;
   ffdb_data_header_t* header;
   unsigned int fspace;
   pgno_t tp, currp, roffset;
@@ -858,7 +856,7 @@ _ffdb_replace_data (ffdb_htab_t* hashp, const FFDB_DBT* val,
       }
 
       /* check whether data will fit this page */
-      if (rlen <= hashp->hdr.bsize - BIG_PAGE_OVERHEAD - BIG_DATA_OVERHEAD) 
+      if ((size_t)rlen <= hashp->hdr.bsize - BIG_PAGE_OVERHEAD - BIG_DATA_OVERHEAD) 
 	copylen = rlen;
       else 
 	copylen = hashp->hdr.bsize - BIG_PAGE_OVERHEAD;
@@ -1119,6 +1117,7 @@ int
 ffdb_put_page (ffdb_htab_t* hashp, void* mem,
 	       unsigned int addrtype, int dirty)
 {
+  (void)addrtype;
   unsigned int flags = 0;
 
   if (dirty) {
@@ -1172,6 +1171,7 @@ ffdb_new_page (ffdb_htab_t* hashp, pgno_t addr,
 static void
 _ffdb_update_free_page (ffdb_htab_t* hashp, void* fpagep, pgno_t opage)
 {
+  (void)hashp;
   unsigned int nf = NUM_FREE_PAGES(fpagep);
 
   FREE_PAGE(fpagep, nf) = opage;
@@ -1191,6 +1191,7 @@ static void
 _ffdb_free_ovflpage (ffdb_htab_t* hashp, void* memp, int isdoubling,
 		     int* deleteit)
 {
+  (void)isdoubling;
   unsigned int level, nf;
   pgno_t fpage, tp, opage, nextpage, xpage;
   void *fpagep, *fnext, *xpagep;
@@ -1507,6 +1508,8 @@ int ffdb_get_item (ffdb_htab_t* hashp,
 		   const FFDB_DBT* key, FFDB_DBT* val,
 		   ffdb_hent_t* item, int freepage)
 {
+  (void)key;
+  (void)val;
   int status;
   ffdb_datap_t* datap;
   unsigned int roff;
@@ -1666,6 +1669,8 @@ _ffdb_replace_item_on_page (ffdb_htab_t* hashp,
 			    FFDB_DBT* key, const FFDB_DBT* val,
 			    ffdb_hent_t* item)
 {
+  (void)key;
+  (void)val;
   int status;
   ffdb_datap_t* datap;
   pgno_t dpage;
@@ -2056,6 +2061,8 @@ _ffdb_update_data_pages_content (ffdb_htab_t* hashp, void *pagep,
 				 pgno_t oldfirst, pgno_t oldlast,
 				 pgno_t newfirst, pgno_t newlast)
 {
+  (void)oldfirst;
+  (void)oldlast;
   unsigned int i;
   void* dpagep;
   pgno_t dp;
@@ -2116,6 +2123,7 @@ _ffdb_update_key_pages_content (ffdb_htab_t* hashp, void *pagep,
 				pgno_t oldfirst, pgno_t oldlast,
 				pgno_t newfirst, pgno_t newlast)
 {
+  (void)newlast;
   unsigned int i, next;
   void* kpagep;
   pgno_t kp, newkp;
@@ -2634,7 +2642,7 @@ ffdb_get_config_info (ffdb_htab_t* hashp, unsigned int confignum,
     
     for (k = 0; k < NUM_ENT(pagep); k++) {
       cfig = CONFIG_INFO(pagep, k);
-      if (cfig->config == confignum) {
+      if ((unsigned int)cfig->config == confignum) {
 	memcpy (config, cfig, sizeof(ffdb_config_info_t));
 	ffdb_put_page (hashp, pagep, TYPE(pagep), 0);
 	return 0;

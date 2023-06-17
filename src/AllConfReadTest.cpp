@@ -80,7 +80,7 @@ main (int argc, char** argv)
     ::sprintf (keystr, "Key Test Loop %d", i);
     StringKey key(keystr);
     char** datav = new char*[numconfigs];
-    for (int k = 0; k < numconfigs; k++) {
+    for (unsigned int k = 0; k < numconfigs; k++) {
       for (int m = 0; m < 128; m++)
 	datastr[m] = (i + k + m) % 127;
       
@@ -89,7 +89,7 @@ main (int argc, char** argv)
     }
 
     vector<UserData> tdatav;
-    for (int k = 0; k < numconfigs; k++) {
+    for (unsigned int k = 0; k < numconfigs; k++) {
       UserData tmp(datav[k], 128);
       tdatav.push_back (tmp);
     }
@@ -101,7 +101,7 @@ main (int argc, char** argv)
       return -1;
     }
     else {
-      for (int k = 0; k < numconfigs; k++) {
+      for (unsigned int k = 0; k < numconfigs; k++) {
 	if (tdatav[k] != rdatav[k]) {
 	  cerr << "Retrieved data is wrong at " << k << " element loop " << i << endl;
 	  dbtest.close ();

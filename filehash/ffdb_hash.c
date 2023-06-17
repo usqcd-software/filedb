@@ -380,7 +380,7 @@ _ffdb_init_hash(ffdb_htab_t* hashp, const char* file,
 	return errno;
       }
       /* the header occupies one page    */
-      if (hashp->hdr.bsize < sizeof(ffdb_hashhdr_t)) {
+      if ((size_t)hashp->hdr.bsize < sizeof(ffdb_hashhdr_t)) {
 	fprintf (stderr, "Hash page is too small to handle meta info.\n");
 	errno = EINVAL;
 	return errno;
@@ -406,6 +406,7 @@ _ffdb_init_hash(ffdb_htab_t* hashp, const char* file,
 unsigned int
 _ffdb_hget_header(ffdb_htab_t *hashp, unsigned int page_size)
 {
+  (void)page_size;
   unsigned num_copied, newchksum;
   unsigned char *hdr_dest;
 
@@ -596,7 +597,7 @@ _ffdb_init_htab (ffdb_htab_t* hashp, int nb, FFDB_HASHINFO* info)
 
   if (l2 >= 1)
     hashp->hdr.spares[1] = nhdr_pages + 1;
-  for (i = 2; i <= l2; i++)
+  for (i = 2; i <= (pgno_t)l2; i++)
     hashp->hdr.spares[i] = hashp->hdr.spares[i - 1] + POW2(i - 2);
 
   for (; i < NCACHED; i++)
@@ -737,7 +738,7 @@ __ffdb_hash_open (const char* fname, int flags, int mode, const void* arg)
 
 
     /* Verify file type, versions and hash function */
-    if (hashp->hdr.magic != FFDB_HASHMAGIC) {
+    if ((unsigned int)hashp->hdr.magic != FFDB_HASHMAGIC) {
       close (hashp->fp);
       free (hashp);
       errno = EFTYPE;
@@ -1094,7 +1095,7 @@ _ffdb_expand_table (ffdb_htab_t* hashp)
    */
   spare_indx = __ffdb_log2(hashp->hdr.max_bucket + 1);
 
-  if (spare_indx > hashp->hdr.ovfl_point) {
+  if ((unsigned int)spare_indx > hashp->hdr.ovfl_point) {
     /* update current data page value */
     hashp->curr_dpage = INVALID_PGNO;
     hashp->hdr.ovfl_point = spare_indx;
@@ -1139,6 +1140,7 @@ static int
 _ffdb_hash_get (const FFDB_DB* dbp, const FFDB_DBT* key,
 		FFDB_DBT* data, unsigned int flag)
 {
+  (void)flag;
   ffdb_htab_t* hashp;
   ffdb_hent_t item;
   unsigned int bucket;
@@ -1227,7 +1229,7 @@ _ffdb_hash_put (const FFDB_DB* dbp, FFDB_DBT* key, const FFDB_DBT* data,
   }
 
   /* check key size */
-  if (key->size > FFDB_MAX_KEYSIZE(hashp)) {
+  if ((size_t)key->size > FFDB_MAX_KEYSIZE(hashp)) {
     fprintf (stderr, "Requested key size %zi is greater than the maximum allowed key size of %zi \n",
              (size_t)key->size,  (size_t)FFDB_MAX_KEYSIZE(hashp));
     return -1;
@@ -1341,6 +1343,9 @@ _ffdb_hash_put (const FFDB_DB* dbp, FFDB_DBT* key, const FFDB_DBT* data,
 static int
 _ffdb_hash_delete (const FFDB_DB* dbp, const FFDB_DBT* key, unsigned int flag)
 {
+  (void)dbp;
+  (void)key;
+  (void)flag;
   return 0;
 }
 
@@ -1371,6 +1376,7 @@ _ffdb_hash_fd (const FFDB_DB* dbp)
 static int
 _ffdb_hash_sync (const FFDB_DB *dbp, unsigned int flags)
 {
+  (void)flags;
   ffdb_htab_t* hashp;
   
   if (!dbp) 
@@ -1454,7 +1460,7 @@ ffdb_set_all_configs (FFDB_DB* db, ffdb_all_config_info_t* configs)
   /* Check whether configs have the same number of configs the database
    * thinks it should have
    */
-  if (configs->numconfigs != hashp->hdr.num_cfigs) {
+  if ((unsigned int)configs->numconfigs != hashp->hdr.num_cfigs) {
     fprintf (stderr, "Number of configurations mismatch: %d (dbase thinks) != %d (requested). \n", hashp->hdr.num_cfigs, configs->numconfigs);
     errno = EINVAL;
     return -1;
@@ -1500,7 +1506,7 @@ ffdb_set_config (FFDB_DB* db, ffdb_config_info_t* config)
 
   hashp = (ffdb_htab_t *)db->internal;
 
-  if (config->index >= hashp->hdr.num_cfigs || config->index < 0) {
+  if ((unsigned int)config->index >= hashp->hdr.num_cfigs || config->index < 0) {
     fprintf (stderr, "ffdb_set_config provides a wrong configuration index number %d ( shoud be less than %d) \n",
 	     config->index, hashp->hdr.cfig_npages);
     errno = EINVAL;

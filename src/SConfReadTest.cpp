@@ -150,7 +150,7 @@ main (int argc, char** argv)
   vector<StringKey> keys;
   dbtest.keys (keys);
 
-  for (int i = 0; i < keys.size(); i++) {
+  for (std::size_t i = 0; i < keys.size(); i++) {
     cerr << "Key " << i << endl;
     cerr << (string)keys[i] << endl;
     

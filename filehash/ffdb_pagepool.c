@@ -279,7 +279,7 @@ _ffdb_pagepool_write(ffdb_pagepool_t* pgp,
   if (lseek(pgp->fd, offset, SEEK_SET) != offset) 
     ret = -1;
   else {
-    if ((nbytes = write(pgp->fd, bp->page, pgp->pagesize)) != pgp->pagesize) 
+    if ((unsigned int)(nbytes = write(pgp->fd, bp->page, pgp->pagesize)) != pgp->pagesize) 
       ret = -1;
   }
 
@@ -324,7 +324,7 @@ _ffdb_clean_page_ondisk (ffdb_pagepool_t* pgp, pgno_t num)
   if (lseek(pgp->fd, offset, SEEK_SET) != offset) 
     ret = -1;
   else {
-    if ((nbytes = write(pgp->fd, cleanbuf, pgp->pagesize)) != pgp->pagesize) 
+    if ((unsigned int)(nbytes = write(pgp->fd, cleanbuf, pgp->pagesize)) != pgp->pagesize) 
       ret = -1;
   }
 
@@ -486,6 +486,7 @@ _ffdb_pagepool_new_bkt (ffdb_pagepool_t* pgp)
 int
 ffdb_pagepool_create (ffdb_pagepool_t** pgp, unsigned int flags)
 {
+  (void)flags;
   int ret, i;
 
   ffdb_pagepool_t *p = (ffdb_pagepool_t *)malloc(sizeof(ffdb_pagepool_t));
@@ -766,7 +767,7 @@ _ffdb_pagepool_load_new_page (ffdb_pagepool_t* pgp, pgno_t pageno,
     return errno;
   }
   nbytes = read (pgp->fd, bp->page, pgp->pagesize);
-  if (nbytes != pgp->pagesize && nbytes > 0) {
+  if ((unsigned int)nbytes != pgp->pagesize && nbytes > 0) {
     fprintf (stderr, "ffdb_pagepool_load_new_page: cannot read back end file\n");
     return errno;
   }

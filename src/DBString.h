@@ -122,8 +122,8 @@ namespace FILEDB
      * Empty hash and compare functions. We are using default functions
      * provided by Berkeley DB
      */
-    static unsigned int hash (const void* bytes, unsigned int len) {return 0;}
-    static int compare (const FFDB_DBT* k1, const FFDB_DBT* k2) {return 0;}
+    static unsigned int hash (const void*, unsigned int) {return 0;}
+    static int compare (const FFDB_DBT*, const FFDB_DBT*) {return 0;}
    
   private:
     static const unsigned short MAGIC= (unsigned short)0x11ff;

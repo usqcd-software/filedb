@@ -107,7 +107,7 @@ namespace FILEDB
   /**
    * Return number of elements in the vector
    */
-  const int
+  int
   VFloatData::numberOfElements (void) const
   {
     return data_.size();
@@ -133,7 +133,7 @@ namespace FILEDB
     vcfbuf = new float[data_.size()];
 
     // assign complex data values to the array
-    for (int i = 0; i < data_.size(); i++) 
+    for (std::size_t i = 0; i < data_.size(); i++) 
       vcfbuf[i] = hton_int((int)data_[i]);
 
     // output stream
@@ -168,7 +168,7 @@ namespace FILEDB
   VFloatData::readObject (const std::string& input)  noexcept (false)
   {
     float* vcfbuf;
-    unsigned short id, pad;
+    unsigned short id;
     unsigned int   num;
     unsigned int hlen = 2 * sizeof(unsigned short) + sizeof(unsigned int);
     unsigned int idlen = sizeof(unsigned short);
@@ -194,7 +194,7 @@ namespace FILEDB
     data_.resize(num);
 
     // assign vector elements
-    for (int i = 0; i < num; i++) 
+    for (unsigned int i = 0; i < num; i++) 
       data_[i] = ntoh_int((int)vcfbuf[i]);
 
     delete []vcfbuf;

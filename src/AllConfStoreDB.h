@@ -263,14 +263,14 @@ namespace FILEDB
       if (bytesize_ == 0) 
 	bytesize_ = cdata.size()/nbin_;
 
-      if (bytesize_ != cdata.size()/nbin_) {
+      if ((std::size_t)bytesize_ != cdata.size()/nbin_) {
 	std::cerr << "Previous byte size " << bytesize_ << " is not the same as the current one " << cdata.size()/nbin_ << std::endl;
 	return -1;
       }
 
       // now split this data blob into a vector
       char *rdata = (char *)&cdata[0];
-      for (long i = 0; i < cdata.length(); i += bytesize_) {
+      for (std::size_t i = 0; i < cdata.length(); i += bytesize_) {
 	D elem;
 	std::string tmp;
 	tmp.assign (&rdata[i], bytesize_);
@@ -430,6 +430,7 @@ namespace FILEDB
      */
     int update (const K& key, const D& v, const int config, const int index)
     {
+      (void)config;
       int ret = 0;
 
       if (empty_) {
@@ -464,7 +465,7 @@ namespace FILEDB
 	if (bytesize_ == 0) 
 	  bytesize_ = cdata.size()/nbin_;
 
-	if (bytesize_ != cdata.size()/nbin_) {
+	if ((std::size_t)bytesize_ != cdata.size()/nbin_) {
 	  std::cerr << "Previous byte size " << bytesize_ << " is not the same as the current one " << cdata.size()/nbin_ << std::endl;
 	  return -1;
 	}
@@ -478,7 +479,7 @@ namespace FILEDB
 	  std::cerr << "Serialize a single value error: " << e.what() << std::endl;
 	  return -1;
 	}
-	if (tmp.size() != bytesize_) {
+	if (tmp.size() != (std::size_t)bytesize_) {
 	  std::cerr << "Update a single item has length " << tmp.size() << " not equal to the length of the other " << bytesize_ << std::endl;
 	  return -1;
 	}
@@ -510,7 +511,7 @@ namespace FILEDB
 
       this->binaryKeysAndData (binkeys, bvalues);
 
-      for (long i = 0; i < binkeys.size(); i++) {
+      for (std::size_t i = 0; i < binkeys.size(); i++) {
 	K tkey;
 	try {
 	  tkey.readObject (binkeys[i]);
@@ -523,7 +524,7 @@ namespace FILEDB
       }
 
       // walk through each vector of string convert it into vector of D
-      for (long i = 0; i < bvalues.size(); i++) {
+      for (std::size_t i = 0; i < bvalues.size(); i++) {
 	if (bvalues[i].length() % nbin_ != 0) {
 	  std::cerr << "Data element size " << bvalues[i].length() << " is not multiple of number of configuration " << nbin_ << std::endl;
 	  abort ();
@@ -541,7 +542,7 @@ namespace FILEDB
 	  abort ();
 	}
 
-	for (long k = 0; k < bvalues[i].length(); k += bsize) {
+	for (std::size_t k = 0; k < bvalues[i].length(); k += bsize) {
 	  D elem;
 	  std::string tmp;
 	  tmp.assign (&dbuf[k], bsize);

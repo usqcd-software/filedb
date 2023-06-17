@@ -49,7 +49,7 @@ using namespace std;
 using namespace FILEDB;
 
 static void
-usage (int argc, char** argv)
+usage (int, char** argv)
 {
   cerr << "Usage: " << argv[0] << " -f dbasename -l list -m memorysize" << endl;
 }
@@ -220,14 +220,14 @@ main (int argc, char** argv)
   database.close ();
 
   // Display Keys and data
-  for (int i = 0; i < keys.size(); i++) {
+  for (std::size_t i = 0; i < keys.size(); i++) {
     cerr << "Key " << i << endl;
     cerr << (string)keys[i] << endl;
     cerr << "value " << i << endl;
 
-    for (int k = 0; k < data[i].size(); k++) {
+    for (std::size_t k = 0; k < data[i].size(); k++) {
       cerr << "config " << k << endl;
-      for (int m = 0; m < ((vector<float>)(data[i][k])).size(); m++) 
+      for (std::size_t m = 0; m < ((vector<float>)(data[i][k])).size(); m++) 
 	cerr << ((vector<float>)(data[i][k]))[m];
       cerr << endl;
     }

@@ -30,7 +30,6 @@
  *
  *
  */
-#if defined(_FFDB_HUGE_DATA)
 #include <cstdio>
 #include <fstream>
 #include <iostream>
@@ -46,7 +45,7 @@ using namespace FILEDB;
 int
 main (int argc, char** argv)
 {
-  char keystr[80], datastr[128];
+  char keystr[80];
   if (argc < 7) {
     cerr << "Usage: " << argv[0] << " cachesize numconfigs rearrange(0|1) dbasename numkeys datasize" << endl;
     return -1;
@@ -110,10 +109,3 @@ main (int argc, char** argv)
 
   return 0;
 }
-#else
-int main (int argc, char** argv)
-{
-  return 0;
-}
-#endif
-

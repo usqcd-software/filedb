@@ -64,7 +64,7 @@ main (int argc, char** argv)
 
   vector<int> configs;
 
-  for (int i = 0; i < numconfigs; i++)
+  for (unsigned int i = 0; i < numconfigs; i++)
     configs.push_back(i);
   
   // Open database
@@ -94,7 +94,7 @@ main (int argc, char** argv)
     ::sprintf (keystr, "Key Test Loop %d", i);
     StringKey key(keystr);
     char** datav = new char*[numconfigs];
-    for (int k = 0; k < numconfigs; k++) {
+    for (unsigned int k = 0; k < numconfigs; k++) {
       for (int m = 0; m < 128; m++)
 	datastr[m] = (i + k + m) % 127;
 
@@ -103,7 +103,7 @@ main (int argc, char** argv)
     }
     
     vector<UserData> tdata;
-    for (int k = 0; k < numconfigs; k++) {
+    for (unsigned int k = 0; k < numconfigs; k++) {
       UserData tmp(datav[k], 128);
       tdata.push_back (tmp);
     }
