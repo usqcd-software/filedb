@@ -62,34 +62,22 @@ namespace FILEDB
      * @param reason what causes this exception
      */
     SerializeException (const std::string& cls, 
-			const std::string& reason);
-
-    /**
-     * Copy constructor
-     */
-    SerializeException (const SerializeException& exp);
-
-    /**
-     * Assignment operator
-     */
-    SerializeException& operator = (const SerializeException& exp);
+			const std::string& reason) : msg_(cls + ": " + reason) {}
 
     /**
      * Destructor
      */
-    virtual ~SerializeException (void);
+    virtual ~SerializeException() noexcept {}
 
     /**
      * Return reason of the exception
      */
-    virtual const char* what (void) const noexcept;
+    virtual const char* what (void) const noexcept {
+       return msg_.c_str();
+    }
 
   protected:
-    std::string cls_;
-    std::string reason_;
-
-    // hide default exception
-    SerializeException (void);
+    std::string msg_;
   };
 
 
@@ -105,34 +93,22 @@ namespace FILEDB
      * @param reason what causes this exception
      */
     FileHashDBException (const std::string& cls, 
-			 const std::string& reason);
-
-    /**
-     * Copy constructor
-     */
-    FileHashDBException (const FileHashDBException& exp);
-
-    /**
-     * Assignment operator
-     */
-    FileHashDBException& operator = (const FileHashDBException& exp);
+			 const std::string& reason) : msg_(cls + ": " + reason) {}
 
     /**
      * Destructor
      */
-    virtual ~FileHashDBException (void);
+    virtual ~FileHashDBException () noexcept {};
 
     /**
      * Return reason of the exception
      */
-    virtual const char* what (void) const noexcept;
+    virtual const char* what (void) const noexcept {
+       return msg_.c_str();
+    }
 
   protected:
-    std::string cls_;
-    std::string reason_;
-
-    // hide default exception
-    FileHashDBException (void);
+    std::string msg_;
   };
 
   /**
