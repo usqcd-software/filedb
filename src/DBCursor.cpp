@@ -58,7 +58,7 @@ namespace FILEDB
 
 
   DBCursorRep::DBCursorRep (const DBCursorRep& c)
-    :count_ (1)
+    : DBCursorRep()
   {
     if (cursor_)
       cursor_->close (cursor_);
