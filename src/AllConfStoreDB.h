@@ -48,6 +48,7 @@
 
 #include <vector>
 #include <iterator>
+#include <memory>
 #include <string>
 #include "FileDB.h"
 #include "DBCursor.h"
@@ -78,7 +79,7 @@ namespace FILEDB
     /**
      * Configuration information
      */
-    ffdb_all_config_info_t allcfgs_;
+    std::shared_ptr<ffdb_all_config_info_t> allcfgs_;
 
     /**
      * Current insertion record number
@@ -100,7 +101,7 @@ namespace FILEDB
       int ret;
 
       try {
-	ret = isDatabaseEmpty<K> (this->dbh_);
+	ret = isDatabaseEmpty<K> (this->db->dbh_);
       }
       catch (SerializeException& e) {
 	std::cerr << "Check database empty failed with error : " << e.what () << std::endl;
@@ -117,27 +118,34 @@ namespace FILEDB
     AllConfStoreDB (void)
       : ConfDataStoreDB<K, D>(), nbin_(0), bytesize_(0), empty_(1)
     {
-      allcfgs_.numconfigs = 0;
-      allcfgs_.allconfigs = 0;
+      allcfgs_ = std::shared_ptr<ffdb_all_config_info_t>(
+          new ffdb_all_config_info_t,
+          /* deleter function */ [=](ffdb_all_config_info_t *allcfgs_) {
+            if (allcfgs_->numconfigs > 0)
+              delete[] allcfgs_->allconfigs;
+            delete allcfgs_;
+          });
+      allcfgs_->numconfigs = 0;
+      allcfgs_->allconfigs = 0;
     }
 
     /**
      * Constructor taking a vector of configuration information
      */
     AllConfStoreDB (const std::vector<int>& configs)
-      :ConfDataStoreDB<K, D>(), bytesize_ (0), empty_(1)
+      :AllConfStoreDB()
     {
       nbin_ = configs.size();
 
-      allcfgs_.numconfigs = nbin_;
-      allcfgs_.allconfigs = new ffdb_config_info_t[nbin_];
+      allcfgs_->numconfigs = nbin_;
+      allcfgs_->allconfigs = new ffdb_config_info_t[nbin_];
       for (int i = 0; i < nbin_; i++) {
-	allcfgs_.allconfigs[i].config = configs[i];
-	allcfgs_.allconfigs[i].index = i;
-	allcfgs_.allconfigs[i].inserted = 0;
-	allcfgs_.allconfigs[i].type = 0;
-	allcfgs_.allconfigs[i].mtime = 0;
-	allcfgs_.allconfigs[i].fname[0] = '\0';
+	allcfgs_->allconfigs[i].config = configs[i];
+	allcfgs_->allconfigs[i].index = i;
+	allcfgs_->allconfigs[i].inserted = 0;
+	allcfgs_->allconfigs[i].type = 0;
+	allcfgs_->allconfigs[i].mtime = 0;
+	allcfgs_->allconfigs[i].fname[0] = '\0';
       }
 
       // Set configuration maximum slot
@@ -151,31 +159,20 @@ namespace FILEDB
      */
     AllConfStoreDB (const std::vector<int>& configs, 
 		    const std::vector<std::string>& names)
-      :ConfDataStoreDB<K, D>(), bytesize_ (0), empty_(1)
+      :AllConfStoreDB(configs)
     {
       if (configs.size () != names.size()) {
 	std::cerr << "configuration number size != configuration name size" << std::endl;
 	abort ();
       }
-      nbin_ = configs.size();
 
-      allcfgs_.numconfigs = nbin_;
-      allcfgs_.allconfigs = new ffdb_config_info_t[nbin_];
-      for (int i = 0; i < nbin_; i++) {
-	allcfgs_.allconfigs[i].config = configs[i];
-	allcfgs_.allconfigs[i].index = i;
-	allcfgs_.allconfigs[i].inserted = 0;
-	allcfgs_.allconfigs[i].type = 0;
-	allcfgs_.allconfigs[i].mtime = 0;
+      for (std::size_t i = 0; i < names.size(); i++) {
 	if (names[i] == "N/A")
-	  allcfgs_.allconfigs[i].fname[0] = '\0';
+	  allcfgs_->allconfigs[i].fname[0] = '\0';
 	else
-	  strncpy (allcfgs_.allconfigs[i].fname, names[i].c_str(), 
+	  strncpy (allcfgs_->allconfigs[i].fname, names[i].c_str(), 
 		   _FFDB_MAX_FNAME);
       }
-
-      // Set configuration maximum slot
-      this->setMaxNumberConfigs (nbin_);
     }
       
     /**
@@ -188,11 +185,10 @@ namespace FILEDB
      * @return 0 on success, -1 on failure with proper errno set
      * 
      */
-    virtual int open (const std::string& file, int open_flags, int mode)
+    virtual int open (const std::string& file, int open_flags, int mode) override
     {
-      this->dbh_ = openDatabase< K >(file,open_flags,mode, &(this->options_));
-      if (!this->dbh_)
-	return -1;
+      if (this->ConfDataStoreDB<K, D>::open(file, open_flags, mode) != 0)
+        return -1;
       
       // check whether this database is empty
       empty_ = this->isEmpty ();
@@ -204,12 +200,12 @@ namespace FILEDB
 	}
 
 	// update configuration information
-	ffdb_set_all_configs (this->dbh_, &allcfgs_);
+	ffdb_set_all_configs (this->db->dbh_, &*allcfgs_);
       }
       else {
 	// update configuration information
-	ffdb_get_all_configs (this->dbh_, &allcfgs_);
-	nbin_ = allcfgs_.numconfigs;
+	ffdb_get_all_configs (this->db->dbh_, &*allcfgs_);
+	nbin_ = allcfgs_->numconfigs;
 	if (nbin_ == 0) {
 	  std::cerr << "number of configurations = 0 on an existing database." << std::endl;
 	  return -1;
@@ -225,8 +221,6 @@ namespace FILEDB
      */
     virtual ~AllConfStoreDB (void)
     {
-      if (allcfgs_.numconfigs > 0)
-	delete []allcfgs_.allconfigs;
     }
 
 
@@ -243,7 +237,7 @@ namespace FILEDB
 
       // get record number information from the database
       try {
-	ret = getData <K, std::string> (this->dbh_, key, cdata);
+	ret = getData <K, std::string> (this->db->dbh_, key, cdata);
       }
       catch (SerializeException& e) {
 	std::cerr << "Retrieve record number information error : " << e.what () << std::endl;
@@ -377,7 +371,7 @@ namespace FILEDB
 
       // now insert this string into database
       try {
-	ret = insertData< K > (this->dbh_, key, dstr);
+	ret = insertData< K > (this->db->dbh_, key, dstr);
       }
       catch (SerializeException& e) {
 	std::cerr << "InsertData key and string error: " << e.what () << std::endl;
@@ -444,7 +438,7 @@ namespace FILEDB
 	std::string cdata;
 	
 	try {
-	  ret = getData<K, std::string> (this->dbh_, key, cdata);
+	  ret = getData<K, std::string> (this->db->dbh_, key, cdata);
 	}
 	catch (SerializeException& e) {
 	  std::cerr << "Get data error for update " << e.what () << std::endl;
@@ -490,7 +484,7 @@ namespace FILEDB
 
 	// Now insert this one into the database again
 	try {
-	  ret = insertData< K > (this->dbh_, key, cdata);
+	  ret = insertData< K > (this->db->dbh_, key, cdata);
 	}
 	catch (SerializeException& e) {
 	  std::cerr << "Update single item error: " << e.what() << std::endl;
@@ -502,6 +496,9 @@ namespace FILEDB
 
       return ret;
     }
+
+    // Avoid warning that the following keysAndData member hides ConfDataStoreDB's keysAndData
+    using ConfDataStoreDB<K, D>::keysAndData;
 
     void keysAndData (std::vector<K>& keys, 
 		      std::vector< std::vector <D> >& values)
@@ -571,6 +568,7 @@ namespace FILEDB
      */
     void erase (const K& key)
     {
+      (void)key;
       std::cerr << "erease not yet implemented " << std::endl;
     }
 
@@ -607,7 +605,7 @@ namespace FILEDB
       info.mtime = config.modifiedTime();
       strncpy (info.fname, config.urlname().c_str(), _FFDB_MAX_FNAME);
 
-      return ffdb_set_config (this->dbh_, &info);
+      return ffdb_set_config (this->db->dbh_, &info);
     }
 
     /**
@@ -624,7 +622,7 @@ namespace FILEDB
       int stat;
       ffdb_config_info_t cf;
 
-      stat = ffdb_get_config (this->dbh_, confignum, &cf);
+      stat = ffdb_get_config (this->db->dbh_, confignum, &cf);
       if (stat == 0) {
 	info.configNumber (confignum);
 	info.index (cf.index);
@@ -646,7 +644,7 @@ namespace FILEDB
       ffdb_all_config_info_t allcfigs;
       ConfigInfo cf;
       int stat, i;
-      stat = ffdb_get_all_configs (this->dbh_, &allcfigs);
+      stat = ffdb_get_all_configs (this->db->dbh_, &allcfigs);
 
       if (stat == 0) {
 	for (i = 0; i < allcfigs.numconfigs; i++) {
@@ -675,7 +673,7 @@ namespace FILEDB
      */
     key_iterator begin (void) const
     {
-      return DBKeyIterator < K, D >::init (this->dbh_);
+      return DBKeyIterator < K, D >::init (this->db->dbh_);
     }
 
     key_iterator end   (void) const

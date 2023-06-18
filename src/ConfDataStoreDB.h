@@ -67,9 +67,10 @@
 #ifndef _FILEDB_CONF_DATA_STORE_DB_H
 #define _FILEDB_CONF_DATA_STORE_DB_H
 
-#include <string>
 #include "DBCursor.h"
 #include "DBFunc.h"
+#include <memory>
+#include <string>
 
 #define FILEDB_DEFAULT_PAGESIZE 8192
 #define FILEDB_DEFAULT_NUM_BUCKETS 32
@@ -83,14 +84,51 @@ namespace FILEDB
   class ConfDataStoreDB 
   {
   protected:
-    // database name
-    std::string filename_;
 
-    // all open options
-    FFDB_HASHINFO options_;
+    struct DB {
+      // database name
+      std::string filename_;
 
-    // opened database handle
-    FFDB_DB* dbh_;
+      // all open options
+      FFDB_HASHINFO options_;
+
+      // opened database handle
+      FFDB_DB *dbh_;
+
+      DB() {
+        dbh_ = nullptr;
+
+        ::memset(&options_, 0, sizeof(FFDB_HASHINFO));
+        options_.bsize = FILEDB_DEFAULT_PAGESIZE;
+        options_.nbuckets = FILEDB_DEFAULT_NUM_BUCKETS;
+        // the other elements will be arranged by file hash package
+      }
+
+      ~DB() { close(); }
+
+      int open(const std::string &file, int open_flags, int mode) {
+        if (close() != 0)
+          return -1;
+        dbh_ = openDatabase< K > (file, open_flags, mode, &options_);
+        if (!dbh_)
+          return -1;
+        filename_ = file;
+        return 0;
+      }
+
+      int close(void) {
+        int ret = 0;
+        if (dbh_) {
+          ret = dbh_->close(dbh_);
+          dbh_ = nullptr;
+          filename_.clear();
+        }
+        return ret;
+      }
+    };
+
+    // database reference
+    std::shared_ptr<DB> db;
 
   public:
 
@@ -98,14 +136,9 @@ namespace FILEDB
      * Empty constructor for a data store for one configuration
      */
     ConfDataStoreDB (void)
-    :filename_(), dbh_()
     {
       crc32_init();
-    
-      ::memset (&options_, 0, sizeof(FFDB_HASHINFO));
-      options_.bsize = FILEDB_DEFAULT_PAGESIZE;
-      options_.nbuckets = FILEDB_DEFAULT_NUM_BUCKETS;
-      // the other elements will be arranged by file hash package
+      db = std::make_shared<DB>();
     }
 
     /**
@@ -113,7 +146,6 @@ namespace FILEDB
      */
     virtual ~ConfDataStoreDB (void)
     {
-      this->close ();
     }
 
 
@@ -126,7 +158,7 @@ namespace FILEDB
      */
     virtual void setCacheSize (const unsigned int size)
     {
-      options_.cachesize = size;
+      db->options_.cachesize = size;
     }
 
     /**
@@ -152,10 +184,10 @@ namespace FILEDB
 	  }
 	  i++;
 	}
-	options_.cachesize = tsize;
+	db->options_.cachesize = tsize;
       }
       else 
-	options_.cachesize = ((unsigned long)size) << 20;
+	db->options_.cachesize = ((unsigned long)size) << 20;
     }
     
     /**
@@ -169,7 +201,7 @@ namespace FILEDB
      */
     virtual void setPageSize (const unsigned int size)
     {
-      options_.bsize = size;
+      db->options_.bsize = size;
     }
 
 
@@ -183,7 +215,7 @@ namespace FILEDB
      */
     virtual void setNumberBuckets (const unsigned int num)
     {
-      options_.nbuckets = num;
+      db->options_.nbuckets = num;
     }
 
 
@@ -195,12 +227,12 @@ namespace FILEDB
      */
     virtual void enablePageMove (void)
     {
-      options_.rearrangepages = 1;
+      db->options_.rearrangepages = 1;
     }
 
     virtual void disablePageMove (void)
     {
-      options_.rearrangepages = 0;
+      db->options_.rearrangepages = 0;
     }
 
     /**
@@ -208,15 +240,15 @@ namespace FILEDB
      */
     virtual void setMaxUserInfoLen (unsigned int len)
     {
-      options_.userinfolen = len + 1;  // account for possible null terminator on string
+      db->options_.userinfolen = len + 1;  // account for possible null terminator on string
     }
 
     virtual unsigned int getMaxUserInfoLen (void) const
     {
-      if (!dbh_) 
-	return options_.userinfolen;
+      if (!db->dbh_) 
+	return db->options_.userinfolen;
     
-      return ffdb_max_user_info_len (dbh_);
+      return ffdb_max_user_info_len (db->dbh_);
     }
 
     /**
@@ -224,15 +256,15 @@ namespace FILEDB
      */
     virtual void setMaxNumberConfigs (unsigned int num)
     {
-      options_.numconfigs = num;
+      db->options_.numconfigs = num;
     }
 
     virtual unsigned int getMaxNumberConfigs (void) const
     {
-      if (!dbh_) 
-	return options_.numconfigs;
+      if (!db->dbh_) 
+	return db->options_.numconfigs;
     
-      return ffdb_num_configs (dbh_);
+      return ffdb_num_configs (db->dbh_);
     }
 
 
@@ -257,22 +289,13 @@ namespace FILEDB
      */
     virtual int open (const std::string& file, int open_flags, int mode)
     {
-      this->dbh_ = openDatabase< K > (file, open_flags, mode, &options_);
-      if (!this->dbh_)
-	return -1;
-
-      return 0;
+      return db->open(file, open_flags, mode);
     }
 
 
     virtual int close (void)
     {
-      int ret = 0;
-      if (this->dbh_) {
-	ret = this->dbh_->close (this->dbh_);
-	this->dbh_ = 0;
-      }
-      return ret;
+      return db->close();
     }
 
     /**
@@ -285,10 +308,13 @@ namespace FILEDB
      */
     int insert (const K& key, const D& data)
     {
+      if (!db->dbh_)
+        return -1;
+
       int ret = 0;
 
       try {
-	ret = insertData<K, D>(dbh_, key, data);
+	ret = insertData<K, D>(db->dbh_, key, data);
       }
       catch (SerializeException& e) {
 	std::cerr << "ConfDataStoreDB insert error: " << e.what() << std::endl;
@@ -306,10 +332,13 @@ namespace FILEDB
      */
     int insertBinary (const std::string& key, const std::string& data)
     {
+      if (!db->dbh_)
+        return -1;
+
       int ret = 0;
 
       try {
-	ret = insertBinaryData(dbh_, key, data);
+	ret = insertBinaryData(db->dbh_, key, data);
       }
       catch (SerializeException& e) {
 	std::cerr << "ConfDataStoreDB insert error: " << e.what() << std::endl;
@@ -327,10 +356,13 @@ namespace FILEDB
      */
     int get (const K& key, D& data)
     {
+      if (!db->dbh_)
+        return -1;
+
       int ret = 0;
 
       try {
-	ret = getData<K, D>(dbh_, key, data);
+	ret = getData<K, D>(db->dbh_, key, data);
       }
       catch (SerializeException& e) {
 	std::cerr << "ConfDataStoreDB get error: " << e.what () << std::endl;
@@ -349,7 +381,10 @@ namespace FILEDB
      */
     int getBinary (const std::string& key, std::string& data)
     {
-      return getBinaryData (dbh_, key, data);
+      if (!db->dbh_)
+        return -1;
+
+      return getBinaryData (db->dbh_, key, data);
     }
 
     /**
@@ -362,7 +397,7 @@ namespace FILEDB
       int ret;
 
       try {
-	ret = keyExist< K > (dbh_, key);
+	ret = keyExist< K > (db->dbh_, key);
       }
       catch (SerializeException& e) {
 	std::cerr << "Key check exist error: " << e.what () << std::endl;
@@ -379,7 +414,8 @@ namespace FILEDB
      */
     virtual void keys (std::vector<K>& keys)
     {
-      allKeys< K, D >(dbh_, keys);
+      if (db->dbh_)
+        allKeys<K, D>(db->dbh_, keys);
     }
 
     /**
@@ -389,7 +425,8 @@ namespace FILEDB
      */
     virtual void binaryKeys (std::vector<std::string>& keys)
     {
-      binaryAllKeys (dbh_, keys);
+      if (db->dbh_)
+        binaryAllKeys(db->dbh_, keys);
     }
 
     /**
@@ -400,9 +437,9 @@ namespace FILEDB
      */
     virtual void keysAndData (std::vector<K>& keys, std::vector<D>& values)
     {
-      allPairs<K, D> (dbh_, keys, values);
+      if (db->dbh_)
+        allPairs<K, D>(db->dbh_, keys, values);
     }
-
 
     /**
      * Return all pairs of keys and data in binary string form
@@ -413,7 +450,8 @@ namespace FILEDB
     virtual void binaryKeysAndData (std::vector<std::string>& keys,
 				    std::vector<std::string>& values)
     {
-      binaryAllPairs (dbh_, keys, values);
+      if (db->dbh_)
+        binaryAllPairs(db->dbh_, keys, values);
     }
 
     /**
@@ -421,7 +459,8 @@ namespace FILEDB
      */
     virtual void flush (void)
     {
-      flushDatabase (dbh_);
+      if (db->dbh_)
+        flushDatabase(db->dbh_);
     }
 
     /**
@@ -431,7 +470,7 @@ namespace FILEDB
      */
     virtual std::string storageName (void) const
     {
-      return filename_;
+      return db->filename_;
     }
 
     
@@ -443,7 +482,10 @@ namespace FILEDB
      */
     virtual int insertUserdata (const std::string& user_data)
     {
-      return ffdb_set_user_info (dbh_, 
+      if (!db->dbh_)
+        return -1;
+
+      return ffdb_set_user_info (db->dbh_, 
 				 (unsigned char *)user_data.c_str(), user_data.length());
     }
     
@@ -455,13 +497,16 @@ namespace FILEDB
      */
     virtual int getUserdata (std::string& user_data)
     {
+      if (!db->dbh_)
+        return -1;
+
       int ret;
       unsigned int len;
       unsigned char* data;
 
-      len = ffdb_max_user_info_len (dbh_);
+      len = ffdb_max_user_info_len (db->dbh_);
       data = new unsigned char[len];
-      ret = ffdb_get_user_info (dbh_, data, &len);
+      ret = ffdb_get_user_info (db->dbh_, data, &len);
       if (ret == 0) 
 	user_data.assign((char *)data, len);
 
