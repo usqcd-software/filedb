@@ -94,7 +94,6 @@ main (int argc, char** argv)
 
 
   VFloatData vfdata(vectorlen, (float)confnum);
-  int i = 0;
   while (sf.good()) {
     string t1;
 
@@ -110,7 +109,6 @@ main (int argc, char** argv)
       dbtest.close ();
       return -1;
     }
-    i++;
   }
   sf.close ();
   dbtest.close ();

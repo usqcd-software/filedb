@@ -213,7 +213,6 @@ namespace FILEDB
      */
     void insertBag (MemMap_t& bag)
     {
-      int num = 0;
       // iterator is a template also
       MemMap_t::iterator ite;
       
@@ -222,7 +221,6 @@ namespace FILEDB
 	std::string tkey((*ite).first);
 
 	dbh_->insertBinaryData (tkey, (*ite).second);
-	num++;
       }
     }
 
