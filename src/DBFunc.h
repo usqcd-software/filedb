@@ -135,6 +135,31 @@ namespace FILEDB
     return dbh;
   }
 
+  /**
+   * Open a database with name dbase. If this database does not exist,
+   * a new database will be created.
+   *
+   * @param dbase     database file name
+   * @param open_flags database flags for opening: it is can be regular unix
+   * open flags: such as O_RDONLY, O_RDWR, O_TRUNC and so on
+   * @param mode file creation mode
+   * @return Database pointer. If something wrong, a NULL pointer is returned
+   */
+  inline FFDB_DB *openDatabaseSimple(const std::string &dbase, int open_flags,
+                                     int mode, FFDB_HASHINFO *info) {
+    FFDB_DB* dbh;
+
+    // other information elements have been set before calling this one
+    // open database
+    std::cerr << "Open store database " << dbase << std::endl;
+
+    // turn off umask
+    ::umask (0);
+
+    dbh = ffdb_dbopen (dbase.c_str(), open_flags, mode, (const void *)info);
+
+    return dbh;
+  }
 
   /**
    * Insert key and data pair into a database pointed by pointer dbh
