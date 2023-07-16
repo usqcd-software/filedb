@@ -67,9 +67,10 @@
 #ifndef _FILEDB_CONF_DATA_STORE_DB_SIMPLE_H
 #define _FILEDB_CONF_DATA_STORE_DB_SIMPLE_H
 
-#include <string>
 #include "DBCursor.h"
 #include "DBFunc.h"
+#include <memory>
+#include <string>
 
 #define FILEDB_DEFAULT_PAGESIZE 8192
 #define FILEDB_DEFAULT_NUM_BUCKETS 32
