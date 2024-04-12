@@ -324,6 +324,31 @@ namespace FILEDB
     }
 
     /**
+     * Insert a pair of data and key into the database
+     * data is not ensemble, but a vector of complex.
+     * @param key a binary key
+     * @param data a user provided data
+     *
+     * @return 0 on successful write, -1 on failure with proper errno set
+     */
+    int insertWithStringKey(const std::string& key, const D& data)
+    {
+      if (!db->dbh_)
+        return -1;
+
+      int ret = 0;
+
+      try {
+	ret = insertData<D>(db->dbh_, key, data);
+      }
+      catch (SerializeException& e) {
+	std::cerr << "ConfDataStoreDB insert error: " << e.what() << std::endl;
+	ret = -1;
+      }
+      return ret;
+    }
+
+    /**
      * Insert a pair of data and key into the database in string format
      * @param key a key
      * @param data a user provided data
@@ -439,6 +464,18 @@ namespace FILEDB
     {
       if (db->dbh_)
         allPairs<K, D>(db->dbh_, keys, values);
+    }
+
+    /**
+     * Return all pairs of binary keys and data
+     * @param keys user supplied empty vector to hold all keys
+     * @param data user supplied empty vector to hold data
+     * @return keys and data in the vectors having the same size
+     */
+    virtual void stringKeysAndData (std::vector<std::string>& keys, std::vector<D>& values)
+    {
+      if (db->dbh_)
+        allPairsWithBinaryKeys<D>(db->dbh_, keys, values);
     }
 
     /**

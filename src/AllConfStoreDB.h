@@ -382,6 +382,60 @@ namespace FILEDB
 
     /**
      * Insert a pair into the secondary storage
+     * @param key a binary key provided by caller
+     * @param v a vector containing all values
+     */
+    int insertWithStringKey (const std::string & key, const std::vector < D > & v)
+    {
+      int ret;
+      // sanity check
+      if (v.size () != (unsigned int)nbin_) {
+	std::cerr << "Fatal: Number of vector in ensemble is not the same as expected " << v.size () 
+		  << " != " << nbin_ << std::endl;
+	::exit (1);
+      }
+
+      // if bytesize_ is not set, we set it now
+      if (bytesize_ == 0) {
+	std::string tmpstr;
+	try {
+	  v[0].writeObject (tmpstr);
+	}
+	catch (SerializeException& e) {
+	  std::cerr << "Serialize the first element in insert error: " << e.what () 
+		    << std::endl;
+	  return -1;
+	}
+	bytesize_ = tmpstr.size();
+      }
+
+      // combine every element in the array into a string
+      std::string dstr;
+      for (unsigned int i = 0; i < v.size(); i++) {
+	std::string elem;
+	try {
+	  v[i].writeObject (elem);
+	}
+	catch (SerializeException& e) {
+	  std::cerr << "Serialize insert individual element error: " << e.what() << std::endl;
+	  return -1;
+	}
+	dstr.append (elem);
+      }
+
+      // now insert this string into database
+      try {
+	ret = insertData(this->db->dbh_, key, dstr);
+      }
+      catch (SerializeException& e) {
+	std::cerr << "InsertData key and string error: " << e.what () << std::endl;
+	::exit (1);
+      }
+      return ret;
+    }
+
+    /**
+     * Insert a pair into the secondary storage
      * @param key a key provided by caller in string format
      * @param v a vector containing all values
      */
@@ -497,28 +551,17 @@ namespace FILEDB
       return ret;
     }
 
-    // Avoid warning that the following keysAndData member hides ConfDataStoreDB's keysAndData
-    using ConfDataStoreDB<K, D>::keysAndData;
-
-    void keysAndData (std::vector<K>& keys, 
-		      std::vector< std::vector <D> >& values)
+    /**
+     * Return the binary keys and values in the secondary storage
+     * @param keys a vector where to append the keys
+     * @param v a vector where to append the values
+     */
+    void stringKeysAndData (std::vector<std::string>& keys, 
+		            std::vector< std::vector <D> >& values)
     {
-      std::vector<std::string> binkeys;
       std::vector<std::string> bvalues;
 
-      this->binaryKeysAndData (binkeys, bvalues);
-
-      for (std::size_t i = 0; i < binkeys.size(); i++) {
-	K tkey;
-	try {
-	  tkey.readObject (binkeys[i]);
-	}
-	catch (SerializeException& e) {
-	  std::cerr << "Serialize individual key error: " << e.what() << std::endl;
-	  abort ();
-	}
-	keys.push_back (tkey);
-      }
+      this->binaryKeysAndData (keys, bvalues);
 
       // walk through each vector of string convert it into vector of D
       for (std::size_t i = 0; i < bvalues.size(); i++) {
@@ -538,7 +581,8 @@ namespace FILEDB
 	  std::cerr << "Individual element size " << bsize << " != expected " << bytesize_ << std::endl;
 	  abort ();
 	}
-
+ 
+        vals.reserve(bvalues[i].length()/bsize);
 	for (std::size_t k = 0; k < bvalues[i].length(); k += bsize) {
 	  D elem;
 	  std::string tmp;
@@ -556,6 +600,34 @@ namespace FILEDB
 	
 	// add this vector into the big vector
 	values.push_back (vals);
+      }
+    }
+
+    // Avoid warning that the following keysAndData member hides ConfDataStoreDB's keysAndData
+    using ConfDataStoreDB<K, D>::keysAndData;
+
+    /**
+     * Return the keys and values in the secondary storage
+     * @param keys a vector where to append the keys
+     * @param v a vector where to append the values
+     */
+    void keysAndData (std::vector<K>& keys, 
+		      std::vector< std::vector <D> >& values)
+    {
+      std::vector<std::string> binkeys;
+
+      this->stringKeysAndData(binkeys, values);
+
+      for (std::size_t i = 0; i < binkeys.size(); i++) {
+	K tkey;
+	try {
+	  tkey.readObject (binkeys[i]);
+	}
+	catch (SerializeException& e) {
+	  std::cerr << "Serialize individual key error: " << e.what() << std::endl;
+	  abort ();
+	}
+	keys.push_back (tkey);
       }
     }
 
