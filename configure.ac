@@ -71,7 +71,7 @@ fi
 # Turn on massive debug information
 FILEDB_DEBUG_ON=NO
 AC_ARG_ENABLE([debug-hashdb],
-AC_HELP_STRING([--enable-debug-hashdb],[turn on low level debug verbose messages.]),
+AS_HELP_STRING([--enable-debug-hashdb],[turn on low level debug verbose messages.]),
 [if test "$enableval" = yes; then FILEDB_DEBUG_ON=YES;fi])
 
 if test "$FILEDB_DEBUG_ON" = YES
@@ -82,7 +82,7 @@ fi
 
 FILEDB_TEMPLATE_COMPILE_TEST=NO
 AC_ARG_ENABLE([template-compile-test],
-AC_HELP_STRING([--enable-template-compile-test],[Test compile template headers through dumb instantiations.]),
+AS_HELP_STRING([--enable-template-compile-test],[Test compile template headers through dumb instantiations.]),
 [if test "$enableval" = yes; then FILEDB_TEMPLATE_COMPILE_TEST=YES;fi])
 
 if test "$FILEDB_TEMPLATE_COMPILE_TEST" = YES
