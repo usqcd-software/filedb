@@ -172,44 +172,47 @@ namespace FILEDB
    *
    * @return 0 on success. Otherwise failure
    */
+  inline int insertData(FFDB_DB* dbh, const std::string& key, const std::string& data,
+			unsigned int flag = 0)
+  {
+    // create key
+    FFDB_DBT dbkey;
+    dbkey.data = const_cast<char*>(key.c_str());
+    dbkey.size = key.size();
+          
+    // create DBt object
+    FFDB_DBT dbdata;
+    dbdata.data = const_cast<char*>(data.c_str());
+    dbdata.size = data.size();
+
+    // now it is time to insert
+    return dbh->put(dbh, &dbkey, &dbdata, flag);
+  }
+
+  /**
+   * Insert key and data pair into a database pointed by pointer dbh
+   *
+   * @param dbh database pointer
+   * @key key associated with this data. This key must be subclass of DBKey
+   * @data data to be stored into the database. This data must be subclass of
+   * DBData
+   * @param flag database put flag: FFDB_NOOVERWRITE or 0
+   *
+   * @return 0 on success. Otherwise failure
+   */
   template <typename K, typename D>
   int insertData (FFDB_DB* dbh, const K& key, const D& data,
 		  unsigned int flag = 0)
-    noexcept (false)
   {
-    int ret;
-       
     // convert key into its binary form
     std::string keyObj;
-    try {
-      key.writeObject (keyObj);
-    }
-    catch (SerializeException& e) {
-      throw;
-    }
-    
-    // create key
-    FFDB_DBT dbkey;
-    dbkey.data = &keyObj[0];
-    dbkey.size = keyObj.size();
-          
+    key.writeObject(keyObj);
+
     // Convert data into binary form
     std::string dataObj;
-    try {
-      data.writeObject (dataObj);
-    }catch (SerializeException& e) {
-      throw;
-    }
+    data.writeObject(dataObj);
 
-    // create DBt object
-    FFDB_DBT dbdata;
-    dbdata.data = &dataObj[0];
-    dbdata.size = dataObj.size();
-
-    // now it is time to insert
-    ret = dbh->put (dbh, &dbkey, &dbdata, flag);
-
-    return ret;
+    return insertData(dbh, keyObj, dataObj, flag);
   }
 
 
@@ -227,35 +230,36 @@ namespace FILEDB
   template <typename K>
   int insertData (FFDB_DB* dbh, const K& key, const std::string& data,
 		  unsigned int flag = 0)
-    noexcept (false)
   {
-    int ret;
-       
     // convert key into its binary form
     std::string keyObj;
-    try {
-      key.writeObject (keyObj);
-    }
-    catch (SerializeException& e) {
-      throw;
-    }
-    
-    // create key
-    FFDB_DBT dbkey;
-    dbkey.data = const_cast<char*>(keyObj.c_str());
-    dbkey.size = keyObj.size();
-          
-    // create DBt object
-    FFDB_DBT dbdata;
-    dbdata.data = const_cast<char*>(data.c_str());
-    dbdata.size = data.size();
+    key.writeObject(keyObj);
 
-    // now it is time to insert
-    ret = dbh->put (dbh, &dbkey, &dbdata, flag);
-
-    return ret;
+    return insertData(dbh, keyObj, data, flag);
   }
 
+
+  /**
+   * Insert key and data pair into a database pointed by pointer dbh
+   *
+   * @param dbh database pointer
+   * @key key associated with this data. This key must be subclass of DBKey
+   * @data data to be stored into the database. This data must be subclass of
+   * DBData
+   * @param flag database put flag: FFDB_NOOVERWRITE or 0
+   *
+   * @return 0 on success. Otherwise failure
+   */
+  template <typename D>
+  int insertData (FFDB_DB* dbh, const std::string& key, const D& data,
+		  unsigned int flag = 0)
+  {
+    // Convert data into binary form
+    std::string dataObj;
+    data.writeObject(dataObj);
+
+    return insertData(dbh, key, dataObj, flag);
+  }
 
   /**
    * get key and data pair from a database pointed by pointer dbh
@@ -473,6 +477,58 @@ namespace FILEDB
       crp->close(crp);
   }
 
+  /**
+   * Return all keys and data to vectors provided by an application
+   *
+   */
+  template <typename D>
+  void allPairsWithBinaryKeys (FFDB_DB* dbh, std::vector<std::string>& keys, std::vector<D>& data) 
+    noexcept (false)
+  {
+    FFDB_DBT  dbkey, dbdata;
+    ffdb_cursor_t* crp;
+    D    d;
+    int  ret;
+    
+    try {
+      // create cursor
+      ret = dbh->cursor (dbh, &crp, FFDB_KEY_CURSOR);
+      if (ret != 0) 
+	throw FileHashDBException ("DBFunc AllPairs", "Create Cursor Error");
+
+      // get everything from meta data
+      dbkey.data = dbdata.data = 0;
+      dbkey.size = dbdata.size = 0;
+      while ((ret = crp->get (crp, &dbkey, &dbdata, FFDB_NEXT)) == 0) {
+	std::string keyObj((char*)dbkey.data, dbkey.size);
+
+	// convert into data object
+	std::string dataObj;
+	dataObj.assign((char*)dbdata.data, dbdata.size);
+	d.readObject (dataObj);
+
+	// put this new key into the vector
+	keys.push_back (keyObj);
+	
+	// put this data into the other vector
+	data.push_back (d);
+
+	// free memory
+	free (dbkey.data); free (dbdata.data);
+	dbkey.data = dbdata.data = 0;
+	dbkey.size = dbdata.size = 0;
+      }
+      if (ret != FFDB_NOT_FOUND) 
+	throw FileHashDBException ("DBFunc AllPairs", "Cursor Next Error");
+    }
+    catch (SerializeException& e) {
+      throw;
+    }
+    
+    // close cursor
+    if (crp != NULL)
+      crp->close(crp);
+  }
 
   /**
    * Check whether this database is empty or not
