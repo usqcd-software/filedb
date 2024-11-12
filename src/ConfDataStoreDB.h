@@ -442,6 +442,18 @@ namespace FILEDB
     }
 
     /**
+     * Return at most a single pair of key and datum
+     * @param keys user supplied empty vector to hold all keys
+     * @param data user supplied empty vector to hold data
+     * @return keys and data in the vectors having the same size
+     */
+    virtual void someKeyAndData (std::vector<K>& keys, std::vector<D>& values)
+    {
+      if (db->dbh_)
+        allPairs<K, D>(db->dbh_, keys, values, true);
+    }
+
+    /**
      * Return all pairs of keys and data in binary string form
      * @param keys user supplied empty vector to hold all keys
      * @param data user supplied empty vector to hold data

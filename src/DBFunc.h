@@ -415,8 +415,8 @@ namespace FILEDB
    *
    */
   template <typename K, typename D>
-  void allPairs (FFDB_DB* dbh, std::vector<K>& keys, std::vector<D>& data) 
-    noexcept (false)
+  void allPairs(FFDB_DB* dbh, std::vector<K>& keys, std::vector<D>& data,
+		bool only_one = false) noexcept(false)
   {
     FFDB_DBT  dbkey, dbdata;
     ffdb_cursor_t* crp;
@@ -454,6 +454,12 @@ namespace FILEDB
 	free (dbkey.data); free (dbdata.data);
 	dbkey.data = dbdata.data = 0;
 	dbkey.size = dbdata.size = 0;
+
+	if (only_one)
+	{
+	  ret = FFDB_NOT_FOUND;
+	  break;
+	}
       }
       if (ret != FFDB_NOT_FOUND) 
 	throw FileHashDBException ("DBFunc AllPairs", "Cursor Next Error");
