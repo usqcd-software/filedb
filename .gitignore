@@ -1,5 +1,6 @@
 aclocal.m4
 configure
+configure~
 filehash/Makefile.in
 Makefile.in
 src/Makefile.in
