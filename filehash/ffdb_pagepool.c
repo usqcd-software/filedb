@@ -604,7 +604,7 @@ ffdb_pagepool_open (ffdb_pagepool_t* pgp,
   }
   /* File size should be multiple of pagesize */
   if (sb.st_size % pagesize != 0) {
-    fprintf (stderr, "File %s filesize %ld is not multiple of pagesize %d\n",
+    fprintf (stderr, "File %s filesize %lld is not multiple of pagesize %d\n",
 	     filename, sb.st_size, pagesize);
     errno = EINVAL;
     goto openerr;
@@ -689,7 +689,7 @@ ffdb_pagepool_open_fd (ffdb_pagepool_t* pgp,
 
   /* File size should be multiple of pagesize */
   if (sb.st_size % pagesize != 0) {
-    fprintf (stderr, "filesize %ld is not multiple of pagesize %d\n",
+    fprintf (stderr, "filesize %lld is not multiple of pagesize %d\n",
 	     sb.st_size, pagesize);
     errno = EINVAL;
     goto openerr;
