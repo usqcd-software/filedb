@@ -60,6 +60,9 @@
  *
  *
  */
+#if !defined(_XOPEN_SOURCE)
+#define _XOPEN_SOURCE 500
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
