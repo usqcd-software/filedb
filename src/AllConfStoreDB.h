@@ -122,7 +122,7 @@ namespace FILEDB
           new ffdb_all_config_info_t,
           /* deleter function */ [=](ffdb_all_config_info_t *allcfgs_) {
             if (allcfgs_->numconfigs > 0)
-              delete[] allcfgs_->allconfigs;
+              free(allcfgs_->allconfigs);
             delete allcfgs_;
           });
       allcfgs_->numconfigs = 0;
@@ -138,7 +138,8 @@ namespace FILEDB
       nbin_ = configs.size();
 
       allcfgs_->numconfigs = nbin_;
-      allcfgs_->allconfigs = new ffdb_config_info_t[nbin_];
+      allcfgs_->allconfigs =
+          (ffdb_config_info_t *)malloc(sizeof(ffdb_config_info_t) * nbin_);
       for (int i = 0; i < nbin_; i++) {
 	allcfgs_->allconfigs[i].config = configs[i];
 	allcfgs_->allconfigs[i].index = i;
