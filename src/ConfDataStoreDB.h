@@ -437,10 +437,11 @@ namespace FILEDB
      * @param keys user suppled an empty vector which is populated
      * by keys after this call.
      */
-    virtual void keys (std::vector<K>& keys)
+    template <typename K0 = K>
+    void keys (std::vector<K0>& keys)
     {
       if (db->dbh_)
-        allKeys<K, D>(db->dbh_, keys);
+        allKeys<K0, D>(db->dbh_, keys);
     }
 
     /**
@@ -473,10 +474,11 @@ namespace FILEDB
      * @return keys and data in the vectors having the same size
      */
 
-    virtual void someKeyAndData (std::vector<K>& keys, std::vector<D>& values)
+    template <typename K0 = K, typename D0 = D>
+    void someKeyAndData(std::vector<K0>& keys, std::vector<D0>& values)
     {
       if (db->dbh_)
-	allPairs<K, D>(db->dbh_, keys, values, true);
+	allPairs<K0, D0>(db->dbh_, keys, values, true);
     }
 
     /**

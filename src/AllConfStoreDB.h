@@ -230,14 +230,15 @@ namespace FILEDB
      * @param vectors user supplied ensemble - here, an array single config corrs
      * @return 0 when there are something for this key. 1 wheen there are no
      */
-    int get (const K& key, std::vector< D >& vs)
+    template <typename K0 = K, typename D0 = D>
+    int get (const K0& key, std::vector< D0 >& vs)
     {
       int ret;
       std::string cdata;
 
       // get record number information from the database
       try {
-	ret = getData <K, std::string> (this->db->dbh_, key, cdata);
+	ret = getData <K0, std::string> (this->db->dbh_, key, cdata);
       }
       catch (SerializeException& e) {
 	std::cerr << "Retrieve record number information error : " << e.what () << std::endl;
@@ -265,7 +266,7 @@ namespace FILEDB
       // now split this data blob into a vector
       char *rdata = (char *)&cdata[0];
       for (std::size_t i = 0; i < cdata.length(); i += bytesize_) {
-	D elem;
+	D0 elem;
 	std::string tmp;
 	tmp.assign (&rdata[i], bytesize_);
 	try {
@@ -663,15 +664,16 @@ namespace FILEDB
      * @param keys a vector where to append the keys
      * @param v a vector where to append the values
      */
-    void keysAndData (std::vector<K>& keys, 
-		      std::vector< std::vector <D> >& values)
+    template <typename K0 = K, typename D0 = D>
+    void keysAndData(std::vector<K0>& keys, std::vector<std::vector<D0>>& values)
     {
       std::vector<std::string> binkeys;
 
       this->stringKeysAndData(binkeys, values);
 
+      keys.reserve(keys.size() + binkeys.size());
       for (std::size_t i = 0; i < binkeys.size(); i++) {
-	K tkey;
+	K0 tkey;
 	try {
 	  tkey.readObject (binkeys[i]);
 	}
