@@ -73,7 +73,7 @@ ffdb_dbopen(const char* fname, int flags, int mode, const void* openinfo)
 }
 
 static int
-__ffdb_dberr (void)
+__ffdb_dberr (...)
 {
   return (FFDB_ERROR);
 }
@@ -87,12 +87,12 @@ __ffdb_dberr (void)
 void
 ffdb_dbpanic(FFDB_DB* dbp)
 {
-  /* The only thing that can succeed is a close. */
-  dbp->del = (int (*)())__ffdb_dberr;
-  dbp->fd = (int (*)())__ffdb_dberr;
-  dbp->get = (int (*)())__ffdb_dberr;
-  dbp->put = (int (*)())__ffdb_dberr;
-  dbp->cursor = (int (*)())__ffdb_dberr;
-  dbp->sync = (int (*)())__ffdb_dberr;
+  /* modified for gcc 15 -- should be fairly harmless */
+  dbp->del    = (int (*)(const FFDB_DB *, const FFDB_DBT *, unsigned int)) __ffdb_dberr;
+  dbp->fd     = (int (*)(const FFDB_DB *)) __ffdb_dberr;
+  dbp->get    = (int (*)(const FFDB_DB *, const FFDB_DBT *, FFDB_DBT *, unsigned int)) __ffdb_dberr;
+  dbp->put    = (int (*)(const FFDB_DB *, FFDB_DBT *, const FFDB_DBT *, unsigned int)) __ffdb_dberr;
+  dbp->cursor = (int (*)(const FFDB_DB *, ffdb_cursor_t **, unsigned int)) __ffdb_dberr;
+  dbp->sync   = (int (*)(const FFDB_DB *, unsigned int)) __ffdb_dberr;
 }
 
