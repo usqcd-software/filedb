@@ -73,7 +73,7 @@ ffdb_dbopen(const char* fname, int flags, int mode, const void* openinfo)
 }
 
 static int
-__ffdb_dberr (const FFDB_DB *, ...)
+__ffdb_dberr (const FFDB_DB *thedb, ...)
 {
   return (FFDB_ERROR);
 }
