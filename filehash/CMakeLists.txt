@@ -36,7 +36,7 @@ target_include_directories( filehash PUBLIC
 target_link_libraries( filehash PUBLIC Threads::Threads)
 
 # Define a macro to build our executables
-macro(add_test EXECNAME)
+macro(add_filehash_test EXECNAME)
 	# Add the executable
     add_executable(${EXECNAME} ${EXECNAME}.c)
 
@@ -48,16 +48,16 @@ macro(add_test EXECNAME)
 endmacro()
 
 # Create all the executables
-add_test(tcreate)
-add_test(twrite)
-add_test(tdualwrite)
-add_test(treplace)
-add_test(tread)
-add_test(tread-th)
-add_test(tkeyseq)
-add_test(tcheck)
-add_test(createStrings)
-add_test(replaceStrings)
+add_filehash_test(tcreate)
+add_filehash_test(twrite)
+add_filehash_test(tdualwrite)
+add_filehash_test(treplace)
+add_filehash_test(tread)
+add_filehash_test(tread-th)
+add_filehash_test(tkeyseq)
+add_filehash_test(tcheck)
+add_filehash_test(createStrings)
+add_filehash_test(replaceStrings)
 
 
 # Install the public header
